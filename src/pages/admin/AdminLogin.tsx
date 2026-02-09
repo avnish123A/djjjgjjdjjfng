@@ -11,7 +11,9 @@ const AdminLogin: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { login } = useAdminAuth();
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
+  const [signupSuccess, setSignupSuccess] = useState(false);
+  const { login, signup } = useAdminAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,11 +21,20 @@ const AdminLogin: React.FC = () => {
     setError('');
     setLoading(true);
 
-    const success = await login(email, password);
-    if (success) {
-      navigate('/admin/dashboard');
+    if (mode === 'signup') {
+      const result = await signup(email, password);
+      if (result.success) {
+        setSignupSuccess(true);
+      } else {
+        setError(result.error || 'Signup failed');
+      }
     } else {
-      setError('Invalid email or password');
+      const result = await login(email, password);
+      if (result.success) {
+        navigate('/admin/dashboard');
+      } else {
+        setError(result.error || 'Invalid email or password');
+      }
     }
     setLoading(false);
   };
@@ -38,9 +49,16 @@ const AdminLogin: React.FC = () => {
               LUXE <span className="text-accent">Admin</span>
             </h1>
             <p className="text-sm text-muted-foreground mt-2">
-              Sign in to manage your store
+              {mode === 'login' ? 'Sign in to manage your store' : 'Create an admin account'}
             </p>
           </div>
+
+          {/* Success message */}
+          {signupSuccess && (
+            <div className="mb-6 text-sm bg-success/10 text-success px-4 py-3 rounded-lg">
+              Account created! Please check your email to verify, then sign in.
+            </div>
+          )}
 
           {/* Error */}
           {error && (
@@ -80,6 +98,7 @@ const AdminLogin: React.FC = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10"
                   required
+                  minLength={6}
                 />
               </div>
             </div>
@@ -90,12 +109,30 @@ const AdminLogin: React.FC = () => {
               className="w-full"
               disabled={loading}
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? (mode === 'login' ? 'Signing in...' : 'Creating account...') : (mode === 'login' ? 'Sign In' : 'Create Account')}
             </Button>
           </form>
 
           <p className="mt-6 text-xs text-center text-muted-foreground">
-            Demo: studenthubince@gmail.com / avnish@123A
+            {mode === 'login' ? (
+              <>
+                Need an account?{' '}
+                <button onClick={() => { setMode('signup'); setError(''); setSignupSuccess(false); }} className="text-accent hover:underline">
+                  Sign up
+                </button>
+              </>
+            ) : (
+              <>
+                Already have an account?{' '}
+                <button onClick={() => { setMode('login'); setError(''); setSignupSuccess(false); }} className="text-accent hover:underline">
+                  Sign in
+                </button>
+              </>
+            )}
+          </p>
+
+          <p className="mt-3 text-xs text-center text-muted-foreground">
+            Note: After signup, an admin must assign you the admin role.
           </p>
         </div>
       </div>
