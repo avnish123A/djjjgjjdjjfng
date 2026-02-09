@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { X, ChevronRight, User, Heart, Package, Home, Search, Grid3X3 } from 'lucide-react';
+import { X, ChevronRight, User, Heart, Package, Search } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useCategories } from '@/hooks/useCategories';
 
@@ -19,35 +19,35 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent side="left" className="w-[300px] sm:w-[340px] p-0">
+      <SheetContent side="left" className="w-[300px] sm:w-[340px] p-0 border-r-0">
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-border">
+          <div className="flex items-center justify-between p-5 border-b border-border">
             <span className="text-lg font-extrabold tracking-tight">
               LUXE<span className="text-accent">.</span>
             </span>
-            <button onClick={onClose} className="p-1.5 hover:bg-secondary rounded-lg transition-colors">
-              <X className="h-5 w-5" />
+            <button onClick={onClose} className="p-1.5 hover:bg-secondary rounded-full transition-colors">
+              <X className="h-4 w-4" />
             </button>
           </div>
 
           {/* Search */}
-          <div className="p-4 pb-2">
+          <div className="px-5 pt-5 pb-2">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search products..."
-                className="w-full pl-10 pr-4 py-2.5 bg-secondary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
+                className="w-full pl-10 pr-4 py-2.5 bg-secondary rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-foreground/10"
               />
             </div>
           </div>
 
           {/* Navigation */}
           <div className="flex-1 overflow-y-auto">
-            <div className="p-4 pt-2">
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                Shop by Category
+            <div className="px-5 pt-4 pb-2">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.15em] mb-3">
+                Categories
               </p>
               <nav className="space-y-0.5">
                 {categories.map((cat) => (
@@ -58,7 +58,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
                     className="flex items-center justify-between py-3 px-3 rounded-lg text-sm font-medium hover:bg-secondary transition-colors"
                   >
                     {cat.name}
-                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
                   </Link>
                 ))}
                 <Link
@@ -67,15 +67,15 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
                   className="flex items-center justify-between py-3 px-3 rounded-lg text-sm font-semibold text-accent hover:bg-secondary transition-colors"
                 >
                   View All Products
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-3.5 w-3.5" />
                 </Link>
               </nav>
             </div>
 
-            <div className="border-t border-border mx-4" />
+            <div className="border-t border-border mx-5" />
 
-            <div className="p-4">
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+            <div className="px-5 py-4">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.15em] mb-3">
                 Account
               </p>
               <nav className="space-y-0.5">
@@ -93,14 +93,13 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
               </nav>
             </div>
 
-            <div className="border-t border-border mx-4" />
+            <div className="border-t border-border mx-5" />
 
-            {/* Policy Links */}
-            <div className="p-4">
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
+            <div className="px-5 py-4">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.15em] mb-3">
                 Help
               </p>
-              <nav className="space-y-0.5">
+              <nav className="space-y-1">
                 <Link to="/policies/shipping" onClick={onClose} className="block py-2 px-3 text-sm text-muted-foreground hover:text-foreground transition-colors">
                   Shipping Policy
                 </Link>

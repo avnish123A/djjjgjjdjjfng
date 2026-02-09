@@ -36,14 +36,14 @@ const paymentMethods = ['Visa', 'Mastercard', 'UPI', 'RuPay', 'Paytm', 'PhonePe'
 
 export const Footer = () => {
   return (
-    <footer className="bg-foreground text-card">
-      {/* Trust Badges */}
-      <div className="border-b border-card/10">
+    <footer className="bg-foreground text-background">
+      {/* Trust Badges Strip */}
+      <div className="border-b border-background/8">
         <div className="container mx-auto px-4 py-5">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-6">
             {trustBadges.map((badge) => (
-              <div key={badge.label} className="flex items-center gap-2.5 text-card/80">
-                <badge.icon className="h-5 w-5 text-accent shrink-0" />
+              <div key={badge.label} className="flex items-center gap-2.5 text-background/70">
+                <badge.icon className="h-4 w-4 text-accent shrink-0" />
                 <span className="text-xs font-medium leading-tight">{badge.label}</span>
               </div>
             ))}
@@ -52,17 +52,17 @@ export const Footer = () => {
       </div>
 
       {/* Main Footer */}
-      <div className="container mx-auto px-4 py-12 lg:py-16">
+      <div className="container mx-auto px-4 py-14 lg:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
           {/* Brand */}
           <div className="lg:col-span-2">
             <h3 className="text-xl font-extrabold mb-4 tracking-tight">
               LUXE<span className="text-accent">.</span>
             </h3>
-            <p className="text-card/60 text-sm leading-relaxed mb-6 max-w-sm">
+            <p className="text-background/50 text-sm leading-relaxed mb-6 max-w-xs">
               India's premier multi-category store. Curated products for the modern lifestyle. Shop with confidence — 100% genuine, always.
             </p>
-            <div className="space-y-2.5 text-sm text-card/60">
+            <div className="space-y-2.5 text-sm text-background/50">
               <div className="flex items-center gap-2.5">
                 <Mail className="h-4 w-4 shrink-0" />
                 <span>support@luxestore.in</span>
@@ -77,7 +77,7 @@ export const Footer = () => {
               </div>
             </div>
             {/* Social Icons */}
-            <div className="flex items-center gap-3 mt-6">
+            <div className="flex items-center gap-2 mt-6">
               {[
                 { icon: Facebook, label: 'Facebook' },
                 { icon: Instagram, label: 'Instagram' },
@@ -87,7 +87,7 @@ export const Footer = () => {
                 <a
                   key={social.label}
                   href="#"
-                  className="p-2 rounded-lg bg-card/10 hover:bg-accent hover:text-accent-foreground transition-colors"
+                  className="p-2 rounded-full bg-background/8 hover:bg-accent hover:text-accent-foreground transition-all duration-200"
                   aria-label={social.label}
                 >
                   <social.icon className="h-4 w-4" />
@@ -98,13 +98,13 @@ export const Footer = () => {
 
           {/* Shop */}
           <div>
-            <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-card/80">Shop</h4>
-            <nav className="space-y-2.5">
+            <h4 className="font-semibold mb-5 text-xs uppercase tracking-[0.15em] text-background/60">Shop</h4>
+            <nav className="space-y-3">
               {footerLinks.shop.map((link) => (
                 <Link
                   key={link.label}
                   to={link.href}
-                  className="block text-sm text-card/50 hover:text-card transition-colors"
+                  className="block text-sm text-background/40 hover:text-background transition-colors"
                 >
                   {link.label}
                 </Link>
@@ -114,13 +114,13 @@ export const Footer = () => {
 
           {/* Support */}
           <div>
-            <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-card/80">Customer Service</h4>
-            <nav className="space-y-2.5">
+            <h4 className="font-semibold mb-5 text-xs uppercase tracking-[0.15em] text-background/60">Customer Service</h4>
+            <nav className="space-y-3">
               {footerLinks.support.map((link) => (
                 <Link
                   key={link.label}
                   to={link.href}
-                  className="block text-sm text-card/50 hover:text-card transition-colors"
+                  className="block text-sm text-background/40 hover:text-background transition-colors"
                 >
                   {link.label}
                 </Link>
@@ -130,13 +130,13 @@ export const Footer = () => {
 
           {/* Company */}
           <div>
-            <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-card/80">Company</h4>
-            <nav className="space-y-2.5">
+            <h4 className="font-semibold mb-5 text-xs uppercase tracking-[0.15em] text-background/60">Company</h4>
+            <nav className="space-y-3">
               {footerLinks.company.map((link) => (
                 <Link
                   key={link.label}
                   to={link.href}
-                  className="block text-sm text-card/50 hover:text-card transition-colors"
+                  className="block text-sm text-background/40 hover:text-background transition-colors"
                 >
                   {link.label}
                 </Link>
@@ -147,19 +147,19 @@ export const Footer = () => {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-card/10">
+      <div className="border-t border-background/8">
         <div className="container mx-auto px-4 py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs text-card/40">
+            <p className="text-xs text-background/30">
               © 2026 LUXE. All rights reserved.
             </p>
             {/* Payment Methods */}
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] text-card/30 uppercase tracking-wider mr-1">We Accept</span>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-background/25 uppercase tracking-wider mr-1">We Accept</span>
               {paymentMethods.map((method) => (
                 <span
                   key={method}
-                  className="text-[10px] font-medium text-card/40 px-2 py-1 rounded bg-card/5 border border-card/10"
+                  className="text-[10px] font-medium text-background/35 px-2 py-0.5 rounded bg-background/5"
                 >
                   {method}
                 </span>

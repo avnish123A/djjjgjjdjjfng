@@ -44,29 +44,32 @@ export const HeroCarousel = () => {
         <CarouselContent>
           {slides.map((slide, index) => (
             <CarouselItem key={index}>
-              <div className="relative h-[400px] sm:h-[500px] lg:h-[600px] overflow-hidden">
+              <div className="relative h-[420px] sm:h-[520px] lg:h-[620px] overflow-hidden">
                 <img
                   src={slide.image}
                   alt={slide.headline}
                   className="absolute inset-0 w-full h-full object-cover"
                   loading={index === 0 ? 'eager' : 'lazy'}
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-foreground/65 via-foreground/35 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
                 <div className="relative h-full flex items-center">
                   <div className="container mx-auto px-4">
                     <div className="max-w-lg">
-                      <span className="inline-block text-xs sm:text-sm font-semibold uppercase tracking-[3px] text-card/80 mb-3">
+                      <span className="inline-block text-[11px] sm:text-xs font-semibold uppercase tracking-[4px] text-white/70 mb-4">
                         {slide.label}
                       </span>
-                      <h1 className="text-display-sm sm:text-display text-card mb-4 leading-tight">
+                      <h1 className="text-display-sm sm:text-display text-white mb-5 leading-tight">
                         {slide.headline}
                       </h1>
-                      <p className="text-base sm:text-lg text-card/80 mb-8 max-w-md">
+                      <p className="text-base sm:text-lg text-white/75 mb-8 max-w-md leading-relaxed">
                         {slide.subtitle}
                       </p>
-                      <Button variant="hero" asChild>
-                        <Link to={slide.link}>{slide.cta}</Link>
-                      </Button>
+                      <Link
+                        to={slide.link}
+                        className="inline-flex items-center gap-2 bg-white text-foreground px-8 py-3.5 rounded-full text-sm font-semibold hover:bg-white/90 transition-all shadow-hero"
+                      >
+                        {slide.cta}
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -74,8 +77,8 @@ export const HeroCarousel = () => {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="left-4 lg:left-8 h-10 w-10 bg-card/20 border-0 text-card backdrop-blur-sm hover:bg-card/40" />
-        <CarouselNext className="right-4 lg:right-8 h-10 w-10 bg-card/20 border-0 text-card backdrop-blur-sm hover:bg-card/40" />
+        <CarouselPrevious className="left-4 lg:left-8 h-10 w-10 bg-white/15 border-0 text-white backdrop-blur-sm hover:bg-white/25" />
+        <CarouselNext className="right-4 lg:right-8 h-10 w-10 bg-white/15 border-0 text-white backdrop-blur-sm hover:bg-white/25" />
       </Carousel>
     </section>
   );

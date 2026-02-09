@@ -75,9 +75,9 @@ const Checkout = () => {
   if (items.length === 0) {
     return (
       <main className="min-h-screen">
-        <div className="container mx-auto px-4 py-20 text-center">
-          <h1 className="text-2xl font-bold mb-4">Your cart is empty</h1>
-          <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
+        <div className="container mx-auto px-4 py-24 text-center">
+          <h1 className="text-2xl font-bold mb-4 tracking-tight">Your cart is empty</h1>
+          <Button asChild className="rounded-full bg-foreground text-background hover:bg-foreground/90 px-8">
             <Link to="/products">Continue Shopping</Link>
           </Button>
         </div>
@@ -85,12 +85,12 @@ const Checkout = () => {
     );
   }
 
-  const inputCls = "w-full px-4 py-3 border border-border rounded-lg text-sm bg-card focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/40 transition-all";
+  const inputCls = "w-full px-4 py-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10 focus:border-foreground/20 transition-all";
 
   return (
-    <main className="min-h-screen bg-secondary/30">
+    <main className="min-h-screen bg-secondary/50">
       {/* Simplified Header */}
-      <div className="bg-card border-b border-border">
+      <div className="bg-background border-b border-border">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="text-xl font-extrabold tracking-tight">
             LUXE<span className="text-accent">.</span>
@@ -103,14 +103,14 @@ const Checkout = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6 lg:py-10">
+      <div className="container mx-auto px-4 py-8 lg:py-12">
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
             {/* Left - Forms */}
             <div className="lg:col-span-7 space-y-6">
               {/* Contact */}
-              <section className="bg-card border border-border rounded-xl p-5 lg:p-6">
-                <h2 className="font-bold text-base mb-4">Contact Information</h2>
+              <section className="bg-background border border-border rounded-2xl p-6">
+                <h2 className="font-bold text-base mb-5">Contact Information</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
                     <label className="block text-sm font-medium mb-1.5">Full Name *</label>
@@ -128,8 +128,8 @@ const Checkout = () => {
               </section>
 
               {/* Shipping */}
-              <section className="bg-card border border-border rounded-xl p-5 lg:p-6">
-                <h2 className="font-bold text-base mb-4">Shipping Address</h2>
+              <section className="bg-background border border-border rounded-2xl p-6">
+                <h2 className="font-bold text-base mb-5">Shipping Address</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
                     <label className="block text-sm font-medium mb-1.5">Address Line 1 *</label>
@@ -158,15 +158,15 @@ const Checkout = () => {
               </section>
 
               {/* Payment */}
-              <section className="bg-card border border-border rounded-xl p-5 lg:p-6">
-                <h2 className="font-bold text-base mb-4">Payment Method</h2>
+              <section className="bg-background border border-border rounded-2xl p-6">
+                <h2 className="font-bold text-base mb-5">Payment Method</h2>
                 <div className="space-y-2.5">
                   {paymentOptions.map((opt) => (
                     <label
                       key={opt.id}
                       className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all ${
                         paymentMethod === opt.id
-                          ? 'border-accent bg-accent/5 ring-1 ring-accent/20'
+                          ? 'border-foreground bg-secondary'
                           : 'border-border hover:border-muted-foreground/30'
                       }`}
                     >
@@ -176,7 +176,7 @@ const Checkout = () => {
                         value={opt.id}
                         checked={paymentMethod === opt.id}
                         onChange={() => setPaymentMethod(opt.id)}
-                        className="accent-accent w-4 h-4"
+                        className="accent-foreground w-4 h-4"
                       />
                       <opt.icon className="h-5 w-5 text-muted-foreground shrink-0" />
                       <div>
@@ -191,17 +191,17 @@ const Checkout = () => {
 
             {/* Right - Summary */}
             <div className="lg:col-span-5">
-              <div className="sticky top-24 bg-card border border-border rounded-xl p-5 lg:p-6 space-y-4">
+              <div className="sticky top-24 bg-background border border-border rounded-2xl p-6 space-y-4">
                 <h2 className="font-bold text-base">Order Summary</h2>
 
                 <div className="space-y-3 max-h-[280px] overflow-y-auto scrollbar-hide">
                   {items.map(item => (
                     <div key={item.id} className="flex gap-3">
                       <div className="relative shrink-0">
-                        <div className="w-14 h-14 rounded-lg overflow-hidden bg-secondary">
+                        <div className="w-14 h-14 rounded-xl overflow-hidden bg-secondary">
                           <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                         </div>
-                        <span className="absolute -top-1.5 -right-1.5 bg-muted-foreground text-card text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                        <span className="absolute -top-1.5 -right-1.5 bg-foreground text-background text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
                           {item.quantity}
                         </span>
                       </div>
@@ -238,12 +238,12 @@ const Checkout = () => {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full h-12 text-base font-semibold bg-accent text-accent-foreground hover:bg-accent/90"
+                  className="w-full h-12 text-base font-semibold rounded-full bg-foreground text-background hover:bg-foreground/90"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
                     <span className="flex items-center gap-2">
-                      <span className="h-4 w-4 border-2 border-accent-foreground/30 border-t-accent-foreground rounded-full animate-spin" />
+                      <span className="h-4 w-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
                       Placing Order...
                     </span>
                   ) : paymentMethod === 'cod' ? 'Place Order (COD)' : 'Proceed to Pay'}

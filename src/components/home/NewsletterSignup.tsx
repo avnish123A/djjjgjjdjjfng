@@ -9,17 +9,17 @@ export const NewsletterSignup = () => {
   };
 
   return (
-    <section className="py-16 lg:py-20 bg-primary">
+    <section className="py-16 lg:py-24 bg-foreground">
       <div className="container mx-auto px-4">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
           className="max-w-xl mx-auto text-center"
         >
-          <h2 className="text-2xl sm:text-3xl font-bold mb-3 text-primary-foreground">Join Our Community</h2>
-          <p className="text-primary-foreground/70 mb-8 text-sm">
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3 text-background tracking-tight">Join Our Community</h2>
+          <p className="text-background/50 mb-8 text-sm">
             Get exclusive offers, new arrivals, and 10% off your first order.
           </p>
           <form onSubmit={handleSubmit} className="flex gap-3 max-w-md mx-auto">
@@ -27,15 +27,15 @@ export const NewsletterSignup = () => {
               type="email"
               placeholder="Enter your email"
               required
-              className="flex-1 px-4 py-3 bg-primary-foreground/10 border border-primary-foreground/20 rounded-lg text-sm text-primary-foreground placeholder:text-primary-foreground/40 focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all"
+              className="flex-1 px-5 py-3 bg-background/10 border border-background/15 rounded-full text-sm text-background placeholder:text-background/35 focus:outline-none focus:ring-2 focus:ring-accent/40 transition-all"
             />
-            <Button type="submit" className="px-6 bg-accent text-accent-foreground hover:bg-accent/90">
+            <Button type="submit" className="px-6 rounded-full bg-accent text-accent-foreground hover:bg-accent/90">
               Subscribe
             </Button>
           </form>
-          <p className="text-xs text-primary-foreground/40 mt-4">
+          <p className="text-xs text-background/30 mt-5">
             No spam, unsubscribe anytime. Read our{' '}
-            <a href="/policies/privacy" className="underline hover:text-primary-foreground/60">Privacy Policy</a>.
+            <a href="/policies/privacy" className="underline hover:text-background/50">Privacy Policy</a>.
           </p>
         </motion.div>
       </div>

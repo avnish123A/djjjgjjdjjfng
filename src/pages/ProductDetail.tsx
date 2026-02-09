@@ -25,7 +25,7 @@ const ProductDetail = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin h-8 w-8 border-4 border-accent border-t-transparent rounded-full" />
+        <div className="animate-spin h-8 w-8 border-4 border-foreground border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -88,15 +88,15 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6 lg:py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14">
+      <div className="container mx-auto px-4 py-8 lg:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
           {/* Images */}
           <motion.div
-            initial={{ opacity: 0, x: -15 }}
+            initial={{ opacity: 0, x: -12 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <div className="aspect-square rounded-xl overflow-hidden bg-secondary">
+            <div className="aspect-square rounded-2xl overflow-hidden bg-secondary">
               <img
                 src={displayImages[selectedImage] || product.image}
                 alt={product.name}
@@ -109,8 +109,8 @@ const ProductDetail = () => {
                   <button
                     key={i}
                     onClick={() => setSelectedImage(i)}
-                    className={`w-16 h-16 lg:w-20 lg:h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                      i === selectedImage ? 'border-accent shadow-card' : 'border-transparent hover:border-border'
+                    className={`w-16 h-16 lg:w-20 lg:h-20 rounded-xl overflow-hidden border-2 transition-all ${
+                      i === selectedImage ? 'border-foreground' : 'border-transparent hover:border-border'
                     }`}
                   >
                     <img src={img} alt={`${product.name} view ${i + 1}`} className="w-full h-full object-cover" />
@@ -122,17 +122,17 @@ const ProductDetail = () => {
 
           {/* Product Info */}
           <motion.div
-            initial={{ opacity: 0, x: 15 }}
+            initial={{ opacity: 0, x: 12 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4 }}
-            className="space-y-5"
+            className="space-y-6"
           >
             <div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium mb-1">{product.brand}</p>
-              <h1 className="text-xl lg:text-2xl font-bold mb-3 leading-tight">{product.name}</h1>
+              <p className="text-xs text-muted-foreground uppercase tracking-[0.15em] font-medium mb-1.5">{product.brand}</p>
+              <h1 className="text-xl lg:text-[28px] font-bold mb-3 leading-tight tracking-tight">{product.name}</h1>
 
               {/* Rating */}
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-5">
                 <div className="flex items-center gap-0.5">
                   {[...Array(5)].map((_, i) => (
                     <Star
@@ -154,13 +154,13 @@ const ProductDetail = () => {
                 {product.originalPrice && (
                   <>
                     <span className="text-base text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>
-                    <span className="px-2 py-0.5 bg-success/10 text-success text-sm font-semibold rounded">
+                    <span className="px-2.5 py-0.5 bg-success/10 text-success text-sm font-semibold rounded-full">
                       {discount}% off
                     </span>
                   </>
                 )}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Inclusive of all taxes</p>
+              <p className="text-xs text-muted-foreground mt-1.5">Inclusive of all taxes</p>
             </div>
 
             {/* Stock */}
@@ -174,7 +174,7 @@ const ProductDetail = () => {
             {/* Sizes */}
             {product.sizes && product.sizes.length > 0 && (
               <div>
-                <p className="text-sm font-semibold mb-2.5">Size: {selectedSize || 'Select'}</p>
+                <p className="text-sm font-semibold mb-3">Size: {selectedSize || 'Select'}</p>
                 <div className="flex gap-2 flex-wrap">
                   {product.sizes.map((size) => (
                     <button
@@ -182,7 +182,7 @@ const ProductDetail = () => {
                       onClick={() => setSelectedSize(size)}
                       className={`min-w-[48px] px-4 py-2.5 border rounded-lg text-sm font-medium transition-all ${
                         selectedSize === size
-                          ? 'border-accent bg-accent/10 text-accent'
+                          ? 'border-foreground bg-foreground text-background'
                           : 'border-border hover:border-foreground'
                       }`}
                     >
@@ -196,20 +196,20 @@ const ProductDetail = () => {
             {/* Colors */}
             {product.colors && product.colors.length > 0 && (
               <div>
-                <p className="text-sm font-semibold mb-2.5">Color</p>
+                <p className="text-sm font-semibold mb-3">Color</p>
                 <div className="flex gap-2.5">
                   {product.colors.map((color, i) => (
                     <button
                       key={i}
                       onClick={() => setSelectedColor(color)}
                       className={`w-9 h-9 rounded-full border-2 transition-all ${
-                        selectedColor === color ? 'border-accent ring-2 ring-accent/30' : 'border-border hover:border-foreground'
+                        selectedColor === color ? 'border-foreground ring-2 ring-foreground/20' : 'border-border hover:border-foreground'
                       }`}
                       style={{ backgroundColor: color }}
                       aria-label={`Color ${i + 1}`}
                     >
                       {selectedColor === color && (
-                        <Check className="h-4 w-4 mx-auto text-card drop-shadow" />
+                        <Check className="h-4 w-4 mx-auto text-background drop-shadow" />
                       )}
                     </button>
                   ))}
@@ -219,7 +219,7 @@ const ProductDetail = () => {
 
             {/* Quantity */}
             <div>
-              <p className="text-sm font-semibold mb-2.5">Quantity</p>
+              <p className="text-sm font-semibold mb-3">Quantity</p>
               <div className="inline-flex items-center border border-border rounded-lg">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -245,20 +245,20 @@ const ProductDetail = () => {
             <div className="flex gap-3 pt-1">
               <Button
                 size="lg"
-                className="flex-1 gap-2 h-12 text-base font-semibold bg-accent text-accent-foreground hover:bg-accent/90"
+                className="flex-1 gap-2 h-13 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-full"
                 onClick={handleAddToCart}
                 disabled={!product.inStock}
               >
                 <ShoppingBag className="h-5 w-5" />
                 Add to Cart
               </Button>
-              <Button variant="outline" size="lg" className="h-12 px-4">
+              <Button variant="outline" size="lg" className="h-13 px-4 rounded-full">
                 <Heart className="h-5 w-5" />
               </Button>
             </div>
 
             {/* Pincode Checker */}
-            <div className="p-4 bg-secondary/60 rounded-xl">
+            <div className="p-5 bg-secondary rounded-2xl">
               <div className="flex items-center gap-2 mb-3">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
                 <p className="text-sm font-semibold">Check Delivery</p>
@@ -270,9 +270,9 @@ const ProductDetail = () => {
                   onChange={(e) => { setPincode(e.target.value.replace(/\D/g, '').slice(0, 6)); setPincodeChecked(false); }}
                   placeholder="Enter pincode"
                   maxLength={6}
-                  className="flex-1 px-3 py-2 border border-border rounded-lg text-sm bg-card focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  className="flex-1 px-4 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10"
                 />
-                <Button variant="outline" size="sm" onClick={handleCheckPincode}>
+                <Button variant="outline" size="sm" onClick={handleCheckPincode} className="px-4">
                   Check
                 </Button>
               </div>
@@ -290,24 +290,22 @@ const ProductDetail = () => {
 
             {/* Trust */}
             <div className="grid grid-cols-3 gap-3 pt-2">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-secondary/40 rounded-lg">
-                <Truck className="h-4 w-4 text-accent shrink-0" />
-                <span>Free Delivery</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-secondary/40 rounded-lg">
-                <RotateCcw className="h-4 w-4 text-accent shrink-0" />
-                <span>7-Day Returns</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-secondary/40 rounded-lg">
-                <ShieldCheck className="h-4 w-4 text-accent shrink-0" />
-                <span>100% Genuine</span>
-              </div>
+              {[
+                { icon: Truck, label: 'Free Delivery' },
+                { icon: RotateCcw, label: '7-Day Returns' },
+                { icon: ShieldCheck, label: '100% Genuine' },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-secondary rounded-xl">
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  <span>{item.label}</span>
+                </div>
+              ))}
             </div>
           </motion.div>
         </div>
 
         {/* Tabs */}
-        <div className="mt-16">
+        <div className="mt-20">
           <div className="flex gap-8 border-b border-border">
             {['description', 'specifications', 'reviews', 'shipping'].map((tab) => (
               <button
@@ -321,7 +319,7 @@ const ProductDetail = () => {
                 {activeTab === tab && (
                   <motion.div
                     layoutId="pdpActiveTab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"
+                    className="absolute bottom-0 left-0 right-0 h-[2px] bg-foreground"
                   />
                 )}
               </button>
@@ -343,9 +341,9 @@ const ProductDetail = () => {
                       ['Rating', `${product.rating} / 5`],
                       ['Availability', product.inStock ? 'In Stock' : 'Out of Stock'],
                     ].map(([label, value], i) => (
-                      <tr key={label} className={i % 2 === 0 ? 'bg-secondary/30' : ''}>
-                        <td className="py-2.5 px-3 text-muted-foreground font-medium">{label}</td>
-                        <td className="py-2.5 px-3 font-medium">{value}</td>
+                      <tr key={label} className={i % 2 === 0 ? 'bg-secondary' : ''}>
+                        <td className="py-3 px-4 text-muted-foreground font-medium">{label}</td>
+                        <td className="py-3 px-4 font-medium">{value}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -372,7 +370,7 @@ const ProductDetail = () => {
               </div>
             )}
             {activeTab === 'shipping' && (
-              <div className="max-w-2xl space-y-4 text-sm text-muted-foreground">
+              <div className="max-w-2xl space-y-5 text-sm text-muted-foreground">
                 <div>
                   <h4 className="font-semibold text-foreground mb-2">Shipping</h4>
                   <ul className="space-y-1.5">
@@ -399,9 +397,9 @@ const ProductDetail = () => {
 
         {/* Related */}
         {relatedProducts.length > 0 && (
-          <section className="mt-12 pt-12 border-t border-border">
-            <h2 className="text-xl font-bold mb-8">You May Also Like</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-5">
+          <section className="mt-16 pt-16 border-t border-border">
+            <h2 className="text-xl font-bold mb-10 tracking-tight">You May Also Like</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 lg:gap-6">
               {relatedProducts.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
@@ -411,13 +409,13 @@ const ProductDetail = () => {
       </div>
 
       {/* Mobile Sticky Bottom Bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border p-3 z-40 shadow-bottom-nav">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t border-border p-3 z-40">
         <div className="flex gap-3">
-          <Button variant="outline" className="h-12 px-4">
+          <Button variant="outline" className="h-12 px-4 rounded-full">
             <Heart className="h-5 w-5" />
           </Button>
           <Button
-            className="flex-1 h-12 gap-2 text-base font-semibold bg-accent text-accent-foreground hover:bg-accent/90"
+            className="flex-1 h-12 gap-2 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-full"
             onClick={handleAddToCart}
             disabled={!product.inStock}
           >

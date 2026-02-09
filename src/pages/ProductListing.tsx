@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronRight, Grid3X3, LayoutList } from 'lucide-react';
+import { ChevronRight, Grid3X3 } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
 import { ProductCard } from '@/components/products/ProductCard';
@@ -73,7 +73,7 @@ const ProductListing = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6 lg:py-8">
+      <div className="container mx-auto px-4 py-6 lg:py-10">
         <div className="flex gap-8">
           <ProductFilters
             selectedCategory={selectedCategory}
@@ -85,9 +85,9 @@ const ProductListing = () => {
 
           <div className="flex-1">
             {/* Top bar */}
-            <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+            <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
               <div>
-                <h1 className="text-xl lg:text-2xl font-bold mb-0.5">{categoryLabel}</h1>
+                <h1 className="text-xl lg:text-2xl font-bold tracking-tight mb-0.5">{categoryLabel}</h1>
                 <p className="text-sm text-muted-foreground">
                   {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
                 </p>
@@ -95,7 +95,7 @@ const ProductListing = () => {
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as SortOption)}
-                className="px-3 py-2 border border-border rounded-lg text-sm bg-card focus:outline-none focus:ring-2 focus:ring-accent/30"
+                className="px-3 py-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10"
               >
                 <option value="relevance">Sort: Featured</option>
                 <option value="price-asc">Price: Low to High</option>
@@ -107,10 +107,10 @@ const ProductListing = () => {
 
             {/* Product Grid */}
             {productsLoading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-5">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="animate-pulse">
-                    <div className="aspect-[3/4] rounded-lg bg-secondary mb-3" />
+                    <div className="aspect-[3/4] rounded-xl bg-secondary mb-3" />
                     <div className="h-3 bg-secondary rounded w-1/3 mb-2" />
                     <div className="h-4 bg-secondary rounded w-2/3 mb-2" />
                     <div className="h-4 bg-secondary rounded w-1/4" />
@@ -118,11 +118,11 @@ const ProductListing = () => {
                 ))}
               </div>
             ) : filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-5">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
                 {filteredProducts.map((product, index) => (
                   <motion.div
                     key={product.id}
-                    initial={{ opacity: 0, y: 15 }}
+                    initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.02 }}
                   >
@@ -131,7 +131,7 @@ const ProductListing = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-20">
+              <div className="text-center py-24">
                 <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
                   <Grid3X3 className="h-7 w-7 text-muted-foreground" />
                 </div>

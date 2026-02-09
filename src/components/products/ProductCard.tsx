@@ -33,58 +33,58 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <motion.div
       whileHover={{ y: -4 }}
-      transition={{ duration: 0.25, ease: 'easeOut' }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
       className="group"
     >
       <Link to={`/product/${product.id}`} className="block">
         {/* Image Container */}
-        <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-secondary mb-3">
+        <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-secondary mb-3">
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-600 group-hover:scale-105"
             loading="lazy"
           />
 
           {/* Badges */}
-          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
+          <div className="absolute top-3 left-3 flex flex-col gap-1.5">
             {product.badge === 'Sale' && discount && (
-              <span className="px-2 py-1 rounded text-[11px] font-bold uppercase tracking-wide bg-destructive text-destructive-foreground">
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-destructive text-destructive-foreground">
                 -{discount}%
               </span>
             )}
             {product.badge === 'New' && (
-              <span className="px-2 py-1 rounded text-[11px] font-bold uppercase tracking-wide bg-info text-info-foreground">
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-accent text-accent-foreground">
                 New
               </span>
             )}
             {product.badge === 'Best Seller' && (
-              <span className="px-2 py-1 rounded text-[11px] font-bold uppercase tracking-wide bg-warning text-warning-foreground">
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-foreground text-background">
                 Best Seller
               </span>
             )}
             {product.badge === 'Featured' && (
-              <span className="px-2 py-1 rounded text-[11px] font-bold uppercase tracking-wide bg-accent text-accent-foreground">
+              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-foreground text-background">
                 Featured
               </span>
             )}
           </div>
 
           {/* Quick Actions (desktop hover) */}
-          <div className="absolute top-2.5 right-2.5 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
+          <div className="absolute top-3 right-3 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
             <button
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 toast('Added to wishlist');
               }}
-              className="hidden lg:flex p-2 rounded-full bg-card shadow-card hover:bg-card/90 transition-all hover:scale-110"
+              className="hidden lg:flex p-2 rounded-full bg-background shadow-soft hover:scale-110 transition-transform"
               aria-label="Add to wishlist"
             >
               <Heart className="h-4 w-4" />
             </button>
             <button
-              className="hidden lg:flex p-2 rounded-full bg-card shadow-card hover:bg-card/90 transition-all hover:scale-110"
+              className="hidden lg:flex p-2 rounded-full bg-background shadow-soft hover:scale-110 transition-transform"
               aria-label="Quick view"
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
             >
@@ -99,17 +99,17 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               e.stopPropagation();
               toast('Added to wishlist');
             }}
-            className="lg:hidden absolute top-2.5 right-2.5 p-2 rounded-full bg-card/90 backdrop-blur-sm shadow-card"
+            className="lg:hidden absolute top-3 right-3 p-2 rounded-full bg-background/90 backdrop-blur-sm shadow-soft"
             aria-label="Add to wishlist"
           >
             <Heart className="h-4 w-4" />
           </button>
 
           {/* Add to Cart (desktop hover) */}
-          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-250 translate-y-2 group-hover:translate-y-0 hidden lg:block">
+          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 hidden lg:block">
             <button
               onClick={handleAddToCart}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors shadow-card-hover"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-foreground text-background rounded-full text-sm font-semibold hover:bg-foreground/90 transition-colors shadow-card-hover"
             >
               <ShoppingBag className="h-4 w-4" />
               Add to Cart
@@ -119,7 +119,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           {/* Mobile Add to Cart */}
           <button
             onClick={handleAddToCart}
-            className="lg:hidden absolute bottom-2.5 right-2.5 p-2.5 rounded-full bg-primary text-primary-foreground shadow-card-hover"
+            className="lg:hidden absolute bottom-3 right-3 p-2.5 rounded-full bg-foreground text-background shadow-card-hover"
             aria-label="Add to cart"
           >
             <ShoppingBag className="h-4 w-4" />
@@ -127,8 +127,8 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
           {/* Out of Stock Overlay */}
           {!product.inStock && (
-            <div className="absolute inset-0 bg-card/60 flex items-center justify-center">
-              <span className="px-4 py-2 bg-foreground/80 text-card text-sm font-semibold rounded-lg">
+            <div className="absolute inset-0 bg-background/60 flex items-center justify-center backdrop-blur-[2px]">
+              <span className="px-4 py-2 bg-foreground text-background text-sm font-semibold rounded-full">
                 Out of Stock
               </span>
             </div>
@@ -138,7 +138,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         {/* Product Info */}
         <div className="space-y-1.5 px-0.5">
           {product.brand && (
-            <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">{product.brand}</p>
+            <p className="text-[11px] text-muted-foreground uppercase tracking-[0.1em] font-medium">{product.brand}</p>
           )}
           <h3 className="text-sm font-medium leading-snug line-clamp-2 group-hover:text-accent transition-colors">
             {product.name}
