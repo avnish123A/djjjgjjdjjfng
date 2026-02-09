@@ -30,6 +30,8 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
 
+  const hasSecondaryImage = product.images && product.images.length > 1;
+
   return (
     <motion.div
       whileHover={{ y: -4 }}
@@ -38,13 +40,25 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     >
       <Link to={`/product/${product.id}`} className="block">
         {/* Image Container */}
-        <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-secondary mb-3">
+        <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-secondary mb-3">
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-600 group-hover:scale-105"
+            className={`w-full h-full object-cover transition-all duration-500 ${
+              hasSecondaryImage ? 'group-hover:opacity-0' : 'group-hover:scale-105'
+            }`}
             loading="lazy"
           />
+
+          {/* Secondary image on hover */}
+          {hasSecondaryImage && (
+            <img
+              src={product.images[1]}
+              alt={`${product.name} alternate`}
+              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+              loading="lazy"
+            />
+          )}
 
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
@@ -92,24 +106,24 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             </button>
           </div>
 
-          {/* Mobile Wishlist */}
+          {/* Mobile Wishlist — always visible, larger touch target */}
           <button
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               toast('Added to wishlist');
             }}
-            className="lg:hidden absolute top-3 right-3 p-2 rounded-full bg-background/90 backdrop-blur-sm shadow-soft"
+            className="lg:hidden absolute top-3 right-3 p-2.5 rounded-full bg-background/90 backdrop-blur-sm shadow-soft min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Add to wishlist"
           >
             <Heart className="h-4 w-4" />
           </button>
 
           {/* Add to Cart (desktop hover) */}
-          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 hidden lg:block">
+          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-3 group-hover:translate-y-0 hidden lg:block">
             <button
               onClick={handleAddToCart}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-foreground text-background rounded-full text-sm font-semibold hover:bg-foreground/90 transition-colors shadow-card-hover"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-foreground text-background rounded-full text-sm font-semibold hover:bg-foreground/90 transition-colors shadow-card-hover active:scale-[0.98]"
             >
               <ShoppingBag className="h-4 w-4" />
               Add to Cart
@@ -119,7 +133,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           {/* Mobile Add to Cart */}
           <button
             onClick={handleAddToCart}
-            className="lg:hidden absolute bottom-3 right-3 p-2.5 rounded-full bg-foreground text-background shadow-card-hover"
+            className="lg:hidden absolute bottom-3 right-3 p-2.5 rounded-full bg-foreground text-background shadow-card-hover min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Add to cart"
           >
             <ShoppingBag className="h-4 w-4" />
@@ -182,7 +196,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               {product.colors.slice(0, 4).map((color, i) => (
                 <span
                   key={i}
-                  className="w-3.5 h-3.5 rounded-full border border-border"
+                  className="w-4 h-4 rounded-full border border-border"
                   style={{ backgroundColor: color }}
                 />
               ))}

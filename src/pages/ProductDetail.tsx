@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronRight, Star, Heart, Minus, Plus, ShoppingBag, Truck, RotateCcw, ShieldCheck, Check, MapPin } from 'lucide-react';
+import { ChevronRight, Star, Heart, Minus, Plus, ShoppingBag, Truck, RotateCcw, ShieldCheck, Check, MapPin, Zap } from 'lucide-react';
 import { useProduct, useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,7 @@ const ProductDetail = () => {
   const [activeTab, setActiveTab] = useState('description');
   const [pincode, setPincode] = useState('');
   const [pincodeChecked, setPincodeChecked] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
 
   if (isLoading) {
     return (
@@ -44,14 +45,18 @@ const ProductDetail = () => {
   }
 
   const handleAddToCart = () => {
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      brand: product.brand,
-    });
-    toast.success(`${product.name} added to cart`);
+    setAddingToCart(true);
+    setTimeout(() => {
+      addItem({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        brand: product.brand,
+      });
+      toast.success(`${product.name} added to cart`);
+      setTimeout(() => setAddingToCart(false), 1200);
+    }, 400);
   };
 
   const handleCheckPincode = () => {
@@ -96,11 +101,11 @@ const ProductDetail = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <div className="aspect-square rounded-2xl overflow-hidden bg-secondary">
+            <div className="aspect-square rounded-2xl overflow-hidden bg-secondary cursor-zoom-in group">
               <img
                 src={displayImages[selectedImage] || product.image}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
             </div>
             {displayImages.length > 1 && (
@@ -110,7 +115,7 @@ const ProductDetail = () => {
                     key={i}
                     onClick={() => setSelectedImage(i)}
                     className={`w-16 h-16 lg:w-20 lg:h-20 rounded-xl overflow-hidden border-2 transition-all ${
-                      i === selectedImage ? 'border-foreground' : 'border-transparent hover:border-border'
+                      i === selectedImage ? 'border-accent' : 'border-transparent hover:border-border'
                     }`}
                   >
                     <img src={img} alt={`${product.name} view ${i + 1}`} className="w-full h-full object-cover" />
@@ -150,7 +155,7 @@ const ProductDetail = () => {
 
               {/* Price */}
               <div className="flex items-baseline gap-3">
-                <span className="text-2xl lg:text-3xl font-bold">{formatPrice(product.price)}</span>
+                <span className="text-2xl lg:text-3xl font-bold text-accent">{formatPrice(product.price)}</span>
                 {product.originalPrice && (
                   <>
                     <span className="text-base text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>
@@ -180,7 +185,7 @@ const ProductDetail = () => {
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
-                      className={`min-w-[48px] px-4 py-2.5 border rounded-lg text-sm font-medium transition-all ${
+                      className={`min-w-[56px] px-4 py-2.5 border rounded-lg text-sm font-medium transition-all ${
                         selectedSize === size
                           ? 'border-foreground bg-foreground text-background'
                           : 'border-border hover:border-foreground'
@@ -242,18 +247,38 @@ const ProductDetail = () => {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pt-1">
+            <div className="space-y-3 pt-1">
+              <div className="flex gap-3">
+                <Button
+                  size="lg"
+                  className="flex-1 gap-2 h-13 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-full"
+                  onClick={handleAddToCart}
+                  disabled={!product.inStock || addingToCart}
+                >
+                  {addingToCart ? (
+                    <>
+                      <Check className="h-5 w-5" />
+                      Added!
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingBag className="h-5 w-5" />
+                      Add to Cart
+                    </>
+                  )}
+                </Button>
+                <Button variant="outline" size="lg" className="h-13 px-4 rounded-full">
+                  <Heart className="h-5 w-5" />
+                </Button>
+              </div>
               <Button
+                variant="outline"
                 size="lg"
-                className="flex-1 gap-2 h-13 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-full"
-                onClick={handleAddToCart}
+                className="w-full gap-2 h-12 text-base font-semibold rounded-full border-2 border-foreground hover:bg-foreground hover:text-background transition-all"
                 disabled={!product.inStock}
               >
-                <ShoppingBag className="h-5 w-5" />
-                Add to Cart
-              </Button>
-              <Button variant="outline" size="lg" className="h-13 px-4 rounded-full">
-                <Heart className="h-5 w-5" />
+                <Zap className="h-5 w-5" />
+                Buy Now
               </Button>
             </div>
 
@@ -270,7 +295,7 @@ const ProductDetail = () => {
                   onChange={(e) => { setPincode(e.target.value.replace(/\D/g, '').slice(0, 6)); setPincodeChecked(false); }}
                   placeholder="Enter pincode"
                   maxLength={6}
-                  className="flex-1 px-4 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10"
+                  className="flex-1 px-4 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all"
                 />
                 <Button variant="outline" size="sm" onClick={handleCheckPincode} className="px-4">
                   Check
@@ -295,8 +320,8 @@ const ProductDetail = () => {
                 { icon: RotateCcw, label: '7-Day Returns' },
                 { icon: ShieldCheck, label: '100% Genuine' },
               ].map((item) => (
-                <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-secondary rounded-xl">
-                  <item.icon className="h-4 w-4 shrink-0" />
+                <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground p-3 bg-secondary rounded-xl group/trust hover:bg-accent/5 transition-colors cursor-default">
+                  <item.icon className="h-4 w-4 shrink-0 group-hover/trust:text-accent transition-colors" />
                   <span>{item.label}</span>
                 </div>
               ))}
@@ -409,18 +434,24 @@ const ProductDetail = () => {
       </div>
 
       {/* Mobile Sticky Bottom Bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t border-border p-3 z-40">
-        <div className="flex gap-3">
-          <Button variant="outline" className="h-12 px-4 rounded-full">
+      <div className="lg:hidden fixed bottom-[60px] left-0 right-0 bg-background/95 backdrop-blur-md border-t border-border p-3 z-40" style={{ height: '64px' }}>
+        <div className="flex items-center gap-3 h-full">
+          <div className="shrink-0">
+            <span className="text-lg font-bold text-accent">{formatPrice(product.price)}</span>
+          </div>
+          <Button variant="outline" className="h-10 px-3 rounded-full shrink-0">
             <Heart className="h-5 w-5" />
           </Button>
           <Button
-            className="flex-1 h-12 gap-2 text-base font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-full"
+            className="flex-1 h-10 gap-2 text-sm font-semibold bg-foreground text-background hover:bg-foreground/90 rounded-full"
             onClick={handleAddToCart}
-            disabled={!product.inStock}
+            disabled={!product.inStock || addingToCart}
           >
-            <ShoppingBag className="h-5 w-5" />
-            Add to Cart
+            {addingToCart ? (
+              <><Check className="h-4 w-4" /> Added!</>
+            ) : (
+              <><ShoppingBag className="h-4 w-4" /> Add to Cart</>
+            )}
           </Button>
         </div>
       </div>

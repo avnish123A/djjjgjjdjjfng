@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronRight, ShieldCheck, Truck, Lock, CreditCard, Banknote } from 'lucide-react';
+import { ChevronRight, ShieldCheck, Truck, Lock, CreditCard, Banknote, Check, Calendar } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { formatPrice } from '@/lib/format';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const indianStates = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -22,11 +23,19 @@ const paymentOptions = [
   { id: 'cashfree' as const, label: 'Cashfree', desc: 'UPI, Cards, Net Banking, EMI', icon: CreditCard },
 ];
 
+const steps = [
+  { label: 'Cart', step: 0 },
+  { label: 'Information', step: 1 },
+  { label: 'Shipping', step: 2 },
+  { label: 'Payment', step: 3 },
+];
+
 const Checkout = () => {
   const { items, totalPrice, clearCart } = useCart();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'razorpay' | 'cashfree'>('cod');
+  const [mobileSummaryOpen, setMobileSummaryOpen] = useState(false);
 
   const [form, setForm] = useState({
     name: '', email: '', phone: '',
@@ -85,21 +94,42 @@ const Checkout = () => {
     );
   }
 
-  const inputCls = "w-full px-4 py-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10 focus:border-foreground/20 transition-all";
+  const inputCls = "w-full px-4 py-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent/30 transition-all";
 
   return (
     <main className="min-h-screen bg-secondary/50">
       {/* Simplified Header */}
       <div className="bg-background border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="text-xl font-extrabold tracking-tight">
-            LUXE<span className="text-accent">.</span>
-          </Link>
-          <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link to="/cart" className="hover:text-foreground">Cart</Link>
-            <ChevronRight className="h-3 w-3" />
-            <span className="text-foreground font-medium">Checkout</span>
-          </nav>
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <Link to="/" className="text-xl font-extrabold tracking-tight">
+              LUXE<span className="text-accent">.</span>
+            </Link>
+            <nav className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+              <Link to="/cart" className="hover:text-foreground">Cart</Link>
+              <ChevronRight className="h-3 w-3" />
+              <span className="text-foreground font-medium">Checkout</span>
+            </nav>
+          </div>
+
+          {/* Step Progress Bar */}
+          <div className="flex items-center justify-between max-w-md mx-auto">
+            {steps.map((s, i) => (
+              <div key={s.label} className="flex items-center">
+                <div className="flex flex-col items-center">
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                    i <= 2 ? 'bg-foreground text-background' : 'bg-border text-muted-foreground'
+                  }`}>
+                    {i <= 1 ? <Check className="h-3.5 w-3.5" /> : i + 1}
+                  </div>
+                  <span className="text-[10px] text-muted-foreground mt-1 hidden sm:block">{s.label}</span>
+                </div>
+                {i < steps.length - 1 && (
+                  <div className={`w-8 sm:w-16 h-[2px] mx-1 ${i < 2 ? 'bg-foreground' : 'bg-border'}`} />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -192,38 +222,57 @@ const Checkout = () => {
             {/* Right - Summary */}
             <div className="lg:col-span-5">
               <div className="sticky top-24 bg-background border border-border rounded-2xl p-6 space-y-4">
-                <h2 className="font-bold text-base">Order Summary</h2>
-
-                <div className="space-y-3 max-h-[280px] overflow-y-auto scrollbar-hide">
-                  {items.map(item => (
-                    <div key={item.id} className="flex gap-3">
-                      <div className="relative shrink-0">
-                        <div className="w-14 h-14 rounded-xl overflow-hidden bg-secondary">
-                          <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                        </div>
-                        <span className="absolute -top-1.5 -right-1.5 bg-foreground text-background text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                          {item.quantity}
-                        </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium line-clamp-1">{item.name}</p>
-                        <p className="text-xs text-muted-foreground">{item.brand}</p>
-                      </div>
-                      <span className="text-sm font-semibold shrink-0">{formatPrice(item.price * item.quantity)}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="border-t border-border pt-4 space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-medium">{formatPrice(totalPrice)}</span>
+                {/* Mobile collapsible toggle */}
+                <button
+                  onClick={() => setMobileSummaryOpen(!mobileSummaryOpen)}
+                  className="lg:hidden flex items-center justify-between w-full"
+                >
+                  <h2 className="font-bold text-base">Order Summary</h2>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold">{formatPrice(total)}</span>
+                    <ChevronRight className={`h-4 w-4 transition-transform ${mobileSummaryOpen ? 'rotate-90' : ''}`} />
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Delivery</span>
-                    <span className="font-medium">
-                      {shipping === 0 ? <span className="text-success">FREE</span> : formatPrice(shipping)}
-                    </span>
+                </button>
+                <h2 className="font-bold text-base hidden lg:block">Order Summary</h2>
+
+                <div className={`space-y-4 ${mobileSummaryOpen ? 'block' : 'hidden lg:block'}`}>
+                  <div className="space-y-3 max-h-[280px] overflow-y-auto scrollbar-hide">
+                    {items.map(item => (
+                      <div key={item.id} className="flex gap-3">
+                        <div className="relative shrink-0">
+                          <div className="w-14 h-14 rounded-xl overflow-hidden bg-secondary">
+                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                          </div>
+                          <span className="absolute -top-1.5 -right-1.5 bg-foreground text-background text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                            {item.quantity}
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium line-clamp-1">{item.name}</p>
+                          <p className="text-xs text-muted-foreground">{item.brand}</p>
+                        </div>
+                        <span className="text-sm font-semibold shrink-0">{formatPrice(item.price * item.quantity)}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="border-t border-border pt-4 space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="font-medium">{formatPrice(totalPrice)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Delivery</span>
+                      <span className="font-medium">
+                        {shipping === 0 ? <span className="text-success">FREE</span> : formatPrice(shipping)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Estimated Delivery */}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary rounded-lg px-3 py-2">
+                    <Calendar className="h-3.5 w-3.5 shrink-0" />
+                    <span>Estimated delivery: 3-5 business days</span>
                   </div>
                 </div>
 

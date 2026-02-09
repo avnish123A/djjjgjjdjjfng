@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronRight, Grid3X3 } from 'lucide-react';
+import { ChevronRight, Grid3X3, X } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
 import { ProductCard } from '@/components/products/ProductCard';
@@ -60,6 +60,8 @@ const ProductListing = () => {
     ? categories.find(c => c.slug === selectedCategory)?.name || selectedCategory.replace('-', ' & ').replace(/\b\w/g, (l) => l.toUpperCase())
     : 'All Products';
 
+  const hasActiveFilters = selectedCategory || priceRange[0] > 0 || priceRange[1] < 50000;
+
   return (
     <main className="min-h-screen">
       {/* Breadcrumb */}
@@ -85,7 +87,7 @@ const ProductListing = () => {
 
           <div className="flex-1">
             {/* Top bar */}
-            <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
+            <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
               <div>
                 <h1 className="text-xl lg:text-2xl font-bold tracking-tight mb-0.5">{categoryLabel}</h1>
                 <p className="text-sm text-muted-foreground">
@@ -95,7 +97,12 @@ const ProductListing = () => {
               <select
                 value={sort}
                 onChange={(e) => setSort(e.target.value as SortOption)}
-                className="px-3 py-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10"
+                className="px-4 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 appearance-none cursor-pointer pr-8"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2386868B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 12px center',
+                }}
               >
                 <option value="relevance">Sort: Featured</option>
                 <option value="price-asc">Price: Low to High</option>
@@ -105,26 +112,57 @@ const ProductListing = () => {
               </select>
             </div>
 
+            {/* Active Filter Chips */}
+            {hasActiveFilters && (
+              <div className="flex items-center gap-2 flex-wrap mb-6">
+                <span className="text-xs font-medium text-muted-foreground mr-1">Active filters:</span>
+                {selectedCategory && (
+                  <button
+                    onClick={() => handleCategoryChange(null)}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-secondary text-sm rounded-full hover:bg-muted transition-colors"
+                  >
+                    {categoryLabel}
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
+                {(priceRange[0] > 0 || priceRange[1] < 50000) && (
+                  <button
+                    onClick={() => setPriceRange([0, 50000])}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-secondary text-sm rounded-full hover:bg-muted transition-colors"
+                  >
+                    ₹{priceRange[0].toLocaleString('en-IN')} - ₹{priceRange[1].toLocaleString('en-IN')}
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
+                <button
+                  onClick={() => { handleCategoryChange(null); setPriceRange([0, 50000]); }}
+                  className="text-xs text-accent font-medium hover:underline ml-1"
+                >
+                  Clear all
+                </button>
+              </div>
+            )}
+
             {/* Product Grid */}
             {productsLoading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="animate-pulse">
-                    <div className="aspect-[3/4] rounded-xl bg-secondary mb-3" />
-                    <div className="h-3 bg-secondary rounded w-1/3 mb-2" />
-                    <div className="h-4 bg-secondary rounded w-2/3 mb-2" />
-                    <div className="h-4 bg-secondary rounded w-1/4" />
+              <div className="grid grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-4 lg:gap-6">
+                {[...Array(8)].map((_, i) => (
+                  <div key={i}>
+                    <div className="aspect-[3/4] rounded-2xl shimmer mb-3" />
+                    <div className="h-3 shimmer rounded w-1/3 mb-2" />
+                    <div className="h-4 shimmer rounded w-2/3 mb-2" />
+                    <div className="h-4 shimmer rounded w-1/4" />
                   </div>
                 ))}
               </div>
             ) : filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-4 lg:gap-6">
                 {filteredProducts.map((product, index) => (
                   <motion.div
                     key={product.id}
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.02 }}
+                    transition={{ duration: 0.3, delay: Math.min(index * 0.05, 0.4) }}
                   >
                     <ProductCard product={product} />
                   </motion.div>
