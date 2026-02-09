@@ -1,74 +1,116 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import type { User } from '@supabase/supabase-js';
 
 interface AdminAuthContextType {
   isLoggedIn: boolean;
+  isAdmin: boolean;
   adminEmail: string | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
+  user: User | null;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
   isLoading: boolean;
 }
 
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
 
-// Demo mode: simple client-side auth for UI preview
-// In production, replace with your Express backend API calls
-const DEMO_EMAIL = 'studenthubince@gmail.com';
-const DEMO_PASSWORD = 'avnish@123A';
-
 export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [adminEmail, setAdminEmail] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  const checkAdminRole = useCallback(async (userId: string) => {
+    const { data } = await supabase.rpc('has_role', {
+      _user_id: userId,
+      _role: 'admin',
+    });
+    return !!data;
+  }, []);
+
   useEffect(() => {
-    // Check for existing session
-    const session = localStorage.getItem('admin_session');
-    if (session) {
-      try {
-        const parsed = JSON.parse(session);
-        if (parsed.loggedIn && parsed.email) {
-          setIsLoggedIn(true);
-          setAdminEmail(parsed.email);
-        }
-      } catch {
-        localStorage.removeItem('admin_session');
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        setUser(session.user);
+        // Check admin role without blocking
+        const adminStatus = await checkAdminRole(session.user.id);
+        setIsAdmin(adminStatus);
+      } else {
+        setUser(null);
+        setIsAdmin(false);
       }
-    }
-    setIsLoading(false);
-  }, []);
-
-  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    
-    // TODO: Replace with actual API call to your Express backend
-    // const res = await apiFetch(apiConfig.endpoints.login, {
-    //   method: 'POST',
-    //   body: JSON.stringify({ email, password }),
-    // });
-    
-    // Demo mode: client-side check
-    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network
-    
-    if (email === DEMO_EMAIL && password === DEMO_PASSWORD) {
-      setIsLoggedIn(true);
-      setAdminEmail(email);
-      localStorage.setItem('admin_session', JSON.stringify({ loggedIn: true, email }));
       setIsLoading(false);
-      return true;
+    });
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user);
+        const adminStatus = await checkAdminRole(session.user.id);
+        setIsAdmin(adminStatus);
+      }
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [checkAdminRole]);
+
+  const login = useCallback(async (email: string, password: string) => {
+    setIsLoading(true);
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      setIsLoading(false);
+      return { success: false, error: error.message };
     }
-    
+
+    if (data.user) {
+      const adminStatus = await checkAdminRole(data.user.id);
+      if (!adminStatus) {
+        await supabase.auth.signOut();
+        setIsLoading(false);
+        return { success: false, error: 'You do not have admin access' };
+      }
+      setIsAdmin(true);
+    }
+
     setIsLoading(false);
-    return false;
+    return { success: true };
+  }, [checkAdminRole]);
+
+  const signup = useCallback(async (email: string, password: string) => {
+    setIsLoading(true);
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: window.location.origin },
+    });
+
+    setIsLoading(false);
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true };
   }, []);
 
-  const logout = useCallback(() => {
-    setIsLoggedIn(false);
-    setAdminEmail(null);
-    localStorage.removeItem('admin_session');
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setIsAdmin(false);
   }, []);
 
   return (
-    <AdminAuthContext.Provider value={{ isLoggedIn, adminEmail, login, logout, isLoading }}>
+    <AdminAuthContext.Provider
+      value={{
+        isLoggedIn: !!user && isAdmin,
+        isAdmin,
+        adminEmail: user?.email || null,
+        user,
+        login,
+        signup,
+        logout,
+        isLoading,
+      }}
+    >
       {children}
     </AdminAuthContext.Provider>
   );
