@@ -1,10 +1,32 @@
 import { motion } from 'framer-motion';
-import { products } from '@/data/products';
+import { useProducts } from '@/hooks/useProducts';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
 export const FeaturedProducts = () => {
+  const { data: products = [], isLoading } = useProducts();
   const featured = products.slice(0, 8);
+
+  if (isLoading) {
+    return (
+      <section className="py-16 lg:py-24 bg-secondary/50">
+        <div className="container mx-auto px-4">
+          <div className="h-8 bg-secondary rounded w-48 mb-10" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="aspect-square rounded-xl bg-secondary mb-3" />
+                <div className="h-3 bg-secondary rounded w-1/3 mb-2" />
+                <div className="h-4 bg-secondary rounded w-2/3" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (featured.length === 0) return null;
 
   return (
     <section className="py-16 lg:py-24 bg-secondary/50">

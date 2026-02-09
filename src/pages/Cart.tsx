@@ -4,10 +4,11 @@ import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ChevronRight } from 'luci
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { formatPrice } from '@/lib/format';
 
 const Cart = () => {
   const { items, updateQuantity, removeItem, totalPrice, totalItems } = useCart();
-  const shipping = totalPrice >= 100 ? 0 : 9.99;
+  const shipping = totalPrice >= 999 ? 0 : 99;
   const total = totalPrice + shipping;
 
   if (items.length === 0) {
@@ -117,7 +118,7 @@ const Cart = () => {
                       </div>
 
                       {/* Price */}
-                      <span className="font-semibold">${(item.price * item.quantity).toFixed(2)}</span>
+                      <span className="font-semibold">{formatPrice(item.price * item.quantity)}</span>
                     </div>
                   </div>
                 </motion.div>
@@ -133,15 +134,15 @@ const Cart = () => {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium">${totalPrice.toFixed(2)}</span>
+                  <span className="font-medium">{formatPrice(totalPrice)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Shipping</span>
+                  <span className="text-muted-foreground">Delivery</span>
                   <span className="font-medium">
                     {shipping === 0 ? (
                       <span className="text-success">Free</span>
                     ) : (
-                      `$${shipping.toFixed(2)}`
+                      formatPrice(shipping)
                     )}
                   </span>
                 </div>
@@ -164,13 +165,15 @@ const Cart = () => {
               <div className="border-t border-border pt-4">
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-lg">Total</span>
-                  <span className="font-bold text-xl">${total.toFixed(2)}</span>
+                  <span className="font-bold text-xl">{formatPrice(total)}</span>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">Including taxes</p>
+                <p className="text-xs text-muted-foreground mt-1">Including all taxes</p>
               </div>
 
-              <Button variant="accent" size="lg" className="w-full gap-2">
-                Proceed to Checkout <ArrowRight className="h-4 w-4" />
+              <Button variant="accent" size="lg" className="w-full gap-2" asChild>
+                <Link to="/checkout">
+                  Proceed to Checkout <ArrowRight className="h-4 w-4" />
+                </Link>
               </Button>
 
               <Link
@@ -182,7 +185,7 @@ const Cart = () => {
 
               {shipping > 0 && (
                 <p className="text-xs text-center text-muted-foreground">
-                  Add ${(100 - totalPrice).toFixed(2)} more for free shipping
+                  Add {formatPrice(999 - totalPrice)} more for free delivery
                 </p>
               )}
             </div>

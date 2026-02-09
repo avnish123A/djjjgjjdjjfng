@@ -3,9 +3,11 @@ import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { products } from '@/data/products';
+import { useProducts } from '@/hooks/useProducts';
+import { useCategories } from '@/hooks/useCategories';
 import { ProductCard } from '@/components/products/ProductCard';
 import { ProductFilters } from '@/components/products/ProductFilters';
+import { formatPrice } from '@/lib/format';
 
 type SortOption = 'relevance' | 'price-asc' | 'price-desc' | 'newest' | 'rating';
 
@@ -13,8 +15,11 @@ const ProductListing = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const categoryParam = searchParams.get('category');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(categoryParam);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 50000]);
   const [sort, setSort] = useState<SortOption>('relevance');
+
+  const { data: products = [], isLoading: productsLoading } = useProducts();
+  const { data: categories = [] } = useCategories();
 
   const handleCategoryChange = (cat: string | null) => {
     setSelectedCategory(cat);
@@ -27,31 +32,34 @@ const ProductListing = () => {
 
   const filteredProducts = useMemo(() => {
     let result = products.filter((p) => {
-      if (selectedCategory && p.category !== selectedCategory) return false;
+      if (selectedCategory) {
+        const matchingCat = categories.find(c => c.slug === selectedCategory);
+        if (matchingCat && p.categoryId !== matchingCat.id) return false;
+      }
       if (p.price < priceRange[0] || p.price > priceRange[1]) return false;
       return true;
     });
 
     switch (sort) {
       case 'price-asc':
-        result.sort((a, b) => a.price - b.price);
+        result = [...result].sort((a, b) => a.price - b.price);
         break;
       case 'price-desc':
-        result.sort((a, b) => b.price - a.price);
+        result = [...result].sort((a, b) => b.price - a.price);
         break;
       case 'rating':
-        result.sort((a, b) => b.rating - a.rating);
+        result = [...result].sort((a, b) => b.rating - a.rating);
         break;
       case 'newest':
-        result.sort((a, b) => (a.badge === 'New' ? -1 : 1));
+        result = [...result].sort((a, b) => (a.badge === 'New' ? -1 : 1));
         break;
     }
 
     return result;
-  }, [selectedCategory, priceRange, sort]);
+  }, [products, categories, selectedCategory, priceRange, sort]);
 
   const categoryLabel = selectedCategory
-    ? selectedCategory.replace('-', ' & ').replace(/\b\w/g, (l) => l.toUpperCase())
+    ? categories.find(c => c.slug === selectedCategory)?.name || selectedCategory.replace('-', ' & ').replace(/\b\w/g, (l) => l.toUpperCase())
     : 'All Products';
 
   return (
@@ -72,6 +80,7 @@ const ProductListing = () => {
             onCategoryChange={handleCategoryChange}
             priceRange={priceRange}
             onPriceChange={setPriceRange}
+            categories={categories}
           />
 
           <div className="flex-1">
@@ -99,7 +108,18 @@ const ProductListing = () => {
             </div>
 
             {/* Product grid */}
-            {filteredProducts.length > 0 ? (
+            {productsLoading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="aspect-square rounded-xl bg-secondary mb-3" />
+                    <div className="h-3 bg-secondary rounded w-1/3 mb-2" />
+                    <div className="h-4 bg-secondary rounded w-2/3 mb-2" />
+                    <div className="h-4 bg-secondary rounded w-1/4" />
+                  </div>
+                ))}
+              </div>
+            ) : filteredProducts.length > 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
                 {filteredProducts.map((product, index) => (
                   <motion.div
@@ -118,7 +138,7 @@ const ProductListing = () => {
                 <button
                   onClick={() => {
                     handleCategoryChange(null);
-                    setPriceRange([0, 500]);
+                    setPriceRange([0, 50000]);
                   }}
                   className="text-accent font-medium hover:underline"
                 >

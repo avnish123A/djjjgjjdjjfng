@@ -23,7 +23,7 @@ export const PromoBanners = () => {
                   Limited Time
                 </span>
                 <h3 className="text-2xl lg:text-3xl font-bold text-primary-foreground mb-2">
-                  Summer Sale
+                  Mega Sale
                 </h3>
                 <p className="text-primary-foreground/70 mb-6">
                   Up to 50% off on selected items
@@ -39,7 +39,7 @@ export const PromoBanners = () => {
             </div>
           </motion.div>
 
-          {/* Free Shipping Banner */}
+          {/* Free Delivery Banner */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -52,10 +52,10 @@ export const PromoBanners = () => {
                   This Weekend
                 </span>
                 <h3 className="text-2xl lg:text-3xl font-bold text-accent-foreground mb-2">
-                  Free Shipping
+                  Free Delivery
                 </h3>
                 <p className="text-accent-foreground/80 mb-4">
-                  On all orders over $50. No code needed.
+                  On all orders above ₹499. No code needed.
                 </p>
                 <p className="text-accent-foreground/60 text-sm">
                   Standard delivery 3-5 business days

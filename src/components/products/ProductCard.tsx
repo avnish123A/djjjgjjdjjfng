@@ -3,7 +3,8 @@ import { Heart, ShoppingBag, Star } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
-import type { Product } from '@/data/products';
+import { formatPrice } from '@/lib/format';
+import type { Product } from '@/types/product';
 
 interface ProductCardProps {
   product: Product;
@@ -85,7 +86,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             </button>
           </div>
 
-          {/* Mobile add to cart - always visible */}
+          {/* Mobile add to cart */}
           <button
             onClick={handleAddToCart}
             className="lg:hidden absolute bottom-3 right-3 p-2.5 rounded-full bg-primary text-primary-foreground shadow-card"
@@ -119,9 +120,9 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
           {/* Price */}
           <div className="flex items-center gap-2">
-            <span className="font-semibold">${product.price}</span>
+            <span className="font-semibold">{formatPrice(product.price)}</span>
             {product.originalPrice && (
-              <span className="text-sm text-muted-foreground line-through">${product.originalPrice}</span>
+              <span className="text-sm text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>
             )}
           </div>
 

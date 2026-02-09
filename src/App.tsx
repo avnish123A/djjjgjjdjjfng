@@ -11,7 +11,15 @@ import Index from "./pages/Index";
 import ProductListing from "./pages/ProductListing";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import OrderSuccess from "./pages/OrderSuccess";
 import NotFound from "./pages/NotFound";
+
+// Policy pages
+import PrivacyPolicy from "./pages/policies/PrivacyPolicy";
+import TermsConditions from "./pages/policies/TermsConditions";
+import ReturnPolicy from "./pages/policies/ReturnPolicy";
+import ShippingPolicy from "./pages/policies/ShippingPolicy";
 
 // Admin pages
 import AdminLayout from "./components/admin/AdminLayout";
@@ -46,6 +54,15 @@ const AdminGuard = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Storefront layout wrapper
+const StorefrontLayout = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex flex-col min-h-screen">
+    <Header />
+    <div className="flex-1">{children}</div>
+    <Footer />
+  </div>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -56,46 +73,18 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               {/* Storefront routes */}
-              <Route
-                path="/"
-                element={
-                  <div className="flex flex-col min-h-screen">
-                    <Header />
-                    <div className="flex-1"><Index /></div>
-                    <Footer />
-                  </div>
-                }
-              />
-              <Route
-                path="/products"
-                element={
-                  <div className="flex flex-col min-h-screen">
-                    <Header />
-                    <div className="flex-1"><ProductListing /></div>
-                    <Footer />
-                  </div>
-                }
-              />
-              <Route
-                path="/product/:id"
-                element={
-                  <div className="flex flex-col min-h-screen">
-                    <Header />
-                    <div className="flex-1"><ProductDetail /></div>
-                    <Footer />
-                  </div>
-                }
-              />
-              <Route
-                path="/cart"
-                element={
-                  <div className="flex flex-col min-h-screen">
-                    <Header />
-                    <div className="flex-1"><Cart /></div>
-                    <Footer />
-                  </div>
-                }
-              />
+              <Route path="/" element={<StorefrontLayout><Index /></StorefrontLayout>} />
+              <Route path="/products" element={<StorefrontLayout><ProductListing /></StorefrontLayout>} />
+              <Route path="/product/:id" element={<StorefrontLayout><ProductDetail /></StorefrontLayout>} />
+              <Route path="/cart" element={<StorefrontLayout><Cart /></StorefrontLayout>} />
+              <Route path="/checkout" element={<StorefrontLayout><Checkout /></StorefrontLayout>} />
+              <Route path="/order-success" element={<StorefrontLayout><OrderSuccess /></StorefrontLayout>} />
+
+              {/* Policy pages */}
+              <Route path="/policies/privacy" element={<StorefrontLayout><PrivacyPolicy /></StorefrontLayout>} />
+              <Route path="/policies/terms" element={<StorefrontLayout><TermsConditions /></StorefrontLayout>} />
+              <Route path="/policies/returns" element={<StorefrontLayout><ReturnPolicy /></StorefrontLayout>} />
+              <Route path="/policies/shipping" element={<StorefrontLayout><ShippingPolicy /></StorefrontLayout>} />
 
               {/* Admin routes */}
               <Route path="/admin/login" element={<AdminLogin />} />
@@ -119,16 +108,7 @@ const App = () => (
                 <Route path="coupons" element={<AdminCoupons />} />
               </Route>
 
-              <Route
-                path="*"
-                element={
-                  <div className="flex flex-col min-h-screen">
-                    <Header />
-                    <div className="flex-1"><NotFound /></div>
-                    <Footer />
-                  </div>
-                }
-              />
+              <Route path="*" element={<StorefrontLayout><NotFound /></StorefrontLayout>} />
             </Routes>
           </BrowserRouter>
         </AdminAuthProvider>

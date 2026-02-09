@@ -1,11 +1,15 @@
 import { motion } from 'framer-motion';
-import { products } from '@/data/products';
+import { useProducts } from '@/hooks/useProducts';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 
 export const BestSellers = () => {
-  const bestSellers = products.slice(8, 16);
+  const { data: products = [] } = useProducts();
+  const bestSellers = products.filter(p => p.badge === 'Best Seller').slice(0, 8);
+  const displayProducts = bestSellers.length > 0 ? bestSellers : products.slice(0, 8);
+
+  if (displayProducts.length === 0) return null;
 
   return (
     <section className="py-16 lg:py-24">
@@ -30,7 +34,7 @@ export const BestSellers = () => {
         </motion.div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-          {bestSellers.map((product, index) => (
+          {displayProducts.map((product, index) => (
             <motion.div
               key={product.id}
               initial={{ opacity: 0, y: 30 }}
