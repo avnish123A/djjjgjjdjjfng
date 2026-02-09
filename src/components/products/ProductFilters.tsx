@@ -1,17 +1,18 @@
-import { useState } from 'react';
 import { X, SlidersHorizontal } from 'lucide-react';
-import { categories } from '@/data/categories';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { formatPrice } from '@/lib/format';
+import type { Category } from '@/types/product';
 
 interface ProductFiltersProps {
   selectedCategory: string | null;
   onCategoryChange: (category: string | null) => void;
   priceRange: [number, number];
   onPriceChange: (range: [number, number]) => void;
+  categories: Category[];
 }
 
-const FilterContent = ({ selectedCategory, onCategoryChange, priceRange, onPriceChange }: ProductFiltersProps) => (
+const FilterContent = ({ selectedCategory, onCategoryChange, priceRange, onPriceChange, categories }: ProductFiltersProps) => (
   <div className="space-y-6">
     {/* Categories */}
     <div>
@@ -49,14 +50,15 @@ const FilterContent = ({ selectedCategory, onCategoryChange, priceRange, onPrice
         <input
           type="range"
           min={0}
-          max={500}
+          max={50000}
+          step={500}
           value={priceRange[1]}
           onChange={(e) => onPriceChange([priceRange[0], parseInt(e.target.value)])}
           className="w-full accent-accent"
         />
         <div className="flex justify-between text-sm text-muted-foreground">
-          <span>${priceRange[0]}</span>
-          <span>${priceRange[1]}</span>
+          <span>{formatPrice(priceRange[0])}</span>
+          <span>{formatPrice(priceRange[1])}</span>
         </div>
       </div>
     </div>
@@ -68,7 +70,7 @@ const FilterContent = ({ selectedCategory, onCategoryChange, priceRange, onPrice
       className="w-full"
       onClick={() => {
         onCategoryChange(null);
-        onPriceChange([0, 500]);
+        onPriceChange([0, 50000]);
       }}
     >
       <X className="h-3 w-3 mr-1" /> Clear All

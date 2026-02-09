@@ -2,19 +2,30 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ChevronRight, Star, Heart, Minus, Plus, ShoppingBag, Truck, RotateCcw, ShieldCheck } from 'lucide-react';
-import { products } from '@/data/products';
+import { useProduct, useProducts } from '@/hooks/useProducts';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { ProductCard } from '@/components/products/ProductCard';
+import { formatPrice } from '@/lib/format';
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const product = products.find((p) => p.id === id);
+  const { data: product, isLoading } = useProduct(id || '');
+  const { data: allProducts = [] } = useProducts();
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState(0);
   const [activeTab, setActiveTab] = useState('description');
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-accent border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -40,13 +51,15 @@ const ProductDetail = () => {
     toast.success(`${product.name} added to cart`);
   };
 
-  const relatedProducts = products
-    .filter((p) => p.category === product.category && p.id !== product.id)
+  const relatedProducts = allProducts
+    .filter((p) => p.categoryId === product.categoryId && p.id !== product.id)
     .slice(0, 4);
 
   const discount = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : null;
+
+  const displayImages = product.images.length > 0 ? product.images : [product.image];
 
   return (
     <main className="min-h-screen">
@@ -71,28 +84,31 @@ const ProductDetail = () => {
           >
             <div className="aspect-square rounded-2xl overflow-hidden bg-secondary">
               <img
-                src={product.image}
+                src={displayImages[selectedImage] || product.image}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
             </div>
             {/* Thumbnails */}
-            <div className="flex gap-3 mt-4">
-              {[0, 1, 2, 3].map((i) => (
-                <button
-                  key={i}
-                  className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
-                    i === 0 ? 'border-accent' : 'border-border hover:border-muted-foreground'
-                  }`}
-                >
-                  <img
-                    src={product.image}
-                    alt={`${product.name} view ${i + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
+            {displayImages.length > 1 && (
+              <div className="flex gap-3 mt-4">
+                {displayImages.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedImage(i)}
+                    className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-colors ${
+                      i === selectedImage ? 'border-accent' : 'border-border hover:border-muted-foreground'
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt={`${product.name} view ${i + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </motion.div>
 
           {/* Info */}
@@ -125,10 +141,10 @@ const ProductDetail = () => {
 
               {/* Price */}
               <div className="flex items-center gap-3">
-                <span className="text-3xl font-bold">${product.price}</span>
+                <span className="text-3xl font-bold">{formatPrice(product.price)}</span>
                 {product.originalPrice && (
                   <>
-                    <span className="text-lg text-muted-foreground line-through">${product.originalPrice}</span>
+                    <span className="text-lg text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>
                     <span className="px-2 py-0.5 bg-destructive/10 text-destructive text-sm font-medium rounded">
                       -{discount}%
                     </span>
@@ -139,12 +155,14 @@ const ProductDetail = () => {
 
             {/* Availability */}
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-success" />
-              <span className="text-sm font-medium text-success">In Stock</span>
+              <span className={`w-2 h-2 rounded-full ${product.inStock ? 'bg-success' : 'bg-destructive'}`} />
+              <span className={`text-sm font-medium ${product.inStock ? 'text-success' : 'text-destructive'}`}>
+                {product.inStock ? 'In Stock' : 'Out of Stock'}
+              </span>
             </div>
 
             {/* Sizes */}
-            {product.sizes && (
+            {product.sizes && product.sizes.length > 0 && (
               <div>
                 <p className="text-sm font-semibold mb-3">Size</p>
                 <div className="flex gap-2 flex-wrap">
@@ -166,7 +184,7 @@ const ProductDetail = () => {
             )}
 
             {/* Colors */}
-            {product.colors && (
+            {product.colors && product.colors.length > 0 && (
               <div>
                 <p className="text-sm font-semibold mb-3">Color</p>
                 <div className="flex gap-2">
@@ -208,7 +226,7 @@ const ProductDetail = () => {
 
             {/* Actions */}
             <div className="flex gap-3">
-              <Button variant="accent" size="lg" className="flex-1 gap-2" onClick={handleAddToCart}>
+              <Button variant="accent" size="lg" className="flex-1 gap-2" onClick={handleAddToCart} disabled={!product.inStock}>
                 <ShoppingBag className="h-4 w-4" />
                 Add to Cart
               </Button>
@@ -221,11 +239,11 @@ const ProductDetail = () => {
             <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Truck className="h-4 w-4 shrink-0" />
-                <span>Free Shipping</span>
+                <span>Free Delivery</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <RotateCcw className="h-4 w-4 shrink-0" />
-                <span>30-Day Returns</span>
+                <span>7-Day Returns</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <ShieldCheck className="h-4 w-4 shrink-0" />
@@ -270,7 +288,7 @@ const ProductDetail = () => {
                 </div>
                 <div className="flex justify-between py-2 border-b border-border text-sm">
                   <span className="text-muted-foreground">Category</span>
-                  <span className="font-medium capitalize">{product.category}</span>
+                  <span className="font-medium capitalize">{product.categoryName}</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-border text-sm">
                   <span className="text-muted-foreground">Rating</span>
@@ -278,7 +296,9 @@ const ProductDetail = () => {
                 </div>
                 <div className="flex justify-between py-2 border-b border-border text-sm">
                   <span className="text-muted-foreground">Availability</span>
-                  <span className="font-medium text-success">In Stock</span>
+                  <span className={`font-medium ${product.inStock ? 'text-success' : 'text-destructive'}`}>
+                    {product.inStock ? 'In Stock' : 'Out of Stock'}
+                  </span>
                 </div>
               </div>
             )}

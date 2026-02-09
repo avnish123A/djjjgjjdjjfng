@@ -1,20 +1,12 @@
 import { Link } from 'react-router-dom';
 import { X, ChevronRight, User, Heart, Package } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { useCategories } from '@/hooks/useCategories';
 
 interface MobileMenuProps {
   open: boolean;
   onClose: () => void;
 }
-
-const menuItems = [
-  { label: 'Fashion', href: '/products?category=fashion' },
-  { label: 'Electronics', href: '/products?category=electronics' },
-  { label: 'Beauty & Health', href: '/products?category=beauty' },
-  { label: 'Home & Living', href: '/products?category=home-living' },
-  { label: 'Sports & Fitness', href: '/products?category=sports' },
-  { label: 'FMCG & Grocery', href: '/products?category=fmcg' },
-];
 
 const accountLinks = [
   { label: 'My Account', href: '#', icon: User },
@@ -23,6 +15,8 @@ const accountLinks = [
 ];
 
 export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
+  const { data: categories = [] } = useCategories();
+
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent side="left" className="w-80 p-0">
@@ -44,14 +38,14 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
                 Shop by Category
               </p>
               <nav className="space-y-1">
-                {menuItems.map((item) => (
+                {categories.map((cat) => (
                   <Link
-                    key={item.label}
-                    to={item.href}
+                    key={cat.id}
+                    to={`/products?category=${cat.slug}`}
                     onClick={onClose}
                     className="flex items-center justify-between py-3 px-3 rounded-lg text-sm font-medium hover:bg-secondary transition-colors"
                   >
-                    {item.label}
+                    {cat.name}
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </Link>
                 ))}

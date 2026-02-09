@@ -1,30 +1,53 @@
 import { Link } from 'react-router-dom';
-import { Mail, MapPin, Phone } from 'lucide-react';
+import { Mail, MapPin, Phone, ShieldCheck, Truck, RotateCcw, CreditCard, BadgeCheck, Lock } from 'lucide-react';
 
 const footerLinks = {
   company: [
     { label: 'About Us', href: '#' },
     { label: 'Careers', href: '#' },
-    { label: 'Press', href: '#' },
     { label: 'Blog', href: '#' },
+    { label: 'Contact Us', href: '#' },
   ],
   support: [
-    { label: 'Contact Us', href: '#' },
     { label: 'FAQs', href: '#' },
     { label: 'Track Order', href: '#' },
-    { label: 'Shipping Info', href: '#' },
+    { label: 'Shipping Policy', href: '/policies/shipping' },
+    { label: 'Return & Refund', href: '/policies/returns' },
   ],
-  shop: [
-    { label: 'Fashion', href: '/products?category=fashion' },
-    { label: 'Electronics', href: '/products?category=electronics' },
-    { label: 'Beauty', href: '/products?category=beauty' },
-    { label: 'Home & Living', href: '/products?category=home-living' },
+  legal: [
+    { label: 'Privacy Policy', href: '/policies/privacy' },
+    { label: 'Terms & Conditions', href: '/policies/terms' },
+    { label: 'Shipping Policy', href: '/policies/shipping' },
+    { label: 'Refund Policy', href: '/policies/returns' },
   ],
 };
+
+const trustBadges = [
+  { icon: ShieldCheck, label: '100% Genuine' },
+  { icon: Truck, label: 'Free Delivery' },
+  { icon: RotateCcw, label: 'Easy Returns' },
+  { icon: CreditCard, label: 'Secure Payment' },
+  { icon: Lock, label: 'SSL Encrypted' },
+  { icon: BadgeCheck, label: 'Quality Assured' },
+];
 
 export const Footer = () => {
   return (
     <footer className="bg-primary text-primary-foreground">
+      {/* Trust Badges Bar */}
+      <div className="border-b border-primary-foreground/10">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-wrap justify-center gap-6 lg:gap-10">
+            {trustBadges.map((badge) => (
+              <div key={badge.label} className="flex items-center gap-2 text-primary-foreground/80">
+                <badge.icon className="h-4 w-4 text-accent" />
+                <span className="text-xs font-medium">{badge.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
@@ -33,20 +56,20 @@ export const Footer = () => {
               LUXE<span className="text-accent">.</span>
             </h3>
             <p className="text-primary-foreground/70 text-sm leading-relaxed mb-6">
-              Premium multi-category store with curated products for the modern lifestyle.
+              Premium multi-category store with curated products for the modern lifestyle. Shop with confidence.
             </p>
             <div className="space-y-3 text-sm text-primary-foreground/70">
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                <span>hello@luxestore.com</span>
+                <span>support@luxestore.in</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
-                <span>+1 (800) 123-4567</span>
+                <span>+91 98765 43210</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                <span>New York, NY 10001</span>
+                <span>Mumbai, Maharashtra, India</span>
               </div>
             </div>
           </div>
@@ -83,7 +106,7 @@ export const Footer = () => {
             </nav>
           </div>
 
-          {/* Newsletter */}
+          {/* Legal / Newsletter */}
           <div>
             <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider">Stay Updated</h4>
             <p className="text-sm text-primary-foreground/70 mb-4">
@@ -110,9 +133,10 @@ export const Footer = () => {
             © 2026 LUXE. All rights reserved.
           </p>
           <div className="flex items-center gap-6 text-xs text-primary-foreground/50">
-            <Link to="#" className="hover:text-primary-foreground transition-colors">Privacy Policy</Link>
-            <Link to="#" className="hover:text-primary-foreground transition-colors">Terms & Conditions</Link>
-            <Link to="#" className="hover:text-primary-foreground transition-colors">Sitemap</Link>
+            <Link to="/policies/privacy" className="hover:text-primary-foreground transition-colors">Privacy Policy</Link>
+            <Link to="/policies/terms" className="hover:text-primary-foreground transition-colors">Terms & Conditions</Link>
+            <Link to="/policies/shipping" className="hover:text-primary-foreground transition-colors">Shipping</Link>
+            <Link to="/policies/returns" className="hover:text-primary-foreground transition-colors">Returns</Link>
           </div>
         </div>
       </div>

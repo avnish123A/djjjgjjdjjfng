@@ -2,16 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, User, Heart, ShoppingBag, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useCategories } from '@/hooks/useCategories';
 import { MobileMenu } from './MobileMenu';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const navLinks = [
-  { label: 'Fashion', href: '/products?category=fashion' },
-  { label: 'Electronics', href: '/products?category=electronics' },
-  { label: 'Beauty', href: '/products?category=beauty' },
-  { label: 'Home & Living', href: '/products?category=home-living' },
-  { label: 'Sports', href: '/products?category=sports' },
-];
 
 export const Header = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -19,6 +12,7 @@ export const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const { totalItems } = useCart();
+  const { data: categories = [] } = useCategories();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -37,7 +31,7 @@ export const Header = () => {
             className="bg-primary text-primary-foreground text-center text-xs sm:text-sm py-2 px-4 relative"
           >
             <p>
-              Free shipping on orders over $100 · Use code{' '}
+              Free delivery on orders above ₹999 · Use code{' '}
               <span className="font-semibold">WELCOME10</span> for 10% off
             </p>
             <button
@@ -130,15 +124,15 @@ export const Header = () => {
             </div>
           </div>
 
-          {/* Desktop nav */}
+          {/* Desktop nav - from real categories */}
           <nav className="hidden lg:flex items-center gap-8 pb-3">
-            {navLinks.map((link) => (
+            {categories.slice(0, 5).map((cat) => (
               <Link
-                key={link.label}
-                to={link.href}
+                key={cat.id}
+                to={`/products?category=${cat.slug}`}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group"
               >
-                {link.label}
+                {cat.name}
                 <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full" />
               </Link>
             ))}
