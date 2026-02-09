@@ -7,6 +7,8 @@ import { CartProvider } from "@/contexts/CartContext";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
+import { BottomNav } from "@/components/layout/BottomNav";
+import { BackToTop } from "@/components/layout/BackToTop";
 import Index from "./pages/Index";
 import ProductListing from "./pages/ProductListing";
 import ProductDetail from "./pages/ProductDetail";
@@ -56,10 +58,12 @@ const AdminGuard = ({ children }: { children: React.ReactNode }) => {
 
 // Storefront layout wrapper
 const StorefrontLayout = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex flex-col min-h-screen">
+  <div className="flex flex-col min-h-screen pb-[60px] lg:pb-0">
     <Header />
     <div className="flex-1">{children}</div>
     <Footer />
+    <BottomNav />
+    <BackToTop />
   </div>
 );
 

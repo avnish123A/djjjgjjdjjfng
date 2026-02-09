@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ChevronRight, Lock, ShieldCheck, Truck } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ChevronRight, Lock, ShieldCheck, Truck, Heart, ChevronDown, Calendar } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -8,9 +9,11 @@ import { formatPrice } from '@/lib/format';
 
 const Cart = () => {
   const { items, updateQuantity, removeItem, totalPrice, totalItems } = useCart();
+  const [couponOpen, setCouponOpen] = useState(false);
   const shipping = totalPrice >= 999 ? 0 : 99;
   const total = totalPrice + shipping;
   const freeShippingRemaining = 999 - totalPrice;
+  const savings = items.reduce((acc, item) => acc, 0); // placeholder for discount tracking
 
   if (items.length === 0) {
     return (
@@ -104,13 +107,22 @@ const Cart = () => {
                           {item.name}
                         </Link>
                       </div>
-                      <button
-                        onClick={() => { removeItem(item.id); toast('Item removed'); }}
-                        className="shrink-0 p-1.5 text-muted-foreground hover:text-destructive transition-colors"
-                        aria-label="Remove item"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <button
+                          onClick={() => { removeItem(item.id); toast('Item removed'); }}
+                          className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
+                          aria-label="Remove item"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => toast('Moved to wishlist')}
+                          className="p-1.5 text-muted-foreground hover:text-accent transition-colors"
+                          aria-label="Move to wishlist"
+                        >
+                          <Heart className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
 
                     <div className="flex items-end justify-between mt-3">
@@ -166,15 +178,35 @@ const Cart = () => {
                     )}
                   </span>
                 </div>
-                <div className="pt-2">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="Coupon code"
-                      className="flex-1 px-3 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10"
-                    />
-                    <Button variant="outline" size="sm" className="px-4">Apply</Button>
-                  </div>
+
+                {/* Collapsible Coupon */}
+                <div className="pt-1">
+                  <button
+                    onClick={() => setCouponOpen(!couponOpen)}
+                    className="flex items-center justify-between w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <span>Have a coupon code?</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${couponOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  <AnimatePresence>
+                    {couponOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex gap-2 pt-2">
+                          <input
+                            type="text"
+                            placeholder="Coupon code"
+                            className="flex-1 px-3 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent/20"
+                          />
+                          <Button variant="outline" size="sm" className="px-4">Apply</Button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </div>
 
@@ -184,6 +216,12 @@ const Cart = () => {
                   <span className="font-bold text-xl">{formatPrice(total)}</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">Including all taxes</p>
+              </div>
+
+              {/* Estimated Delivery */}
+              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background rounded-lg px-3 py-2">
+                <Calendar className="h-3.5 w-3.5 shrink-0" />
+                <span>Estimated delivery: 3-5 business days</span>
               </div>
 
               <Button asChild size="lg" className="w-full gap-2 h-12 text-base font-semibold rounded-full bg-foreground text-background hover:bg-foreground/90">

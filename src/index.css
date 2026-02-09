@@ -8,20 +8,20 @@
   :root {
     /* Luxury Monochrome — Apple/Nike Inspired */
     --background: 0 0% 100%;
-    --foreground: 0 0% 7%;
+    --foreground: 0 0% 0%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 7%;
+    --card-foreground: 0 0% 0%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 7%;
+    --popover-foreground: 0 0% 0%;
     --primary: 0 0% 0%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 0 0% 7%;
-    --muted: 240 5% 96%;
-    --muted-foreground: 0 0% 45%;
+    --secondary: 240 5% 97%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 240 5% 97%;
+    --muted-foreground: 240 2% 54%;
     --accent: 220 100% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+    --destructive: 4 100% 59%;
     --destructive-foreground: 0 0% 100%;
     --border: 0 0% 90%;
     --input: 0 0% 90%;
@@ -29,21 +29,21 @@
     --radius: 0.625rem;
 
     /* Functional Colors */
-    --success: 142 71% 45%;
+    --success: 142 69% 49%;
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 7%;
+    --warning-foreground: 0 0% 0%;
     --info: 210 100% 50%;
     --info-foreground: 0 0% 100%;
 
     /* Badge Colors */
     --badge-new: 210 100% 50%;
-    --badge-sale: 0 84% 60%;
+    --badge-sale: 4 100% 59%;
     --badge-featured: 42 100% 50%;
     --rating: 36 100% 50%;
 
     /* Sidebar (admin) */
-    --sidebar-background: 240 5% 96%;
+    --sidebar-background: 240 5% 97%;
     --sidebar-foreground: 0 0% 25%;
     --sidebar-primary: 0 0% 0%;
     --sidebar-primary-foreground: 0 0% 100%;
@@ -121,5 +121,24 @@
   }
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+  /* Shimmer skeleton */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--secondary)) 0%,
+      hsl(var(--muted)) 50%,
+      hsl(var(--secondary)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+  }
+  /* Blur-up image placeholder */
+  .blur-up {
+    filter: blur(10px);
+    transition: filter 0.4s ease-out;
+  }
+  .blur-up.loaded {
+    filter: blur(0);
   }
 }

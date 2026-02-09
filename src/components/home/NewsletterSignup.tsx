@@ -9,8 +9,13 @@ export const NewsletterSignup = () => {
   };
 
   return (
-    <section className="py-16 lg:py-24 bg-foreground">
-      <div className="container mx-auto px-4">
+    <section className="py-16 lg:py-24 bg-foreground relative overflow-hidden">
+      {/* Geometric decorations */}
+      <div className="absolute top-10 left-10 w-32 h-32 rounded-full border border-background/10 opacity-50" />
+      <div className="absolute bottom-8 right-16 w-48 h-48 rounded-full border border-background/5 opacity-50" />
+      <div className="absolute top-1/2 left-1/4 w-20 h-20 rounded-full bg-accent/10 blur-2xl" />
+
+      <div className="container mx-auto px-4 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}

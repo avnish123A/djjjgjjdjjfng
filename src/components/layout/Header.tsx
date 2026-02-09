@@ -8,18 +8,30 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export const Header = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [headerVisible, setHeaderVisible] = useState(true);
   const [showAnnouncement, setShowAnnouncement] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const lastScrollY = useRef(0);
   const navigate = useNavigate();
   const { totalItems } = useCart();
   const { data: categories = [] } = useCategories();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      setScrolled(currentY > 50);
+      // Hide on scroll down, show on scroll up (only after 100px)
+      if (currentY > 100) {
+        setHeaderVisible(currentY < lastScrollY.current || currentY < 50);
+      } else {
+        setHeaderVisible(true);
+      }
+      lastScrollY.current = currentY;
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -68,10 +80,10 @@ export const Header = () => {
       <header
         className={`sticky top-0 z-50 transition-all duration-300 bg-background/95 backdrop-blur-md ${
           scrolled ? 'shadow-nav' : 'border-b border-border'
-        }`}
+        } ${headerVisible ? 'translate-y-0' : '-translate-y-full'}`}
       >
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-14 lg:h-16">
             {/* Left: Hamburger (mobile) */}
             <button
               className="lg:hidden p-2 -ml-2 hover:bg-secondary rounded-lg transition-colors"
@@ -96,7 +108,7 @@ export const Header = () => {
                 <Link
                   key={cat.id}
                   to={`/products?category=${cat.slug}`}
-                  className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors relative group py-5"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group py-5"
                 >
                   {cat.name}
                   <span className="absolute bottom-4 left-0 w-0 h-[1.5px] bg-foreground transition-all duration-300 group-hover:w-full" />
@@ -104,7 +116,7 @@ export const Header = () => {
               ))}
               <Link
                 to="/products"
-                className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
               >
                 All Products
               </Link>
@@ -119,7 +131,7 @@ export const Header = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search products..."
-                  className="w-full pl-10 pr-4 py-2 bg-secondary border-0 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-foreground/10 transition-all placeholder:text-muted-foreground"
+                  className="w-full pl-10 pr-4 py-2 bg-secondary border-0 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 focus:bg-background transition-all placeholder:text-muted-foreground"
                 />
               </form>
             </div>
@@ -155,8 +167,10 @@ export const Header = () => {
                 <ShoppingBag className="h-[18px] w-[18px]" />
                 {totalItems > 0 && (
                   <motion.span
+                    key={totalItems}
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 15 }}
                     className="absolute top-0.5 right-0.5 bg-accent text-accent-foreground text-[9px] font-bold rounded-full h-4 w-4 flex items-center justify-center"
                   >
                     {totalItems}
@@ -184,7 +198,7 @@ export const Header = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search products..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-secondary rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-foreground/10"
+                  className="w-full pl-10 pr-4 py-2.5 bg-secondary rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-accent/20"
                 />
               </form>
             </motion.div>

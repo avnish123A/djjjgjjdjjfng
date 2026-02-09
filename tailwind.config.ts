@@ -7,7 +7,12 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "1rem",
+      padding: {
+        DEFAULT: "1rem",
+        sm: "1rem",
+        lg: "2rem",
+        xl: "2rem",
+      },
       screens: {
         sm: "640px",
         md: "768px",
@@ -23,6 +28,8 @@ export default {
       fontSize: {
         "display": ["3.5rem", { lineHeight: "1.08", fontWeight: "700", letterSpacing: "-0.02em" }],
         "display-sm": ["2.5rem", { lineHeight: "1.1", fontWeight: "700", letterSpacing: "-0.02em" }],
+        "price": ["1.5rem", { lineHeight: "1.2", fontWeight: "700" }],
+        "body-lg": ["1.125rem", { lineHeight: "1.6", fontWeight: "400" }],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -87,11 +94,11 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        card: "0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)",
-        "card-hover": "0 12px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04)",
+        card: "0 2px 8px rgba(0,0,0,0.08)",
+        "card-hover": "0 8px 24px rgba(0,0,0,0.12)",
         hero: "0 20px 60px rgba(0,0,0,0.15)",
         nav: "0 1px 0 rgba(0,0,0,0.04)",
-        "bottom-nav": "0 -1px 12px rgba(0,0,0,0.06)",
+        "bottom-nav": "0 -2px 12px rgba(0,0,0,0.06)",
         soft: "0 2px 8px rgba(0,0,0,0.06)",
       },
       keyframes: {
