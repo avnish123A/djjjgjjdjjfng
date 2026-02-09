@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Search, User, Heart, ShoppingBag, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useCategories } from '@/hooks/useCategories';
@@ -11,6 +11,9 @@ export const Header = () => {
   const [showAnnouncement, setShowAnnouncement] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
   const { totalItems } = useCart();
   const { data: categories = [] } = useCategories();
 
@@ -20,19 +23,35 @@ export const Header = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchOpen(false);
+      setSearchQuery('');
+    }
+  };
+
   return (
     <>
+      {/* Announcement Bar */}
       <AnimatePresence>
         {showAnnouncement && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="bg-primary text-primary-foreground text-center text-xs sm:text-sm py-2 px-4 relative"
+            className="bg-primary text-primary-foreground text-center text-xs sm:text-sm py-2.5 px-4 relative"
           >
-            <p>
+            <p className="font-medium tracking-wide">
               Free delivery on orders above ₹999 · Use code{' '}
-              <span className="font-semibold">WELCOME10</span> for 10% off
+              <span className="font-bold">WELCOME10</span> for 10% off
             </p>
             <button
               onClick={() => setShowAnnouncement(false)}
@@ -45,14 +64,15 @@ export const Header = () => {
         )}
       </AnimatePresence>
 
+      {/* Main Header */}
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
-          scrolled ? 'bg-background/95 backdrop-blur-md shadow-sm' : 'bg-background'
+        className={`sticky top-0 z-50 transition-all duration-300 bg-card ${
+          scrolled ? 'shadow-nav' : ''
         }`}
       >
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16 lg:h-20">
-            {/* Mobile hamburger */}
+          <div className="flex items-center justify-between h-16 lg:h-[64px]">
+            {/* Left: Hamburger (mobile) */}
             <button
               className="lg:hidden p-2 -ml-2 hover:bg-secondary rounded-lg transition-colors"
               onClick={() => setMobileMenuOpen(true)}
@@ -66,23 +86,45 @@ export const Header = () => {
             </button>
 
             {/* Logo */}
-            <Link to="/" className="text-xl lg:text-2xl font-bold tracking-tight">
+            <Link to="/" className="text-xl lg:text-2xl font-extrabold tracking-tight">
               LUXE<span className="text-accent">.</span>
             </Link>
 
-            {/* Desktop search */}
-            <div className="hidden lg:flex flex-1 max-w-xl mx-8">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center gap-8 ml-10">
+              {categories.slice(0, 5).map((cat) => (
+                <Link
+                  key={cat.id}
+                  to={`/products?category=${cat.slug}`}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group py-5"
+                >
+                  {cat.name}
+                  <span className="absolute bottom-4 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full" />
+                </Link>
+              ))}
+              <Link
+                to="/products"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                All Products
+              </Link>
+            </nav>
+
+            {/* Desktop Search */}
+            <div className="hidden lg:flex flex-1 max-w-md mx-8">
+              <form onSubmit={handleSearch} className="relative w-full">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Search products, brands, categories..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-secondary rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all placeholder:text-muted-foreground"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search products..."
+                  className="w-full pl-10 pr-4 py-2.5 bg-secondary border border-transparent rounded-full text-sm focus:outline-none focus:border-accent/40 focus:bg-card transition-all placeholder:text-muted-foreground"
                 />
-              </div>
+              </form>
             </div>
 
-            {/* Icons */}
+            {/* Icon Toolbar */}
             <div className="flex items-center gap-1 lg:gap-2">
               <button
                 className="lg:hidden p-2 hover:bg-secondary rounded-lg transition-colors"
@@ -123,26 +165,6 @@ export const Header = () => {
               </Link>
             </div>
           </div>
-
-          {/* Desktop nav - from real categories */}
-          <nav className="hidden lg:flex items-center gap-8 pb-3">
-            {categories.slice(0, 5).map((cat) => (
-              <Link
-                key={cat.id}
-                to={`/products?category=${cat.slug}`}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group"
-              >
-                {cat.name}
-                <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full" />
-              </Link>
-            ))}
-            <Link
-              to="/products"
-              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-            >
-              All Products
-            </Link>
-          </nav>
         </div>
 
         {/* Mobile search */}
@@ -154,15 +176,17 @@ export const Header = () => {
               exit={{ height: 0, opacity: 0 }}
               className="lg:hidden px-4 pb-3"
             >
-              <div className="relative">
+              <form onSubmit={handleSearch} className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
+                  ref={searchInputRef}
                   type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search products..."
                   className="w-full pl-10 pr-4 py-2.5 bg-secondary rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
-                  autoFocus
                 />
-              </div>
+              </form>
             </motion.div>
           )}
         </AnimatePresence>

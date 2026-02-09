@@ -9,12 +9,20 @@ export default {
       center: true,
       padding: "1rem",
       screens: {
+        sm: "640px",
+        md: "768px",
+        lg: "1024px",
+        xl: "1200px",
         "2xl": "1400px",
       },
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "system-ui", "sans-serif"],
+      },
+      fontSize: {
+        "display": ["3.5rem", { lineHeight: "1.1", fontWeight: "700" }],
+        "display-sm": ["2.25rem", { lineHeight: "1.15", fontWeight: "700" }],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -54,6 +62,14 @@ export default {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
         },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        info: {
+          DEFAULT: "hsl(var(--info))",
+          foreground: "hsl(var(--info-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
@@ -71,9 +87,11 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        card: "0 2px 8px rgba(0,0,0,0.08)",
-        "card-hover": "0 8px 24px rgba(0,0,0,0.12)",
-        hero: "0 20px 60px rgba(0,0,0,0.15)",
+        card: "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
+        "card-hover": "0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.04)",
+        hero: "0 20px 60px rgba(0,0,0,0.12)",
+        nav: "0 1px 0 rgba(0,0,0,0.05)",
+        "bottom-nav": "0 -2px 8px rgba(0,0,0,0.08)",
       },
       keyframes: {
         "accordion-down": {
@@ -105,6 +123,10 @@ export default {
           "50%": { transform: "scale(1.15)" },
           "100%": { transform: "scale(1)" },
         },
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -114,6 +136,7 @@ export default {
         "scale-in": "scale-in 0.3s ease-out forwards",
         "slide-in-right": "slide-in-right 0.3s ease-out",
         "bounce-in": "bounce-in 0.4s ease-out",
+        shimmer: "shimmer 2s infinite linear",
       },
     },
   },

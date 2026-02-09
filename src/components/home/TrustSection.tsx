@@ -12,22 +12,22 @@ const trustItems = [
 
 export const TrustSection = () => {
   return (
-    <section className="py-16 lg:py-20 border-y border-border">
+    <section className="py-14 lg:py-16 bg-secondary/50">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 lg:gap-4">
           {trustItems.map((item, index) => (
             <motion.div
               key={item.title}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.08 }}
+              transition={{ duration: 0.3, delay: index * 0.06 }}
               className="text-center"
             >
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/10 mb-4">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-accent/10 mb-3">
                 <item.icon className="h-5 w-5 text-accent" />
               </div>
-              <h3 className="font-semibold text-sm mb-1">{item.title}</h3>
+              <h3 className="font-semibold text-sm mb-0.5">{item.title}</h3>
               <p className="text-xs text-muted-foreground">{item.description}</p>
             </motion.div>
           ))}

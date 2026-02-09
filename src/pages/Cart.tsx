@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ChevronRight } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ChevronRight, Lock, ShieldCheck, Truck } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -10,6 +10,7 @@ const Cart = () => {
   const { items, updateQuantity, removeItem, totalPrice, totalItems } = useCart();
   const shipping = totalPrice >= 999 ? 0 : 99;
   const total = totalPrice + shipping;
+  const freeShippingRemaining = 999 - totalPrice;
 
   if (items.length === 0) {
     return (
@@ -20,10 +21,10 @@ const Cart = () => {
               <ShoppingBag className="h-8 w-8 text-muted-foreground" />
             </div>
             <h1 className="text-2xl font-bold mb-3">Your cart is empty</h1>
-            <p className="text-muted-foreground mb-8">
+            <p className="text-muted-foreground mb-8 text-sm">
               Looks like you haven't added any items yet.
             </p>
-            <Button variant="accent" asChild>
+            <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
               <Link to="/products">Continue Shopping</Link>
             </Button>
           </div>
@@ -35,22 +36,46 @@ const Cart = () => {
   return (
     <main className="min-h-screen">
       {/* Breadcrumb */}
-      <div className="container mx-auto px-4 py-4">
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
-          <ChevronRight className="h-3 w-3" />
-          <span className="text-foreground font-medium">Shopping Cart</span>
-        </nav>
+      <div className="border-b border-border">
+        <div className="container mx-auto px-4 py-3">
+          <nav className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
+            <ChevronRight className="h-3 w-3" />
+            <span className="text-foreground font-medium">Shopping Cart</span>
+          </nav>
+        </div>
       </div>
 
-      <div className="container mx-auto px-4 pb-16">
-        <h1 className="text-2xl lg:text-3xl font-bold mb-8">
+      {/* Free Shipping Progress */}
+      {freeShippingRemaining > 0 && totalPrice > 0 && (
+        <div className="bg-info/5 border-b border-info/10">
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center gap-3">
+              <Truck className="h-4 w-4 text-info shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">
+                  Add {formatPrice(freeShippingRemaining)} more for <span className="text-success font-semibold">FREE delivery</span>
+                </p>
+                <div className="mt-1.5 h-1.5 bg-border rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-success rounded-full transition-all duration-500"
+                    style={{ width: `${Math.min(100, (totalPrice / 999) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="container mx-auto px-4 py-6 lg:py-8">
+        <h1 className="text-xl lg:text-2xl font-bold mb-6">
           Shopping Cart ({totalItems} {totalItems === 1 ? 'item' : 'items'})
         </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
-          {/* Cart items */}
-          <div className="lg:col-span-2 space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+          {/* Cart Items */}
+          <div className="lg:col-span-2 space-y-3">
             <AnimatePresence>
               {items.map((item) => (
                 <motion.div
@@ -59,37 +84,28 @@ const Cart = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
-                  transition={{ duration: 0.3 }}
-                  className="flex gap-4 p-4 border border-border rounded-xl"
+                  transition={{ duration: 0.25 }}
+                  className="flex gap-4 p-4 bg-card border border-border rounded-xl"
                 >
-                  {/* Image */}
                   <Link to={`/product/${item.id}`} className="shrink-0">
-                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-lg overflow-hidden bg-secondary">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-secondary">
+                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                     </div>
                   </Link>
 
-                  {/* Details */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex justify-between gap-4">
+                    <div className="flex justify-between gap-3">
                       <div>
-                        <p className="text-xs text-muted-foreground">{item.brand}</p>
+                        <p className="text-[11px] text-muted-foreground uppercase tracking-wider">{item.brand}</p>
                         <Link
                           to={`/product/${item.id}`}
-                          className="font-medium text-sm sm:text-base hover:text-accent transition-colors line-clamp-2"
+                          className="font-medium text-sm hover:text-accent transition-colors line-clamp-2"
                         >
                           {item.name}
                         </Link>
                       </div>
                       <button
-                        onClick={() => {
-                          removeItem(item.id);
-                          toast('Item removed from cart');
-                        }}
+                        onClick={() => { removeItem(item.id); toast('Item removed'); }}
                         className="shrink-0 p-1.5 text-muted-foreground hover:text-destructive transition-colors"
                         aria-label="Remove item"
                       >
@@ -97,8 +113,7 @@ const Cart = () => {
                       </button>
                     </div>
 
-                    <div className="flex items-end justify-between mt-4">
-                      {/* Quantity */}
+                    <div className="flex items-end justify-between mt-3">
                       <div className="inline-flex items-center border border-border rounded-lg">
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
@@ -107,7 +122,7 @@ const Cart = () => {
                         >
                           <Minus className="h-3 w-3" />
                         </button>
-                        <span className="px-3 text-sm font-medium tabular-nums">{item.quantity}</span>
+                        <span className="px-3 text-sm font-semibold tabular-nums">{item.quantity}</span>
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
                           className="p-2 hover:bg-secondary transition-colors"
@@ -116,48 +131,49 @@ const Cart = () => {
                           <Plus className="h-3 w-3" />
                         </button>
                       </div>
-
-                      {/* Price */}
-                      <span className="font-semibold">{formatPrice(item.price * item.quantity)}</span>
+                      <span className="font-bold">{formatPrice(item.price * item.quantity)}</span>
                     </div>
                   </div>
                 </motion.div>
               ))}
             </AnimatePresence>
+
+            <Link
+              to="/products"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mt-4"
+            >
+              ← Continue Shopping
+            </Link>
           </div>
 
-          {/* Summary */}
+          {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="sticky top-28 border border-border rounded-xl p-6 space-y-4">
+            <div className="sticky top-24 bg-card border border-border rounded-xl p-6 space-y-4">
               <h2 className="font-bold text-lg">Order Summary</h2>
 
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Subtotal</span>
+                  <span className="text-muted-foreground">Subtotal ({totalItems} items)</span>
                   <span className="font-medium">{formatPrice(totalPrice)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Delivery</span>
                   <span className="font-medium">
                     {shipping === 0 ? (
-                      <span className="text-success">Free</span>
+                      <span className="text-success">FREE</span>
                     ) : (
                       formatPrice(shipping)
                     )}
                   </span>
                 </div>
-
-                {/* Discount code */}
                 <div className="pt-2">
                   <div className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="Discount code"
-                      className="flex-1 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
+                      placeholder="Coupon code"
+                      className="flex-1 px-3 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent/30"
                     />
-                    <Button variant="outline" size="sm">
-                      Apply
-                    </Button>
+                    <Button variant="outline" size="sm" className="px-4">Apply</Button>
                   </div>
                 </div>
               </div>
@@ -170,24 +186,23 @@ const Cart = () => {
                 <p className="text-xs text-muted-foreground mt-1">Including all taxes</p>
               </div>
 
-              <Button variant="accent" size="lg" className="w-full gap-2" asChild>
+              <Button asChild size="lg" className="w-full gap-2 h-12 text-base font-semibold bg-accent text-accent-foreground hover:bg-accent/90">
                 <Link to="/checkout">
                   Proceed to Checkout <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
 
-              <Link
-                to="/products"
-                className="block text-center text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Continue Shopping
-              </Link>
-
-              {shipping > 0 && (
-                <p className="text-xs text-center text-muted-foreground">
-                  Add {formatPrice(999 - totalPrice)} more for free delivery
-                </p>
-              )}
+              {/* Trust */}
+              <div className="flex items-center justify-center gap-4 pt-2 border-t border-border">
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <Lock className="h-3 w-3" />
+                  <span>SSL Secure</span>
+                </div>
+                <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <ShieldCheck className="h-3 w-3" />
+                  <span>Safe Checkout</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

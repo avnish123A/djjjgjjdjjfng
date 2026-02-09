@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingBag, Star } from 'lucide-react';
+import { Heart, ShoppingBag, Star, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
@@ -33,109 +33,162 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <motion.div
       whileHover={{ y: -4 }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
       className="group"
     >
       <Link to={`/product/${product.id}`} className="block">
-        {/* Image */}
-        <div className="relative aspect-square rounded-xl overflow-hidden bg-secondary mb-3">
+        {/* Image Container */}
+        <div className="relative aspect-[3/4] rounded-lg overflow-hidden bg-secondary mb-3">
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
           />
 
-          {/* Badge */}
-          {product.badge && (
-            <span
-              className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                product.badge === 'Sale'
-                  ? 'bg-destructive text-destructive-foreground'
-                  : product.badge === 'New'
-                  ? 'bg-accent text-accent-foreground'
-                  : 'bg-primary text-primary-foreground'
-              }`}
-            >
-              {product.badge}
-              {product.badge === 'Sale' && discount ? ` -${discount}%` : ''}
-            </span>
-          )}
+          {/* Badges */}
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
+            {product.badge === 'Sale' && discount && (
+              <span className="px-2 py-1 rounded text-[11px] font-bold uppercase tracking-wide bg-destructive text-destructive-foreground">
+                -{discount}%
+              </span>
+            )}
+            {product.badge === 'New' && (
+              <span className="px-2 py-1 rounded text-[11px] font-bold uppercase tracking-wide bg-info text-info-foreground">
+                New
+              </span>
+            )}
+            {product.badge === 'Best Seller' && (
+              <span className="px-2 py-1 rounded text-[11px] font-bold uppercase tracking-wide bg-warning text-warning-foreground">
+                Best Seller
+              </span>
+            )}
+            {product.badge === 'Featured' && (
+              <span className="px-2 py-1 rounded text-[11px] font-bold uppercase tracking-wide bg-accent text-accent-foreground">
+                Featured
+              </span>
+            )}
+          </div>
 
-          {/* Wishlist */}
+          {/* Quick Actions (desktop hover) */}
+          <div className="absolute top-2.5 right-2.5 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                toast('Added to wishlist');
+              }}
+              className="hidden lg:flex p-2 rounded-full bg-card shadow-card hover:bg-card/90 transition-all hover:scale-110"
+              aria-label="Add to wishlist"
+            >
+              <Heart className="h-4 w-4" />
+            </button>
+            <button
+              className="hidden lg:flex p-2 rounded-full bg-card shadow-card hover:bg-card/90 transition-all hover:scale-110"
+              aria-label="Quick view"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            >
+              <Eye className="h-4 w-4" />
+            </button>
+          </div>
+
+          {/* Mobile Wishlist */}
           <button
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               toast('Added to wishlist');
             }}
-            className="absolute top-3 right-3 p-2 rounded-full bg-background/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-background"
+            className="lg:hidden absolute top-2.5 right-2.5 p-2 rounded-full bg-card/90 backdrop-blur-sm shadow-card"
             aria-label="Add to wishlist"
           >
             <Heart className="h-4 w-4" />
           </button>
 
-          {/* Quick add */}
-          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-2 group-hover:translate-y-0">
+          {/* Add to Cart (desktop hover) */}
+          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-250 translate-y-2 group-hover:translate-y-0 hidden lg:block">
             <button
               onClick={handleAddToCart}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors shadow-card-hover"
             >
               <ShoppingBag className="h-4 w-4" />
               Add to Cart
             </button>
           </div>
 
-          {/* Mobile add to cart */}
+          {/* Mobile Add to Cart */}
           <button
             onClick={handleAddToCart}
-            className="lg:hidden absolute bottom-3 right-3 p-2.5 rounded-full bg-primary text-primary-foreground shadow-card"
+            className="lg:hidden absolute bottom-2.5 right-2.5 p-2.5 rounded-full bg-primary text-primary-foreground shadow-card-hover"
             aria-label="Add to cart"
           >
             <ShoppingBag className="h-4 w-4" />
           </button>
+
+          {/* Out of Stock Overlay */}
+          {!product.inStock && (
+            <div className="absolute inset-0 bg-card/60 flex items-center justify-center">
+              <span className="px-4 py-2 bg-foreground/80 text-card text-sm font-semibold rounded-lg">
+                Out of Stock
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* Info */}
-        <div className="space-y-1.5">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide">{product.brand}</p>
-          <h3 className="text-sm font-medium leading-snug line-clamp-2">{product.name}</h3>
+        {/* Product Info */}
+        <div className="space-y-1.5 px-0.5">
+          {product.brand && (
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">{product.brand}</p>
+          )}
+          <h3 className="text-sm font-medium leading-snug line-clamp-2 group-hover:text-accent transition-colors">
+            {product.name}
+          </h3>
 
           {/* Rating */}
-          <div className="flex items-center gap-1">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-3 w-3 ${
-                    i < Math.floor(product.rating)
-                      ? 'fill-accent text-accent'
-                      : 'text-border'
-                  }`}
-                />
-              ))}
+          {product.rating > 0 && (
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`h-3 w-3 ${
+                      i < Math.floor(product.rating)
+                        ? 'fill-warning text-warning'
+                        : 'text-border'
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-[11px] text-muted-foreground">({product.reviewCount})</span>
             </div>
-            <span className="text-xs text-muted-foreground">({product.reviewCount})</span>
-          </div>
+          )}
 
           {/* Price */}
-          <div className="flex items-center gap-2">
-            <span className="font-semibold">{formatPrice(product.price)}</span>
+          <div className="flex items-center gap-2 pt-0.5">
+            <span className="font-bold text-base">{formatPrice(product.price)}</span>
             {product.originalPrice && (
               <span className="text-sm text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>
             )}
+            {discount && (
+              <span className="text-xs font-semibold text-success">
+                {discount}% off
+              </span>
+            )}
           </div>
 
-          {/* Color dots */}
-          {product.colors && (
+          {/* Color Swatches */}
+          {product.colors && product.colors.length > 0 && (
             <div className="flex items-center gap-1.5 pt-1">
-              {product.colors.map((color, i) => (
+              {product.colors.slice(0, 4).map((color, i) => (
                 <span
                   key={i}
-                  className="w-3 h-3 rounded-full border border-border"
+                  className="w-3.5 h-3.5 rounded-full border border-border"
                   style={{ backgroundColor: color }}
                 />
               ))}
+              {product.colors.length > 4 && (
+                <span className="text-[10px] text-muted-foreground">+{product.colors.length - 4}</span>
+              )}
             </div>
           )}
         </div>

@@ -12,7 +12,7 @@ export const BestSellers = () => {
   if (displayProducts.length === 0) return null;
 
   return (
-    <section className="py-16 lg:py-24">
+    <section className="py-16 lg:py-20">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -22,8 +22,8 @@ export const BestSellers = () => {
           className="flex items-end justify-between mb-10"
         >
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold mb-2">Best Sellers</h2>
-            <p className="text-muted-foreground">Our most loved products across all categories</p>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-1">Best Sellers</h2>
+            <p className="text-muted-foreground text-sm">Our most loved products across all categories</p>
           </div>
           <Link
             to="/products"
@@ -33,14 +33,14 @@ export const BestSellers = () => {
           </Link>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-5">
           {displayProducts.map((product, index) => (
             <motion.div
               key={product.id}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
+              transition={{ duration: 0.4, delay: index * 0.04 }}
             >
               <ProductCard product={product} />
             </motion.div>

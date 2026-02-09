@@ -1,69 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 30 25% 98%;
-    --foreground: 240 10% 10%;
-    --card: 30 20% 99%;
-    --card-foreground: 240 10% 10%;
-    --popover: 30 20% 99%;
-    --popover-foreground: 240 10% 10%;
-    --primary: 240 10% 10%;
-    --primary-foreground: 30 25% 98%;
-    --secondary: 30 15% 95%;
-    --secondary-foreground: 240 10% 10%;
-    --muted: 30 10% 94%;
-    --muted-foreground: 240 5% 46%;
-    --accent: 330 85% 52%;
+    /* Shopify-Inspired Professional Palette */
+    --background: 210 20% 98%;
+    --foreground: 210 29% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 29% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 29% 15%;
+    --primary: 210 29% 15%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 14% 95%;
+    --secondary-foreground: 210 29% 15%;
+    --muted: 210 12% 93%;
+    --muted-foreground: 210 8% 46%;
+    --accent: 244 57% 60%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;
+    --destructive: 7 88% 44%;
     --destructive-foreground: 0 0% 100%;
-    --border: 30 15% 90%;
-    --input: 30 15% 90%;
-    --ring: 330 85% 52%;
-    --radius: 0.625rem;
-    --success: 142 71% 45%;
+    --border: 210 14% 89%;
+    --input: 210 14% 89%;
+    --ring: 244 57% 60%;
+    --radius: 0.5rem;
+
+    /* Functional Colors */
+    --success: 152 56% 32%;
     --success-foreground: 0 0% 100%;
-    --sidebar-background: 30 15% 97%;
-    --sidebar-foreground: 240 10% 26%;
-    --sidebar-primary: 240 10% 10%;
-    --sidebar-primary-foreground: 30 25% 98%;
-    --sidebar-accent: 30 10% 94%;
-    --sidebar-accent-foreground: 240 10% 10%;
-    --sidebar-border: 30 10% 91%;
-    --sidebar-ring: 330 85% 52%;
+    --warning: 38 92% 57%;
+    --warning-foreground: 210 29% 15%;
+    --info: 207 88% 39%;
+    --info-foreground: 0 0% 100%;
+
+    /* Badge Colors */
+    --badge-new: 207 100% 50%;
+    --badge-sale: 0 100% 56%;
+    --badge-featured: 42 100% 50%;
+    --rating: 36 100% 50%;
+
+    /* Sidebar */
+    --sidebar-background: 210 14% 96%;
+    --sidebar-foreground: 210 12% 26%;
+    --sidebar-primary: 210 29% 15%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 12% 92%;
+    --sidebar-accent-foreground: 210 29% 15%;
+    --sidebar-border: 210 12% 90%;
+    --sidebar-ring: 244 57% 60%;
   }
 
   .dark {
-    --background: 240 10% 5%;
-    --foreground: 30 15% 95%;
-    --card: 240 10% 8%;
-    --card-foreground: 30 15% 95%;
-    --popover: 240 10% 8%;
-    --popover-foreground: 30 15% 95%;
-    --primary: 30 15% 95%;
-    --primary-foreground: 240 10% 10%;
-    --secondary: 240 8% 15%;
-    --secondary-foreground: 30 15% 95%;
-    --muted: 240 8% 15%;
-    --muted-foreground: 30 5% 60%;
-    --accent: 330 85% 52%;
+    --background: 210 20% 6%;
+    --foreground: 210 14% 93%;
+    --card: 210 18% 9%;
+    --card-foreground: 210 14% 93%;
+    --popover: 210 18% 9%;
+    --popover-foreground: 210 14% 93%;
+    --primary: 210 14% 93%;
+    --primary-foreground: 210 29% 15%;
+    --secondary: 210 12% 14%;
+    --secondary-foreground: 210 14% 93%;
+    --muted: 210 12% 14%;
+    --muted-foreground: 210 8% 55%;
+    --accent: 244 57% 60%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 30 15% 95%;
-    --border: 240 8% 15%;
-    --input: 240 8% 15%;
-    --ring: 330 85% 52%;
-    --sidebar-background: 240 10% 8%;
-    --sidebar-foreground: 30 15% 95%;
-    --sidebar-primary: 330 85% 52%;
+    --destructive: 7 72% 36%;
+    --destructive-foreground: 210 14% 93%;
+    --border: 210 12% 16%;
+    --input: 210 12% 16%;
+    --ring: 244 57% 60%;
+    --sidebar-background: 210 18% 9%;
+    --sidebar-foreground: 210 14% 93%;
+    --sidebar-primary: 244 57% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 8% 12%;
-    --sidebar-accent-foreground: 30 15% 95%;
-    --sidebar-border: 240 8% 15%;
-    --sidebar-ring: 330 85% 52%;
+    --sidebar-accent: 210 12% 13%;
+    --sidebar-accent-foreground: 210 14% 93%;
+    --sidebar-border: 210 12% 16%;
+    --sidebar-ring: 244 57% 60%;
   }
 }
 
@@ -73,7 +90,12 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  input, select, textarea {
+    font-size: 16px; /* Prevent iOS zoom */
   }
 }
 
@@ -86,5 +108,18 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+  .line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }

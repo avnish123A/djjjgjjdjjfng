@@ -16,26 +16,26 @@ const FilterContent = ({ selectedCategory, onCategoryChange, priceRange, onPrice
   <div className="space-y-6">
     {/* Categories */}
     <div>
-      <h3 className="font-semibold text-sm mb-3 uppercase tracking-wider">Category</h3>
-      <div className="space-y-2">
-        <label className="flex items-center gap-2 cursor-pointer">
+      <h3 className="font-semibold text-sm mb-3">Category</h3>
+      <div className="space-y-1.5">
+        <label className="flex items-center gap-2.5 cursor-pointer py-1">
           <input
             type="radio"
             name="category"
             checked={!selectedCategory}
             onChange={() => onCategoryChange(null)}
-            className="accent-accent"
+            className="accent-accent w-4 h-4"
           />
           <span className="text-sm">All Categories</span>
         </label>
         {categories.map((cat) => (
-          <label key={cat.id} className="flex items-center gap-2 cursor-pointer">
+          <label key={cat.id} className="flex items-center gap-2.5 cursor-pointer py-1">
             <input
               type="radio"
               name="category"
               checked={selectedCategory === cat.slug}
               onChange={() => onCategoryChange(cat.slug)}
-              className="accent-accent"
+              className="accent-accent w-4 h-4"
             />
             <span className="text-sm">{cat.name}</span>
           </label>
@@ -45,7 +45,7 @@ const FilterContent = ({ selectedCategory, onCategoryChange, priceRange, onPrice
 
     {/* Price Range */}
     <div>
-      <h3 className="font-semibold text-sm mb-3 uppercase tracking-wider">Price Range</h3>
+      <h3 className="font-semibold text-sm mb-3">Price Range</h3>
       <div className="space-y-3">
         <input
           type="range"
@@ -82,8 +82,9 @@ export const ProductFilters = (props: ProductFiltersProps) => {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden lg:block w-60 shrink-0">
-        <div className="sticky top-28">
+      <aside className="hidden lg:block w-56 shrink-0">
+        <div className="sticky top-24 bg-card border border-border rounded-xl p-5">
+          <h3 className="font-bold text-sm mb-4 uppercase tracking-wider">Filters</h3>
           <FilterContent {...props} />
         </div>
       </aside>
@@ -98,6 +99,7 @@ export const ProductFilters = (props: ProductFiltersProps) => {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-80 pt-12">
+            <h3 className="font-bold text-sm mb-6 uppercase tracking-wider">Filters</h3>
             <FilterContent {...props} />
           </SheetContent>
         </Sheet>
