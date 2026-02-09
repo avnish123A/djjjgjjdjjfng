@@ -6,81 +6,81 @@
 
 @layer base {
   :root {
-    /* Shopify-Inspired Professional Palette */
-    --background: 210 20% 98%;
-    --foreground: 210 29% 15%;
+    /* Luxury Monochrome — Apple/Nike Inspired */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 7%;
     --card: 0 0% 100%;
-    --card-foreground: 210 29% 15%;
+    --card-foreground: 0 0% 7%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 29% 15%;
-    --primary: 210 29% 15%;
+    --popover-foreground: 0 0% 7%;
+    --primary: 0 0% 0%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 14% 95%;
-    --secondary-foreground: 210 29% 15%;
-    --muted: 210 12% 93%;
-    --muted-foreground: 210 8% 46%;
-    --accent: 244 57% 60%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 0 0% 7%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 220 100% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 7 88% 44%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 210 14% 89%;
-    --input: 210 14% 89%;
-    --ring: 244 57% 60%;
-    --radius: 0.5rem;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 220 100% 50%;
+    --radius: 0.625rem;
 
     /* Functional Colors */
-    --success: 152 56% 32%;
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 57%;
-    --warning-foreground: 210 29% 15%;
-    --info: 207 88% 39%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 7%;
+    --info: 210 100% 50%;
     --info-foreground: 0 0% 100%;
 
     /* Badge Colors */
-    --badge-new: 207 100% 50%;
-    --badge-sale: 0 100% 56%;
+    --badge-new: 210 100% 50%;
+    --badge-sale: 0 84% 60%;
     --badge-featured: 42 100% 50%;
     --rating: 36 100% 50%;
 
-    /* Sidebar */
-    --sidebar-background: 210 14% 96%;
-    --sidebar-foreground: 210 12% 26%;
-    --sidebar-primary: 210 29% 15%;
+    /* Sidebar (admin) */
+    --sidebar-background: 240 5% 96%;
+    --sidebar-foreground: 0 0% 25%;
+    --sidebar-primary: 0 0% 0%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 12% 92%;
-    --sidebar-accent-foreground: 210 29% 15%;
-    --sidebar-border: 210 12% 90%;
-    --sidebar-ring: 244 57% 60%;
+    --sidebar-accent: 240 5% 92%;
+    --sidebar-accent-foreground: 0 0% 7%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 220 100% 50%;
   }
 
   .dark {
-    --background: 210 20% 6%;
-    --foreground: 210 14% 93%;
-    --card: 210 18% 9%;
-    --card-foreground: 210 14% 93%;
-    --popover: 210 18% 9%;
-    --popover-foreground: 210 14% 93%;
-    --primary: 210 14% 93%;
-    --primary-foreground: 210 29% 15%;
-    --secondary: 210 12% 14%;
-    --secondary-foreground: 210 14% 93%;
-    --muted: 210 12% 14%;
-    --muted-foreground: 210 8% 55%;
-    --accent: 244 57% 60%;
+    --background: 0 0% 4%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 7%;
+    --secondary: 0 0% 11%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 11%;
+    --muted-foreground: 0 0% 55%;
+    --accent: 220 100% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 7 72% 36%;
-    --destructive-foreground: 210 14% 93%;
-    --border: 210 12% 16%;
-    --input: 210 12% 16%;
-    --ring: 244 57% 60%;
-    --sidebar-background: 210 18% 9%;
-    --sidebar-foreground: 210 14% 93%;
-    --sidebar-primary: 244 57% 60%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 0 0% 14%;
+    --input: 0 0% 14%;
+    --ring: 220 100% 50%;
+    --sidebar-background: 0 0% 7%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 220 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 12% 13%;
-    --sidebar-accent-foreground: 210 14% 93%;
-    --sidebar-border: 210 12% 16%;
-    --sidebar-ring: 244 57% 60%;
+    --sidebar-accent: 0 0% 11%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 14%;
+    --sidebar-ring: 220 100% 50%;
   }
 }
 
@@ -95,7 +95,7 @@
     -moz-osx-font-smoothing: grayscale;
   }
   input, select, textarea {
-    font-size: 16px; /* Prevent iOS zoom */
+    font-size: 16px;
   }
 }
 

@@ -15,16 +15,16 @@ const Cart = () => {
   if (items.length === 0) {
     return (
       <main className="min-h-screen">
-        <div className="container mx-auto px-4 py-20">
+        <div className="container mx-auto px-4 py-24">
           <div className="max-w-md mx-auto text-center">
             <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
               <ShoppingBag className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h1 className="text-2xl font-bold mb-3">Your cart is empty</h1>
+            <h1 className="text-2xl font-bold mb-3 tracking-tight">Your cart is empty</h1>
             <p className="text-muted-foreground mb-8 text-sm">
               Looks like you haven't added any items yet.
             </p>
-            <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90">
+            <Button asChild className="rounded-full bg-foreground text-background hover:bg-foreground/90 px-8">
               <Link to="/products">Continue Shopping</Link>
             </Button>
           </div>
@@ -48,17 +48,17 @@ const Cart = () => {
 
       {/* Free Shipping Progress */}
       {freeShippingRemaining > 0 && totalPrice > 0 && (
-        <div className="bg-info/5 border-b border-info/10">
+        <div className="bg-secondary">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center gap-3">
-              <Truck className="h-4 w-4 text-info shrink-0" />
+              <Truck className="h-4 w-4 text-muted-foreground shrink-0" />
               <div className="flex-1">
                 <p className="text-sm font-medium">
                   Add {formatPrice(freeShippingRemaining)} more for <span className="text-success font-semibold">FREE delivery</span>
                 </p>
-                <div className="mt-1.5 h-1.5 bg-border rounded-full overflow-hidden">
+                <div className="mt-1.5 h-1 bg-border rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-success rounded-full transition-all duration-500"
+                    className="h-full bg-foreground rounded-full transition-all duration-500"
                     style={{ width: `${Math.min(100, (totalPrice / 999) * 100)}%` }}
                   />
                 </div>
@@ -68,12 +68,12 @@ const Cart = () => {
         </div>
       )}
 
-      <div className="container mx-auto px-4 py-6 lg:py-8">
-        <h1 className="text-xl lg:text-2xl font-bold mb-6">
+      <div className="container mx-auto px-4 py-8 lg:py-10">
+        <h1 className="text-xl lg:text-2xl font-bold mb-8 tracking-tight">
           Shopping Cart ({totalItems} {totalItems === 1 ? 'item' : 'items'})
         </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-3">
             <AnimatePresence>
@@ -85,10 +85,10 @@ const Cart = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
                   transition={{ duration: 0.25 }}
-                  className="flex gap-4 p-4 bg-card border border-border rounded-xl"
+                  className="flex gap-4 p-4 bg-background border border-border rounded-2xl"
                 >
                   <Link to={`/product/${item.id}`} className="shrink-0">
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden bg-secondary">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-secondary">
                       <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                     </div>
                   </Link>
@@ -96,7 +96,7 @@ const Cart = () => {
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between gap-3">
                       <div>
-                        <p className="text-[11px] text-muted-foreground uppercase tracking-wider">{item.brand}</p>
+                        <p className="text-[11px] text-muted-foreground uppercase tracking-[0.1em]">{item.brand}</p>
                         <Link
                           to={`/product/${item.id}`}
                           className="font-medium text-sm hover:text-accent transition-colors line-clamp-2"
@@ -148,7 +148,7 @@ const Cart = () => {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 bg-card border border-border rounded-xl p-6 space-y-4">
+            <div className="sticky top-24 bg-secondary rounded-2xl p-6 space-y-4">
               <h2 className="font-bold text-lg">Order Summary</h2>
 
               <div className="space-y-3 text-sm">
@@ -171,7 +171,7 @@ const Cart = () => {
                     <input
                       type="text"
                       placeholder="Coupon code"
-                      className="flex-1 px-3 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent/30"
+                      className="flex-1 px-3 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-foreground/10"
                     />
                     <Button variant="outline" size="sm" className="px-4">Apply</Button>
                   </div>
@@ -186,14 +186,14 @@ const Cart = () => {
                 <p className="text-xs text-muted-foreground mt-1">Including all taxes</p>
               </div>
 
-              <Button asChild size="lg" className="w-full gap-2 h-12 text-base font-semibold bg-accent text-accent-foreground hover:bg-accent/90">
+              <Button asChild size="lg" className="w-full gap-2 h-12 text-base font-semibold rounded-full bg-foreground text-background hover:bg-foreground/90">
                 <Link to="/checkout">
                   Proceed to Checkout <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
 
               {/* Trust */}
-              <div className="flex items-center justify-center gap-4 pt-2 border-t border-border">
+              <div className="flex items-center justify-center gap-4 pt-2">
                 <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
                   <Lock className="h-3 w-3" />
                   <span>SSL Secure</span>

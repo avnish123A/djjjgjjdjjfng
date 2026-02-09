@@ -21,8 +21,8 @@ export default {
         sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "system-ui", "sans-serif"],
       },
       fontSize: {
-        "display": ["3.5rem", { lineHeight: "1.1", fontWeight: "700" }],
-        "display-sm": ["2.25rem", { lineHeight: "1.15", fontWeight: "700" }],
+        "display": ["3.5rem", { lineHeight: "1.08", fontWeight: "700", letterSpacing: "-0.02em" }],
+        "display-sm": ["2.5rem", { lineHeight: "1.1", fontWeight: "700", letterSpacing: "-0.02em" }],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -87,11 +87,12 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        card: "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
-        "card-hover": "0 10px 25px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.04)",
-        hero: "0 20px 60px rgba(0,0,0,0.12)",
-        nav: "0 1px 0 rgba(0,0,0,0.05)",
-        "bottom-nav": "0 -2px 8px rgba(0,0,0,0.08)",
+        card: "0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)",
+        "card-hover": "0 12px 40px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04)",
+        hero: "0 20px 60px rgba(0,0,0,0.15)",
+        nav: "0 1px 0 rgba(0,0,0,0.04)",
+        "bottom-nav": "0 -1px 12px rgba(0,0,0,0.06)",
+        soft: "0 2px 8px rgba(0,0,0,0.06)",
       },
       keyframes: {
         "accordion-down": {
@@ -103,7 +104,7 @@ export default {
           to: { height: "0" },
         },
         "fade-in-up": {
-          "0%": { opacity: "0", transform: "translateY(20px)" },
+          "0%": { opacity: "0", transform: "translateY(16px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
         "fade-in": {
@@ -111,7 +112,7 @@ export default {
           "100%": { opacity: "1" },
         },
         "scale-in": {
-          "0%": { opacity: "0", transform: "scale(0.95)" },
+          "0%": { opacity: "0", transform: "scale(0.96)" },
           "100%": { opacity: "1", transform: "scale(1)" },
         },
         "slide-in-right": {
@@ -120,7 +121,7 @@ export default {
         },
         "bounce-in": {
           "0%": { transform: "scale(0)" },
-          "50%": { transform: "scale(1.15)" },
+          "50%": { transform: "scale(1.12)" },
           "100%": { transform: "scale(1)" },
         },
         shimmer: {

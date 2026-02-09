@@ -13,29 +13,29 @@ interface ProductFiltersProps {
 }
 
 const FilterContent = ({ selectedCategory, onCategoryChange, priceRange, onPriceChange, categories }: ProductFiltersProps) => (
-  <div className="space-y-6">
+  <div className="space-y-7">
     {/* Categories */}
     <div>
       <h3 className="font-semibold text-sm mb-3">Category</h3>
-      <div className="space-y-1.5">
-        <label className="flex items-center gap-2.5 cursor-pointer py-1">
+      <div className="space-y-1">
+        <label className="flex items-center gap-2.5 cursor-pointer py-1.5">
           <input
             type="radio"
             name="category"
             checked={!selectedCategory}
             onChange={() => onCategoryChange(null)}
-            className="accent-accent w-4 h-4"
+            className="accent-foreground w-4 h-4"
           />
           <span className="text-sm">All Categories</span>
         </label>
         {categories.map((cat) => (
-          <label key={cat.id} className="flex items-center gap-2.5 cursor-pointer py-1">
+          <label key={cat.id} className="flex items-center gap-2.5 cursor-pointer py-1.5">
             <input
               type="radio"
               name="category"
               checked={selectedCategory === cat.slug}
               onChange={() => onCategoryChange(cat.slug)}
-              className="accent-accent w-4 h-4"
+              className="accent-foreground w-4 h-4"
             />
             <span className="text-sm">{cat.name}</span>
           </label>
@@ -54,7 +54,7 @@ const FilterContent = ({ selectedCategory, onCategoryChange, priceRange, onPrice
           step={500}
           value={priceRange[1]}
           onChange={(e) => onPriceChange([priceRange[0], parseInt(e.target.value)])}
-          className="w-full accent-accent"
+          className="w-full accent-foreground"
         />
         <div className="flex justify-between text-sm text-muted-foreground">
           <span>{formatPrice(priceRange[0])}</span>
@@ -83,8 +83,8 @@ export const ProductFilters = (props: ProductFiltersProps) => {
     <>
       {/* Desktop sidebar */}
       <aside className="hidden lg:block w-56 shrink-0">
-        <div className="sticky top-24 bg-card border border-border rounded-xl p-5">
-          <h3 className="font-bold text-sm mb-4 uppercase tracking-wider">Filters</h3>
+        <div className="sticky top-24 bg-background border border-border rounded-2xl p-5">
+          <h3 className="font-bold text-sm mb-5 uppercase tracking-wider">Filters</h3>
           <FilterContent {...props} />
         </div>
       </aside>
