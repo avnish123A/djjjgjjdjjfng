@@ -1,88 +1,110 @@
 import { Link } from 'react-router-dom';
-import { Mail, MapPin, Phone, ShieldCheck, Truck, RotateCcw, CreditCard, BadgeCheck, Lock } from 'lucide-react';
+import { Mail, MapPin, Phone, ShieldCheck, Truck, RotateCcw, CreditCard, BadgeCheck, Lock, Facebook, Instagram, Twitter, Youtube } from 'lucide-react';
 
 const footerLinks = {
-  company: [
-    { label: 'About Us', href: '#' },
-    { label: 'Careers', href: '#' },
-    { label: 'Blog', href: '#' },
-    { label: 'Contact Us', href: '#' },
+  shop: [
+    { label: 'New Arrivals', href: '/products' },
+    { label: 'Best Sellers', href: '/products' },
+    { label: 'Sale', href: '/products' },
+    { label: 'All Products', href: '/products' },
   ],
   support: [
-    { label: 'FAQs', href: '#' },
     { label: 'Track Order', href: '#' },
     { label: 'Shipping Policy', href: '/policies/shipping' },
     { label: 'Return & Refund', href: '/policies/returns' },
+    { label: 'FAQs', href: '#' },
+    { label: 'Contact Us', href: '#' },
   ],
-  legal: [
+  company: [
+    { label: 'About Us', href: '#' },
     { label: 'Privacy Policy', href: '/policies/privacy' },
     { label: 'Terms & Conditions', href: '/policies/terms' },
-    { label: 'Shipping Policy', href: '/policies/shipping' },
-    { label: 'Refund Policy', href: '/policies/returns' },
+    { label: 'Careers', href: '#' },
   ],
 };
 
 const trustBadges = [
-  { icon: ShieldCheck, label: '100% Genuine' },
-  { icon: Truck, label: 'Free Delivery' },
-  { icon: RotateCcw, label: 'Easy Returns' },
-  { icon: CreditCard, label: 'Secure Payment' },
+  { icon: ShieldCheck, label: '100% Genuine Products' },
+  { icon: Truck, label: 'Free Delivery ₹999+' },
+  { icon: RotateCcw, label: '7-Day Easy Returns' },
+  { icon: CreditCard, label: 'Secure Payments' },
   { icon: Lock, label: 'SSL Encrypted' },
   { icon: BadgeCheck, label: 'Quality Assured' },
 ];
 
+const paymentMethods = ['Visa', 'Mastercard', 'UPI', 'RuPay', 'Paytm', 'PhonePe', 'GPay'];
+
 export const Footer = () => {
   return (
-    <footer className="bg-primary text-primary-foreground">
-      {/* Trust Badges Bar */}
-      <div className="border-b border-primary-foreground/10">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-wrap justify-center gap-6 lg:gap-10">
+    <footer className="bg-foreground text-card">
+      {/* Trust Badges */}
+      <div className="border-b border-card/10">
+        <div className="container mx-auto px-4 py-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-6">
             {trustBadges.map((badge) => (
-              <div key={badge.label} className="flex items-center gap-2 text-primary-foreground/80">
-                <badge.icon className="h-4 w-4 text-accent" />
-                <span className="text-xs font-medium">{badge.label}</span>
+              <div key={badge.label} className="flex items-center gap-2.5 text-card/80">
+                <badge.icon className="h-5 w-5 text-accent shrink-0" />
+                <span className="text-xs font-medium leading-tight">{badge.label}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+      {/* Main Footer */}
+      <div className="container mx-auto px-4 py-12 lg:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
           {/* Brand */}
-          <div>
-            <h3 className="text-xl font-bold mb-4">
+          <div className="lg:col-span-2">
+            <h3 className="text-xl font-extrabold mb-4 tracking-tight">
               LUXE<span className="text-accent">.</span>
             </h3>
-            <p className="text-primary-foreground/70 text-sm leading-relaxed mb-6">
-              Premium multi-category store with curated products for the modern lifestyle. Shop with confidence.
+            <p className="text-card/60 text-sm leading-relaxed mb-6 max-w-sm">
+              India's premier multi-category store. Curated products for the modern lifestyle. Shop with confidence — 100% genuine, always.
             </p>
-            <div className="space-y-3 text-sm text-primary-foreground/70">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
+            <div className="space-y-2.5 text-sm text-card/60">
+              <div className="flex items-center gap-2.5">
+                <Mail className="h-4 w-4 shrink-0" />
                 <span>support@luxestore.in</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
+              <div className="flex items-center gap-2.5">
+                <Phone className="h-4 w-4 shrink-0" />
                 <span>+91 98765 43210</span>
               </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
+              <div className="flex items-center gap-2.5">
+                <MapPin className="h-4 w-4 shrink-0" />
                 <span>Mumbai, Maharashtra, India</span>
               </div>
             </div>
+            {/* Social Icons */}
+            <div className="flex items-center gap-3 mt-6">
+              {[
+                { icon: Facebook, label: 'Facebook' },
+                { icon: Instagram, label: 'Instagram' },
+                { icon: Twitter, label: 'Twitter' },
+                { icon: Youtube, label: 'YouTube' },
+              ].map((social) => (
+                <a
+                  key={social.label}
+                  href="#"
+                  className="p-2 rounded-lg bg-card/10 hover:bg-accent hover:text-accent-foreground transition-colors"
+                  aria-label={social.label}
+                >
+                  <social.icon className="h-4 w-4" />
+                </a>
+              ))}
+            </div>
           </div>
 
-          {/* Company */}
+          {/* Shop */}
           <div>
-            <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider">Company</h4>
-            <nav className="space-y-3">
-              {footerLinks.company.map((link) => (
+            <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-card/80">Shop</h4>
+            <nav className="space-y-2.5">
+              {footerLinks.shop.map((link) => (
                 <Link
                   key={link.label}
                   to={link.href}
-                  className="block text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                  className="block text-sm text-card/50 hover:text-card transition-colors"
                 >
                   {link.label}
                 </Link>
@@ -92,13 +114,13 @@ export const Footer = () => {
 
           {/* Support */}
           <div>
-            <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider">Customer Service</h4>
-            <nav className="space-y-3">
+            <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-card/80">Customer Service</h4>
+            <nav className="space-y-2.5">
               {footerLinks.support.map((link) => (
                 <Link
                   key={link.label}
                   to={link.href}
-                  className="block text-sm text-primary-foreground/70 hover:text-primary-foreground transition-colors"
+                  className="block text-sm text-card/50 hover:text-card transition-colors"
                 >
                   {link.label}
                 </Link>
@@ -106,37 +128,43 @@ export const Footer = () => {
             </nav>
           </div>
 
-          {/* Legal / Newsletter */}
+          {/* Company */}
           <div>
-            <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider">Stay Updated</h4>
-            <p className="text-sm text-primary-foreground/70 mb-4">
-              Subscribe for exclusive offers and new arrivals.
-            </p>
-            <div className="flex gap-2">
-              <input
-                type="email"
-                placeholder="Your email"
-                className="flex-1 px-4 py-2.5 bg-primary-foreground/10 border border-primary-foreground/20 rounded-lg text-sm placeholder:text-primary-foreground/40 focus:outline-none focus:ring-2 focus:ring-accent/50"
-              />
-              <button className="px-4 py-2.5 bg-accent text-accent-foreground rounded-lg text-sm font-medium hover:bg-accent/90 transition-colors">
-                Join
-              </button>
-            </div>
+            <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-card/80">Company</h4>
+            <nav className="space-y-2.5">
+              {footerLinks.company.map((link) => (
+                <Link
+                  key={link.label}
+                  to={link.href}
+                  className="block text-sm text-card/50 hover:text-card transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
           </div>
         </div>
       </div>
 
-      {/* Bottom bar */}
-      <div className="border-t border-primary-foreground/10">
-        <div className="container mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-primary-foreground/50">
-            © 2026 LUXE. All rights reserved.
-          </p>
-          <div className="flex items-center gap-6 text-xs text-primary-foreground/50">
-            <Link to="/policies/privacy" className="hover:text-primary-foreground transition-colors">Privacy Policy</Link>
-            <Link to="/policies/terms" className="hover:text-primary-foreground transition-colors">Terms & Conditions</Link>
-            <Link to="/policies/shipping" className="hover:text-primary-foreground transition-colors">Shipping</Link>
-            <Link to="/policies/returns" className="hover:text-primary-foreground transition-colors">Returns</Link>
+      {/* Bottom Bar */}
+      <div className="border-t border-card/10">
+        <div className="container mx-auto px-4 py-5">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-card/40">
+              © 2026 LUXE. All rights reserved.
+            </p>
+            {/* Payment Methods */}
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] text-card/30 uppercase tracking-wider mr-1">We Accept</span>
+              {paymentMethods.map((method) => (
+                <span
+                  key={method}
+                  className="text-[10px] font-medium text-card/40 px-2 py-1 rounded bg-card/5 border border-card/10"
+                >
+                  {method}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </div>

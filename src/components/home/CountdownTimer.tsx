@@ -27,10 +27,10 @@ export const CountdownTimer = ({ targetDate }: CountdownTimerProps) => {
     <div className="flex gap-2">
       {Object.entries(timeLeft).map(([label, value]) => (
         <div key={label} className="text-center">
-          <div className="bg-background text-foreground rounded-lg px-2.5 py-1.5 text-lg font-bold tabular-nums min-w-[2.75rem]">
+          <div className="bg-card text-foreground rounded-lg px-2.5 py-1.5 text-lg font-bold tabular-nums min-w-[2.75rem]">
             {String(value).padStart(2, '0')}
           </div>
-          <span className="text-[10px] text-background/70 mt-1 block uppercase tracking-wide">{label}</span>
+          <span className="text-[10px] text-primary-foreground/60 mt-1 block uppercase tracking-wide">{label}</span>
         </div>
       ))}
     </div>
