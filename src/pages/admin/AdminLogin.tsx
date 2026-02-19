@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Lock, Mail, AlertCircle, Eye, EyeOff, Shield, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from '@/hooks/use-toast';
 
 /* ── password strength helper ── */
 const getPasswordStrength = (pw: string) => {
@@ -22,7 +23,6 @@ const getPasswordStrength = (pw: string) => {
   return { label: 'Strong', pct: 100, color: 'bg-success' };
 };
 
-/* ── floating orbs ── */
 const Orb = ({ className }: { className?: string }) => (
   <div className={`absolute rounded-full opacity-20 blur-3xl pointer-events-none ${className}`} />
 );
@@ -39,10 +39,13 @@ const AdminLogin: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const { login, signup } = useAdminAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const strength = useMemo(() => getPasswordStrength(password), [password]);
 
-  // Load remembered email
+  // Get the intended destination after login
+  const from = (location.state as { from?: string })?.from || '/admin/dashboard';
+
   useEffect(() => {
     const saved = localStorage.getItem('aurea_admin_email');
     if (saved) {
@@ -89,7 +92,8 @@ const AdminLogin: React.FC = () => {
     const result = await login(email, password);
     setLoading(false);
     if (result.success) {
-      navigate('/admin/dashboard');
+      toast({ title: 'Welcome back!', description: 'Logged in successfully.' });
+      navigate(from, { replace: true });
     } else {
       setError(result.error || 'Invalid credentials');
     }
@@ -102,18 +106,15 @@ const AdminLogin: React.FC = () => {
     setForgotSuccess(false);
   };
 
-  /* ── animation variants ── */
   const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
   const item = { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.45 } } };
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden bg-[#0a0a0a]">
-      {/* Animated background orbs */}
       <Orb className="w-[500px] h-[500px] -top-40 -left-40 bg-accent animate-[float_8s_ease-in-out_infinite]" />
       <Orb className="w-[400px] h-[400px] -bottom-32 -right-32 bg-accent/60 animate-[float_10s_ease-in-out_infinite_reverse]" />
       <Orb className="w-[300px] h-[300px] top-1/2 left-1/3 bg-accent/30 animate-[float_12s_ease-in-out_infinite]" />
 
-      {/* Subtle grid overlay */}
       <div
         className="absolute inset-0 opacity-[0.04]"
         style={{
@@ -129,7 +130,6 @@ const AdminLogin: React.FC = () => {
         className="w-full max-w-md relative z-10"
       >
         <div className="glass-strong rounded-2xl p-8 shadow-[0_8px_60px_-12px_rgba(200,169,106,0.15)]">
-          {/* Logo */}
           <motion.div variants={container} initial="hidden" animate="show" className="text-center mb-8">
             <motion.div variants={item} className="inline-flex items-center gap-2 mb-2">
               <Shield className="h-5 w-5 text-accent" />
@@ -144,7 +144,6 @@ const AdminLogin: React.FC = () => {
             </motion.p>
           </motion.div>
 
-          {/* Feedback messages */}
           <AnimatePresence mode="wait">
             {signupSuccess && (
               <motion.div key="signup-ok" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-6 flex items-center gap-2 text-sm bg-success/10 text-green-400 px-4 py-3 rounded-lg border border-success/20">
@@ -166,9 +165,7 @@ const AdminLogin: React.FC = () => {
             )}
           </AnimatePresence>
 
-          {/* Form */}
           <motion.form onSubmit={handleSubmit} variants={container} initial="hidden" animate="show" className="space-y-5">
-            {/* Email */}
             <motion.div variants={item} className="space-y-2">
               <Label htmlFor="email" className="text-white/70 text-xs uppercase tracking-wider">Email</Label>
               <div className="relative">
@@ -185,7 +182,6 @@ const AdminLogin: React.FC = () => {
               </div>
             </motion.div>
 
-            {/* Password (hidden in forgot mode) */}
             {mode !== 'forgot' && (
               <motion.div variants={item} className="space-y-2">
                 <Label htmlFor="password" className="text-white/70 text-xs uppercase tracking-wider">Password</Label>
@@ -211,7 +207,6 @@ const AdminLogin: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Password strength (signup only) */}
                 {mode === 'signup' && password.length > 0 && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-1 pt-1">
                     <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
@@ -228,7 +223,6 @@ const AdminLogin: React.FC = () => {
               </motion.div>
             )}
 
-            {/* Remember me + Forgot (login mode) */}
             {mode === 'login' && (
               <motion.div variants={item} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -250,7 +244,6 @@ const AdminLogin: React.FC = () => {
               </motion.div>
             )}
 
-            {/* Submit */}
             <motion.div variants={item}>
               <Button
                 type="submit"
@@ -269,7 +262,6 @@ const AdminLogin: React.FC = () => {
             </motion.div>
           </motion.form>
 
-          {/* Mode switcher */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-6 space-y-2 text-center">
             {mode === 'login' && (
               <p className="text-xs text-white/40">
@@ -296,7 +288,6 @@ const AdminLogin: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* Floating animation keyframes (inline for the orbs) */}
       <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0) scale(1); }

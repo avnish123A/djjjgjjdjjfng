@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -15,7 +15,9 @@ import {
   List,
 } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { useInactivityLogout } from '@/hooks/useInactivityLogout';
 import { cn } from '@/lib/utils';
+import { toast } from '@/hooks/use-toast';
 
 interface NavItem {
   label: string;
@@ -47,6 +49,17 @@ const AdminLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState<string[]>(['Products']);
 
+  const handleLogout = useCallback(async () => {
+    await logout();
+    navigate('/admin/login', { replace: true });
+  }, [logout, navigate]);
+
+  // Auto-logout after 30 min of inactivity
+  useInactivityLogout(() => {
+    toast({ title: 'Session expired', description: 'You were logged out due to inactivity.' });
+    handleLogout();
+  }, 30 * 60 * 1000);
+
   const toggleMenu = (label: string) => {
     setExpandedMenus(prev =>
       prev.includes(label) ? prev.filter(l => l !== label) : [...prev, label]
@@ -56,11 +69,6 @@ const AdminLayout: React.FC = () => {
   const isActive = (path: string) => location.pathname === path;
   const isParentActive = (children: { path: string }[]) =>
     children.some(c => location.pathname.startsWith(c.path));
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/admin/login');
-  };
 
   return (
     <div className="flex h-screen bg-secondary/50">
@@ -74,7 +82,7 @@ const AdminLayout: React.FC = () => {
       )}>
         <div className="h-16 flex items-center justify-between px-6 border-b border-border">
           <Link to="/admin/dashboard" className="text-xl font-bold tracking-tight">
-            LUXE <span className="text-accent">Admin</span>
+            AUREA <span className="text-accent">Admin</span>
           </Link>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden"><X className="h-5 w-5" /></button>
         </div>
