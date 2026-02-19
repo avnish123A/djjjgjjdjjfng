@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,81 +6,81 @@
 
 @layer base {
   :root {
-    /* Luxury Monochrome — Apple/Nike Inspired */
-    --background: 0 0% 100%;
-    --foreground: 0 0% 0%;
+    /* AUREA — Warm Luxury Gifting */
+    --background: 36 33% 97%;       /* #F5F3EF warm ivory */
+    --foreground: 0 0% 7%;          /* #111111 deep charcoal */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card-foreground: 0 0% 7%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
-    --primary: 0 0% 0%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 240 5% 97%;
-    --secondary-foreground: 0 0% 0%;
-    --muted: 240 5% 97%;
-    --muted-foreground: 240 2% 54%;
-    --accent: 220 100% 50%;
+    --popover-foreground: 0 0% 7%;
+    --primary: 0 0% 7%;             /* #111111 */
+    --primary-foreground: 36 33% 97%;
+    --secondary: 36 33% 95%;        /* warm ivory lighter */
+    --secondary-foreground: 0 0% 7%;
+    --muted: 36 20% 93%;
+    --muted-foreground: 30 5% 45%;
+    --accent: 37 42% 60%;           /* #C8A96A soft gold */
     --accent-foreground: 0 0% 100%;
-    --destructive: 4 100% 59%;
+    --destructive: 4 80% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 220 100% 50%;
+    --border: 36 15% 88%;
+    --input: 36 15% 88%;
+    --ring: 37 42% 60%;
     --radius: 0.625rem;
 
     /* Functional Colors */
-    --success: 142 69% 49%;
+    --success: 130 30% 56%;         /* #8FA38F muted sage */
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 0%;
-    --info: 210 100% 50%;
+    --warning: 38 70% 55%;
+    --warning-foreground: 0 0% 7%;
+    --info: 210 60% 55%;
     --info-foreground: 0 0% 100%;
 
     /* Badge Colors */
-    --badge-new: 210 100% 50%;
-    --badge-sale: 4 100% 59%;
-    --badge-featured: 42 100% 50%;
-    --rating: 36 100% 50%;
+    --badge-new: 37 42% 60%;
+    --badge-sale: 4 80% 55%;
+    --badge-featured: 37 42% 60%;
+    --rating: 37 70% 55%;
 
     /* Sidebar (admin) */
-    --sidebar-background: 240 5% 97%;
+    --sidebar-background: 36 33% 95%;
     --sidebar-foreground: 0 0% 25%;
-    --sidebar-primary: 0 0% 0%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 5% 92%;
+    --sidebar-primary: 0 0% 7%;
+    --sidebar-primary-foreground: 36 33% 97%;
+    --sidebar-accent: 36 20% 90%;
     --sidebar-accent-foreground: 0 0% 7%;
-    --sidebar-border: 0 0% 90%;
-    --sidebar-ring: 220 100% 50%;
+    --sidebar-border: 36 15% 88%;
+    --sidebar-ring: 37 42% 60%;
   }
 
   .dark {
     --background: 0 0% 4%;
-    --foreground: 0 0% 95%;
+    --foreground: 36 20% 92%;
     --card: 0 0% 7%;
-    --card-foreground: 0 0% 95%;
+    --card-foreground: 36 20% 92%;
     --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 0 0% 100%;
+    --popover-foreground: 36 20% 92%;
+    --primary: 36 20% 92%;
     --primary-foreground: 0 0% 7%;
     --secondary: 0 0% 11%;
-    --secondary-foreground: 0 0% 95%;
+    --secondary-foreground: 36 20% 92%;
     --muted: 0 0% 11%;
-    --muted-foreground: 0 0% 55%;
-    --accent: 220 100% 50%;
+    --muted-foreground: 30 5% 55%;
+    --accent: 37 42% 60%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 95%;
+    --destructive-foreground: 36 20% 92%;
     --border: 0 0% 14%;
     --input: 0 0% 14%;
-    --ring: 220 100% 50%;
+    --ring: 37 42% 60%;
     --sidebar-background: 0 0% 7%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 220 100% 50%;
+    --sidebar-foreground: 36 20% 92%;
+    --sidebar-primary: 37 42% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 11%;
-    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-accent-foreground: 36 20% 92%;
     --sidebar-border: 0 0% 14%;
-    --sidebar-ring: 220 100% 50%;
+    --sidebar-ring: 37 42% 60%;
   }
 }
 
@@ -100,6 +100,9 @@
 }
 
 @layer utilities {
+  .font-display {
+    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  }
   .text-balance {
     text-wrap: balance;
   }

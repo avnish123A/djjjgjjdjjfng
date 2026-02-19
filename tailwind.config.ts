@@ -24,6 +24,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "system-ui", "sans-serif"],
+        display: ["Playfair Display", "Georgia", "Times New Roman", "serif"],
       },
       fontSize: {
         "display": ["3.5rem", { lineHeight: "1.08", fontWeight: "700", letterSpacing: "-0.02em" }],
@@ -94,12 +95,12 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        card: "0 2px 8px rgba(0,0,0,0.08)",
-        "card-hover": "0 8px 24px rgba(0,0,0,0.12)",
-        hero: "0 20px 60px rgba(0,0,0,0.15)",
+        card: "0 2px 8px rgba(0,0,0,0.06)",
+        "card-hover": "0 8px 24px rgba(0,0,0,0.08)",
+        hero: "0 20px 60px rgba(0,0,0,0.12)",
         nav: "0 1px 0 rgba(0,0,0,0.04)",
-        "bottom-nav": "0 -2px 12px rgba(0,0,0,0.06)",
-        soft: "0 2px 8px rgba(0,0,0,0.06)",
+        "bottom-nav": "0 -2px 12px rgba(0,0,0,0.04)",
+        soft: "0 2px 8px rgba(0,0,0,0.04)",
       },
       keyframes: {
         "accordion-down": {

@@ -34,28 +34,27 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -2 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className="group"
     >
       <Link to={`/product/${product.id}`} className="block">
         {/* Image Container */}
-        <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-secondary mb-3">
+        <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-4">
           <img
             src={product.image}
             alt={product.name}
-            className={`w-full h-full object-cover transition-all duration-500 ${
+            className={`w-full h-full object-cover transition-all duration-700 ${
               hasSecondaryImage ? 'group-hover:opacity-0' : 'group-hover:scale-105'
             }`}
             loading="lazy"
           />
 
-          {/* Secondary image on hover */}
           {hasSecondaryImage && (
             <img
               src={product.images[1]}
               alt={`${product.name} alternate`}
-              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+              className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700"
               loading="lazy"
             />
           )}
@@ -63,22 +62,22 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
             {product.badge === 'Sale' && discount && (
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-destructive text-destructive-foreground">
+              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-destructive text-destructive-foreground">
                 -{discount}%
               </span>
             )}
             {product.badge === 'New' && (
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-accent text-accent-foreground">
+              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-accent text-accent-foreground">
                 New
               </span>
             )}
             {product.badge === 'Best Seller' && (
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-foreground text-background">
+              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-foreground text-background">
                 Best Seller
               </span>
             )}
             {product.badge === 'Featured' && (
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-foreground text-background">
+              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-foreground text-background">
                 Featured
               </span>
             )}
@@ -92,13 +91,13 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                 e.stopPropagation();
                 toast('Added to wishlist');
               }}
-              className="hidden lg:flex p-2 rounded-full bg-background shadow-soft hover:scale-110 transition-transform"
+              className="hidden lg:flex p-2 bg-background shadow-soft hover:scale-110 transition-transform"
               aria-label="Add to wishlist"
             >
               <Heart className="h-4 w-4" />
             </button>
             <button
-              className="hidden lg:flex p-2 rounded-full bg-background shadow-soft hover:scale-110 transition-transform"
+              className="hidden lg:flex p-2 bg-background shadow-soft hover:scale-110 transition-transform"
               aria-label="Quick view"
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
             >
@@ -106,14 +105,14 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             </button>
           </div>
 
-          {/* Mobile Wishlist — always visible, larger touch target */}
+          {/* Mobile Wishlist */}
           <button
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               toast('Added to wishlist');
             }}
-            className="lg:hidden absolute top-3 right-3 p-2.5 rounded-full bg-background/90 backdrop-blur-sm shadow-soft min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="lg:hidden absolute top-3 right-3 p-2.5 bg-background/90 backdrop-blur-sm shadow-soft min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Add to wishlist"
           >
             <Heart className="h-4 w-4" />
@@ -123,7 +122,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-3 group-hover:translate-y-0 hidden lg:block">
             <button
               onClick={handleAddToCart}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-foreground text-background rounded-full text-sm font-semibold hover:bg-foreground/90 transition-colors shadow-card-hover active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-foreground text-background text-sm font-medium uppercase tracking-wider hover:bg-foreground/90 transition-colors active:scale-[0.98]"
             >
               <ShoppingBag className="h-4 w-4" />
               Add to Cart
@@ -133,16 +132,16 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           {/* Mobile Add to Cart */}
           <button
             onClick={handleAddToCart}
-            className="lg:hidden absolute bottom-3 right-3 p-2.5 rounded-full bg-foreground text-background shadow-card-hover min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="lg:hidden absolute bottom-3 right-3 p-2.5 bg-foreground text-background shadow-card-hover min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Add to cart"
           >
             <ShoppingBag className="h-4 w-4" />
           </button>
 
-          {/* Out of Stock Overlay */}
+          {/* Out of Stock */}
           {!product.inStock && (
             <div className="absolute inset-0 bg-background/60 flex items-center justify-center backdrop-blur-[2px]">
-              <span className="px-4 py-2 bg-foreground text-background text-sm font-semibold rounded-full">
+              <span className="px-4 py-2 bg-foreground text-background text-sm font-medium uppercase tracking-wider">
                 Out of Stock
               </span>
             </div>
@@ -152,13 +151,12 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         {/* Product Info */}
         <div className="space-y-1.5 px-0.5">
           {product.brand && (
-            <p className="text-[11px] text-muted-foreground uppercase tracking-[0.1em] font-medium">{product.brand}</p>
+            <p className="text-[10px] text-accent uppercase tracking-[3px] font-medium">{product.brand}</p>
           )}
           <h3 className="text-sm font-medium leading-snug line-clamp-2 group-hover:text-accent transition-colors">
             {product.name}
           </h3>
 
-          {/* Rating */}
           {product.rating > 0 && (
             <div className="flex items-center gap-1.5">
               <div className="flex items-center gap-0.5">
@@ -167,7 +165,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                     key={i}
                     className={`h-3 w-3 ${
                       i < Math.floor(product.rating)
-                        ? 'fill-warning text-warning'
+                        ? 'fill-accent text-accent'
                         : 'text-border'
                     }`}
                   />
@@ -177,26 +175,24 @@ export const ProductCard = ({ product }: ProductCardProps) => {
             </div>
           )}
 
-          {/* Price */}
           <div className="flex items-center gap-2 pt-0.5">
-            <span className="font-bold text-base">{formatPrice(product.price)}</span>
+            <span className="font-semibold text-base">{formatPrice(product.price)}</span>
             {product.originalPrice && (
               <span className="text-sm text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>
             )}
             {discount && (
-              <span className="text-xs font-semibold text-success">
+              <span className="text-xs font-medium text-success">
                 {discount}% off
               </span>
             )}
           </div>
 
-          {/* Color Swatches */}
           {product.colors && product.colors.length > 0 && (
             <div className="flex items-center gap-1.5 pt-1">
               {product.colors.slice(0, 4).map((color, i) => (
                 <span
                   key={i}
-                  className="w-4 h-4 rounded-full border border-border"
+                  className="w-4 h-4 border border-border"
                   style={{ backgroundColor: color }}
                 />
               ))}

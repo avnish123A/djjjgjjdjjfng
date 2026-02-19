@@ -19,14 +19,14 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent side="left" className="w-[300px] sm:w-[340px] p-0 border-r-0">
+      <SheetContent side="left" className="w-[300px] sm:w-[340px] p-0 border-r-0 rounded-none">
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-5 border-b border-border">
-            <span className="text-lg font-extrabold tracking-tight">
-              LUXE<span className="text-accent">.</span>
+            <span className="font-display text-lg font-bold tracking-wide">
+              AUREA
             </span>
-            <button onClick={onClose} className="p-1.5 hover:bg-secondary rounded-full transition-colors">
+            <button onClick={onClose} className="p-1.5 hover:bg-secondary transition-colors">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -37,8 +37,8 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search products..."
-                className="w-full pl-10 pr-4 py-2.5 bg-secondary rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-foreground/10"
+                placeholder="Search..."
+                className="w-full pl-10 pr-4 py-2.5 bg-secondary text-sm focus:outline-none focus:ring-1 focus:ring-accent/30"
               />
             </div>
           </div>
@@ -46,7 +46,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
           {/* Navigation */}
           <div className="flex-1 overflow-y-auto">
             <div className="px-5 pt-4 pb-2">
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.15em] mb-3">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[3px] mb-3">
                 Categories
               </p>
               <nav className="space-y-0.5">
@@ -55,7 +55,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
                     key={cat.id}
                     to={`/products?category=${cat.slug}`}
                     onClick={onClose}
-                    className="flex items-center justify-between py-3 px-3 rounded-lg text-sm font-medium hover:bg-secondary transition-colors"
+                    className="flex items-center justify-between py-3 px-3 text-sm font-medium hover:bg-secondary transition-colors"
                   >
                     {cat.name}
                     <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
@@ -64,9 +64,9 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
                 <Link
                   to="/products"
                   onClick={onClose}
-                  className="flex items-center justify-between py-3 px-3 rounded-lg text-sm font-semibold text-accent hover:bg-secondary transition-colors"
+                  className="flex items-center justify-between py-3 px-3 text-sm font-semibold text-accent hover:bg-secondary transition-colors"
                 >
-                  View All Products
+                  View All
                   <ChevronRight className="h-3.5 w-3.5" />
                 </Link>
               </nav>
@@ -75,7 +75,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
             <div className="border-t border-border mx-5" />
 
             <div className="px-5 py-4">
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.15em] mb-3">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[3px] mb-3">
                 Account
               </p>
               <nav className="space-y-0.5">
@@ -84,7 +84,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
                     key={item.label}
                     to={item.href}
                     onClick={onClose}
-                    className="flex items-center gap-3 py-3 px-3 rounded-lg text-sm font-medium hover:bg-secondary transition-colors"
+                    className="flex items-center gap-3 py-3 px-3 text-sm font-medium hover:bg-secondary transition-colors"
                   >
                     <item.icon className="h-4 w-4 text-muted-foreground" />
                     {item.label}
@@ -96,7 +96,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
             <div className="border-t border-border mx-5" />
 
             <div className="px-5 py-4">
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.15em] mb-3">
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[3px] mb-3">
                 Help
               </p>
               <nav className="space-y-1">
