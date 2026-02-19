@@ -34,6 +34,7 @@ import AdminOrderDetail from "./pages/admin/AdminOrderDetail";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminCategories from "./pages/admin/AdminCategories";
 import AdminCoupons from "./pages/admin/AdminCoupons";
+import AdminResetPassword from "./pages/admin/AdminResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -92,6 +93,7 @@ const App = () => (
 
               {/* Admin routes */}
               <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin/reset-password" element={<AdminResetPassword />} />
               <Route
                 path="/admin"
                 element={
