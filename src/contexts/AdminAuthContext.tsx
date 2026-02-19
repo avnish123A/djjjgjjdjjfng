@@ -29,10 +29,15 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   useEffect(() => {
+    // Timeout fallback — if auth never responds, stop loading after 5s
+    const timeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 5000);
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      clearTimeout(timeout);
       if (session?.user) {
         setUser(session.user);
-        // Check admin role without blocking
         const adminStatus = await checkAdminRole(session.user.id);
         setIsAdmin(adminStatus);
       } else {
@@ -43,6 +48,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      clearTimeout(timeout);
       if (session?.user) {
         setUser(session.user);
         const adminStatus = await checkAdminRole(session.user.id);
@@ -51,7 +57,10 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setIsLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
   }, [checkAdminRole]);
 
   const login = useCallback(async (email: string, password: string) => {
