@@ -31,7 +31,15 @@ const trustBadges = [
   { icon: BadgeCheck, label: 'Quality Assured' },
 ];
 
-const paymentMethods = ['Visa', 'Mastercard', 'UPI', 'RuPay', 'GPay'];
+const paymentLogos = [
+  { name: 'Visa', src: '/logos/visa.svg' },
+  { name: 'Mastercard', src: '/logos/mastercard.svg' },
+  { name: 'UPI', src: '/logos/upi.svg' },
+  { name: 'RuPay', src: '/logos/rupay.png' },
+  { name: 'Google Pay', src: '/logos/gpay.svg' },
+  { name: 'PhonePe', src: '/logos/phonepe.svg' },
+  { name: 'Paytm', src: '/logos/paytm.svg' },
+];
 
 export const Footer = () => {
   return (
@@ -75,7 +83,6 @@ export const Footer = () => {
                 <span>Mumbai, India</span>
               </div>
             </div>
-            {/* Social Icons */}
             <div className="flex items-center gap-2 mt-6">
               <a
                 href="#"
@@ -137,22 +144,27 @@ export const Footer = () => {
         </div>
       </div>
 
-      {/* Bottom Bar */}
+      {/* Bottom Bar with Real Payment Logos */}
       <div className="border-t border-background/8">
         <div className="container mx-auto px-4 py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-background/25">
               © 2026 AUREA. All rights reserved.
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <span className="text-[10px] text-background/20 uppercase tracking-wider mr-1">We Accept</span>
-              {paymentMethods.map((method) => (
-                <span
-                  key={method}
-                  className="text-[10px] font-medium text-background/30 px-2 py-0.5 border border-background/8"
+              {paymentLogos.map((logo) => (
+                <div
+                  key={logo.name}
+                  className="h-6 w-auto px-1.5 py-0.5 bg-background/10 border border-background/5 flex items-center justify-center"
                 >
-                  {method}
-                </span>
+                  <img
+                    src={logo.src}
+                    alt={logo.name}
+                    className="h-4 w-auto object-contain brightness-0 invert opacity-60"
+                    loading="lazy"
+                  />
+                </div>
               ))}
             </div>
           </div>
