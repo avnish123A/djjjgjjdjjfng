@@ -7,11 +7,11 @@ export const CategoryGrid = () => {
 
   if (isLoading) {
     return (
-      <section className="py-16 lg:py-24">
+      <section className="py-20 lg:py-28">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="animate-pulse aspect-[3/4] rounded-2xl bg-secondary" />
+              <div key={i} className="animate-pulse aspect-[3/4] bg-secondary" />
             ))}
           </div>
         </div>
@@ -22,17 +22,17 @@ export const CategoryGrid = () => {
   if (categories.length === 0) return null;
 
   return (
-    <section className="py-16 lg:py-24">
+    <section className="py-20 lg:py-28">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-12"
+          className="text-center mb-14"
         >
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2">Shop by Category</h2>
-          <p className="text-muted-foreground text-sm">Find exactly what you're looking for</p>
+          <span className="text-[11px] font-medium uppercase tracking-[4px] text-accent mb-3 block">Collections</span>
+          <h2 className="font-display text-3xl sm:text-4xl tracking-tight">Shop by Category</h2>
         </motion.div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 lg:gap-4">
@@ -46,17 +46,17 @@ export const CategoryGrid = () => {
             >
               <Link
                 to={`/products?category=${cat.slug}`}
-                className="group relative block aspect-[3/4] rounded-2xl overflow-hidden"
+                className="group relative block aspect-[3/4] overflow-hidden"
               >
                 <img
                   src={cat.image}
                   alt={cat.name}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-600 group-hover:scale-105"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-transparent to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <h3 className="text-sm lg:text-base font-semibold text-white">{cat.name}</h3>
+                  <h3 className="text-sm lg:text-base font-medium text-white uppercase tracking-wider">{cat.name}</h3>
                 </div>
               </Link>
             </motion.div>

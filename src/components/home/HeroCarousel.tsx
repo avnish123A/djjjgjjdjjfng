@@ -1,35 +1,35 @@
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
-import heroFashion from '@/assets/hero-fashion.jpg';
-import heroElectronics from '@/assets/hero-electronics.jpg';
-import heroLifestyle from '@/assets/hero-lifestyle.jpg';
+import { motion } from 'framer-motion';
+import heroGifting from '@/assets/hero-gifting.jpg';
+import heroCurated from '@/assets/hero-curated.jpg';
+import heroOccasion from '@/assets/hero-occasion.jpg';
 
 const slides = [
   {
-    image: heroFashion,
-    label: 'NEW COLLECTION',
-    headline: 'New Season Arrivals',
-    subtitle: 'Discover the latest in contemporary fashion',
-    cta: 'Shop Fashion',
-    link: '/products?category=fashion',
+    image: heroGifting,
+    label: 'THE ART OF GIFTING',
+    headline: 'Give Something\nUnforgettable',
+    subtitle: 'Thoughtfully curated gifts for every moment that matters.',
+    cta: 'Explore Gifts',
+    link: '/products',
   },
   {
-    image: heroElectronics,
-    label: 'TRENDING',
-    headline: 'Tech That Inspires',
-    subtitle: 'Premium electronics for the modern lifestyle',
-    cta: 'Shop Electronics',
-    link: '/products?category=electronics',
+    image: heroCurated,
+    label: 'CURATED COLLECTION',
+    headline: 'Luxury,\nRedefined',
+    subtitle: 'Handpicked lifestyle pieces crafted for the discerning.',
+    cta: 'Shop Collection',
+    link: '/products',
   },
   {
-    image: heroLifestyle,
-    label: 'CURATED',
-    headline: 'Elevate Your Space',
-    subtitle: 'Curated home essentials for mindful living',
-    cta: 'Shop Home',
-    link: '/products?category=home-living',
+    image: heroOccasion,
+    label: 'CELEBRATE',
+    headline: 'For Every\nOccasion',
+    subtitle: 'From intimate moments to grand celebrations.',
+    cta: 'Shop Occasions',
+    link: '/products',
   },
 ];
 
@@ -38,47 +38,52 @@ export const HeroCarousel = () => {
     <section className="relative">
       <Carousel
         opts={{ loop: true }}
-        plugins={[Autoplay({ delay: 5000, stopOnInteraction: false })]}
+        plugins={[Autoplay({ delay: 6000, stopOnInteraction: false })]}
         className="w-full"
       >
         <CarouselContent>
           {slides.map((slide, index) => (
             <CarouselItem key={index}>
-              <div className="relative h-[420px] sm:h-[520px] lg:h-[620px] overflow-hidden">
+              <div className="relative h-[500px] sm:h-[600px] lg:h-[700px] overflow-hidden">
                 <img
                   src={slide.image}
                   alt={slide.headline}
                   className="absolute inset-0 w-full h-full object-cover"
                   loading={index === 0 ? 'eager' : 'lazy'}
                 />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-r from-foreground/50 via-foreground/20 to-transparent" />
                 <div className="relative h-full flex items-center">
                   <div className="container mx-auto px-4">
-                    <div className="max-w-lg">
-                      <span className="inline-block text-[11px] sm:text-xs font-semibold uppercase tracking-[4px] text-white/70 mb-4">
+                    <motion.div
+                      initial={{ opacity: 0, y: 24 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.8, delay: 0.2 }}
+                      className="max-w-xl"
+                    >
+                      <span className="inline-block text-[11px] sm:text-xs font-medium uppercase tracking-[5px] text-white/60 mb-5">
                         {slide.label}
                       </span>
-                      <h1 className="text-display-sm sm:text-display text-white mb-5 leading-tight">
+                      <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl text-white mb-6 leading-[1.1] whitespace-pre-line">
                         {slide.headline}
                       </h1>
-                      <p className="text-base sm:text-lg text-white/75 mb-8 max-w-md leading-relaxed">
+                      <p className="text-base sm:text-lg text-white/70 mb-10 max-w-md leading-relaxed">
                         {slide.subtitle}
                       </p>
                       <Link
                         to={slide.link}
-                        className="inline-flex items-center gap-2 bg-white text-foreground px-8 py-3.5 rounded-full text-sm font-semibold hover:bg-white/90 transition-all shadow-hero"
+                        className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-10 py-4 rounded-none text-sm font-semibold uppercase tracking-[2px] hover:bg-accent/90 transition-all"
                       >
                         {slide.cta}
                       </Link>
-                    </div>
+                    </motion.div>
                   </div>
                 </div>
               </div>
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="left-4 lg:left-8 h-10 w-10 bg-white/15 border-0 text-white backdrop-blur-sm hover:bg-white/25" />
-        <CarouselNext className="right-4 lg:right-8 h-10 w-10 bg-white/15 border-0 text-white backdrop-blur-sm hover:bg-white/25" />
+        <CarouselPrevious className="left-4 lg:left-8 h-10 w-10 bg-white/10 border-0 text-white backdrop-blur-sm hover:bg-white/20 rounded-none" />
+        <CarouselNext className="right-4 lg:right-8 h-10 w-10 bg-white/10 border-0 text-white backdrop-blur-sm hover:bg-white/20 rounded-none" />
       </Carousel>
     </section>
   );

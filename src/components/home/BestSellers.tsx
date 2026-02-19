@@ -12,22 +12,22 @@ export const BestSellers = () => {
   if (displayProducts.length === 0) return null;
 
   return (
-    <section className="py-16 lg:py-24">
+    <section className="py-20 lg:py-28">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="flex items-end justify-between mb-12"
+          className="flex items-end justify-between mb-14"
         >
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-1">Best Sellers</h2>
-            <p className="text-muted-foreground text-sm">Our most loved products across all categories</p>
+            <span className="text-[11px] font-medium uppercase tracking-[4px] text-accent mb-3 block">Most Loved</span>
+            <h2 className="font-display text-3xl sm:text-4xl tracking-tight">Best Sellers</h2>
           </div>
           <Link
             to="/products"
-            className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent hover:gap-2.5 transition-all"
+            className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent hover:gap-2.5 transition-all uppercase tracking-wider"
           >
             View All <ArrowRight className="h-4 w-4" />
           </Link>
@@ -50,9 +50,9 @@ export const BestSellers = () => {
         <div className="sm:hidden text-center mt-10">
           <Link
             to="/products"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground uppercase tracking-wider"
           >
-            View All Products <ArrowRight className="h-4 w-4" />
+            View All <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </div>

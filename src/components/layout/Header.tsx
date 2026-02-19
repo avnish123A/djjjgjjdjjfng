@@ -23,7 +23,6 @@ export const Header = () => {
     const handleScroll = () => {
       const currentY = window.scrollY;
       setScrolled(currentY > 50);
-      // Hide on scroll down, show on scroll up (only after 100px)
       if (currentY > 100) {
         setHeaderVisible(currentY < lastScrollY.current || currentY < 50);
       } else {
@@ -59,15 +58,15 @@ export const Header = () => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="bg-foreground text-background text-center text-[13px] py-2.5 px-4 relative"
+            className="bg-foreground text-background text-center text-[12px] py-2.5 px-4 relative"
           >
-            <p className="font-medium tracking-wide">
-              Free delivery on orders above ₹999 · Use code{' '}
-              <span className="font-bold tracking-wider">WELCOME10</span> for 10% off
+            <p className="font-medium tracking-[2px] uppercase">
+              Complimentary shipping on orders above ₹999 · Code{' '}
+              <span className="text-accent font-semibold">WELCOME10</span> for 10% off
             </p>
             <button
               onClick={() => setShowAnnouncement(false)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-background/50 hover:text-background transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-background/40 hover:text-background transition-colors"
               aria-label="Dismiss announcement"
             >
               <X className="h-3.5 w-3.5" />
@@ -78,7 +77,7 @@ export const Header = () => {
 
       {/* Main Header */}
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 bg-background/95 backdrop-blur-md ${
+        className={`sticky top-0 z-50 transition-all duration-300 bg-background/98 backdrop-blur-md ${
           scrolled ? 'shadow-nav' : 'border-b border-border'
         } ${headerVisible ? 'translate-y-0' : '-translate-y-full'}`}
       >
@@ -86,7 +85,7 @@ export const Header = () => {
           <div className="flex items-center justify-between h-14 lg:h-16">
             {/* Left: Hamburger (mobile) */}
             <button
-              className="lg:hidden p-2 -ml-2 hover:bg-secondary rounded-lg transition-colors"
+              className="lg:hidden p-2 -ml-2 hover:bg-secondary transition-colors"
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open menu"
             >
@@ -98,8 +97,8 @@ export const Header = () => {
             </button>
 
             {/* Logo */}
-            <Link to="/" className="text-xl lg:text-2xl font-extrabold tracking-tight">
-              LUXE<span className="text-accent">.</span>
+            <Link to="/" className="font-display text-xl lg:text-2xl font-bold tracking-wide">
+              AUREA
             </Link>
 
             {/* Desktop Navigation */}
@@ -108,17 +107,17 @@ export const Header = () => {
                 <Link
                   key={cat.id}
                   to={`/products?category=${cat.slug}`}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative group py-5"
+                  className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors relative group py-5 uppercase tracking-wider"
                 >
                   {cat.name}
-                  <span className="absolute bottom-4 left-0 w-0 h-[1.5px] bg-foreground transition-all duration-300 group-hover:w-full" />
+                  <span className="absolute bottom-4 left-0 w-0 h-px bg-accent transition-all duration-300 group-hover:w-full" />
                 </Link>
               ))}
               <Link
                 to="/products"
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="text-[13px] font-medium text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider"
               >
-                All Products
+                All
               </Link>
             </nav>
 
@@ -130,8 +129,8 @@ export const Header = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search products..."
-                  className="w-full pl-10 pr-4 py-2 bg-secondary border-0 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 focus:bg-background transition-all placeholder:text-muted-foreground"
+                  placeholder="Search..."
+                  className="w-full pl-10 pr-4 py-2 bg-secondary border-0 text-sm focus:outline-none focus:ring-1 focus:ring-accent/30 transition-all placeholder:text-muted-foreground"
                 />
               </form>
             </div>
@@ -139,7 +138,7 @@ export const Header = () => {
             {/* Icon Toolbar */}
             <div className="flex items-center gap-0.5">
               <button
-                className="lg:hidden p-2.5 hover:bg-secondary rounded-full transition-colors"
+                className="lg:hidden p-2.5 hover:bg-secondary transition-colors"
                 onClick={() => setSearchOpen(!searchOpen)}
                 aria-label="Search"
               >
@@ -147,21 +146,21 @@ export const Header = () => {
               </button>
               <Link
                 to="#"
-                className="hidden lg:flex p-2.5 hover:bg-secondary rounded-full transition-colors"
+                className="hidden lg:flex p-2.5 hover:bg-secondary transition-colors"
                 aria-label="Account"
               >
                 <User className="h-[18px] w-[18px]" />
               </Link>
               <Link
                 to="#"
-                className="hidden lg:flex p-2.5 hover:bg-secondary rounded-full transition-colors"
+                className="hidden lg:flex p-2.5 hover:bg-secondary transition-colors"
                 aria-label="Wishlist"
               >
                 <Heart className="h-[18px] w-[18px]" />
               </Link>
               <Link
                 to="/cart"
-                className="p-2.5 hover:bg-secondary rounded-full transition-colors relative"
+                className="p-2.5 hover:bg-secondary transition-colors relative"
                 aria-label="Cart"
               >
                 <ShoppingBag className="h-[18px] w-[18px]" />
@@ -171,7 +170,7 @@ export const Header = () => {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                    className="absolute top-0.5 right-0.5 bg-accent text-accent-foreground text-[9px] font-bold rounded-full h-4 w-4 flex items-center justify-center"
+                    className="absolute top-0.5 right-0.5 bg-accent text-accent-foreground text-[9px] font-bold h-4 w-4 flex items-center justify-center"
                   >
                     {totalItems}
                   </motion.span>
@@ -198,7 +197,7 @@ export const Header = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search products..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-secondary rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-accent/20"
+                  className="w-full pl-10 pr-4 py-2.5 bg-secondary text-sm focus:outline-none focus:ring-1 focus:ring-accent/30"
                 />
               </form>
             </motion.div>
