@@ -59,10 +59,9 @@ const Checkout = () => {
 
     setIsSubmitting(true);
     try {
-      const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
-      const { error: orderError } = await supabase.functions.invoke('create-order', {
+      const { data, error: orderError } = await supabase.functions.invoke('create-order', {
         body: {
-          orderNumber,
+          orderNumber: 'pending',
           customer: { name: form.name, email: form.email, phone: form.phone },
           shippingAddress: { address: form.address, address2: form.address2, city: form.city, state: form.state, pincode: form.pincode },
           items: items.map(item => ({ productId: item.id, title: item.name, price: item.price, quantity: item.quantity, image: item.image })),
@@ -70,9 +69,10 @@ const Checkout = () => {
         },
       });
       if (orderError) throw orderError;
+      if (data?.error) throw new Error(data.error);
       clearCart();
       toast.success('Order placed successfully!');
-      navigate(`/order-success?order=${orderNumber}`);
+      navigate(`/order-success?order=${data.orderNumber}`);
     } catch (error: any) {
       console.error('Order error:', error);
       toast.error(error?.message || 'Failed to place order');
