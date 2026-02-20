@@ -14,10 +14,13 @@ const OrderSuccess = () => {
   const [searchParams] = useSearchParams();
   const orderNumber = searchParams.get('order') || '';
 
-  // Estimated delivery: 5 days from now
-  const deliveryDate = new Date();
-  deliveryDate.setDate(deliveryDate.getDate() + 5);
-  const formattedDelivery = deliveryDate.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
+  // Estimated delivery: 7–14 days from now
+  const deliveryStart = new Date();
+  deliveryStart.setDate(deliveryStart.getDate() + 7);
+  const deliveryEnd = new Date();
+  deliveryEnd.setDate(deliveryEnd.getDate() + 14);
+  const fmt = (d: Date) => d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+  const formattedDelivery = `${fmt(deliveryStart)} – ${fmt(deliveryEnd)}`;
 
   return (
     <main className="min-h-screen">
@@ -105,7 +108,7 @@ const OrderSuccess = () => {
               </div>
               <div className="flex items-start gap-3 text-sm">
                 <Truck className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                <p className="text-muted-foreground">We'll notify you when your order is shipped (3-7 business days)</p>
+                <p className="text-muted-foreground">Estimated delivery within 7–14 business days. We'll notify you when shipped!</p>
               </div>
             </div>
           </div>

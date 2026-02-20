@@ -264,6 +264,7 @@ export type Database = {
           customer_name: string
           customer_phone: string | null
           discount: number
+          estimated_delivery_date: string | null
           id: string
           order_date: string
           order_number: string
@@ -286,6 +287,7 @@ export type Database = {
           customer_name: string
           customer_phone?: string | null
           discount?: number
+          estimated_delivery_date?: string | null
           id?: string
           order_date?: string
           order_number: string
@@ -308,6 +310,7 @@ export type Database = {
           customer_name?: string
           customer_phone?: string | null
           discount?: number
+          estimated_delivery_date?: string | null
           id?: string
           order_date?: string
           order_number?: string

@@ -100,12 +100,14 @@ const AdminOrderDetail: React.FC = () => {
   const [status, setStatus] = useState('');
   const [trackingNumber, setTrackingNumber] = useState('');
   const [courierName, setCourierName] = useState('');
+  const [estimatedDeliveryDate, setEstimatedDeliveryDate] = useState('');
 
   React.useEffect(() => {
     if (order) {
       setStatus(order.order_status);
       setTrackingNumber(order.tracking_number || '');
       setCourierName(order.courier_name || '');
+      setEstimatedDeliveryDate((order as any).estimated_delivery_date || '');
     }
   }, [order]);
 
@@ -115,6 +117,9 @@ const AdminOrderDetail: React.FC = () => {
       if (status === 'shipped' && trackingNumber) {
         updateData.tracking_number = trackingNumber;
         updateData.courier_name = courierName;
+      }
+      if (estimatedDeliveryDate) {
+        updateData.estimated_delivery_date = estimatedDeliveryDate;
       }
       const { error } = await supabase.from('orders').update(updateData).eq('id', id!);
       if (error) throw error;
@@ -214,6 +219,12 @@ const AdminOrderDetail: React.FC = () => {
                 <p className="text-muted-foreground">Method</p>
                 <p className="font-medium mt-1 uppercase">{order.payment_method}</p>
               </div>
+              {(order as any).estimated_delivery_date && (
+                <div>
+                  <p className="text-muted-foreground">Est. Delivery</p>
+                  <p className="font-medium mt-1 text-primary">{new Date((order as any).estimated_delivery_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -332,6 +343,18 @@ const AdminOrderDetail: React.FC = () => {
                 {allStatuses.map(s => (<option key={s} value={s} className="capitalize">{s}</option>))}
               </select>
             </div>
+            {/* Estimated Delivery Date */}
+            <div className="space-y-2">
+              <Label htmlFor="delivery-date">Estimated Delivery Date</Label>
+              <Input
+                id="delivery-date"
+                type="date"
+                value={estimatedDeliveryDate}
+                onChange={(e) => setEstimatedDeliveryDate(e.target.value)}
+              />
+              <p className="text-[10px] text-muted-foreground">Set the expected delivery date for this order (shown to customer)</p>
+            </div>
+
             {status === 'shipped' && (
               <div className="space-y-3 pt-2 border-t border-border">
                 <div className="space-y-2">
