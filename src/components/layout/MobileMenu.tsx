@@ -23,7 +23,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-5 border-b border-border">
-            <img src="/logo-ekamgift.png" alt="EkamGift" className="h-9 w-auto object-contain" />
+            <img src="/logo-ekamgift.png" alt="EkamGift" className="h-12 w-auto object-contain" />
             <button onClick={onClose} className="p-1.5 hover:bg-secondary rounded-lg transition-colors">
               <X className="h-4 w-4" />
             </button>

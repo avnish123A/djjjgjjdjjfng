@@ -64,7 +64,7 @@ export const Footer = () => {
           {/* Brand */}
           <div className="lg:col-span-2">
             <div className="mb-4">
-              <img src="/logo-ekamgift.png" alt="EkamGift" className="h-10 w-auto object-contain brightness-0 invert" />
+              <img src="/logo-ekamgift.png" alt="EkamGift" className="h-14 w-auto object-contain brightness-0 invert" />
             </div>
             <p className="text-background/40 text-sm leading-relaxed mb-6 max-w-xs">
               Curated gifts and premium lifestyle products for every occasion. Thoughtfully selected, beautifully delivered.

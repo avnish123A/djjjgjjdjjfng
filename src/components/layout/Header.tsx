@@ -98,7 +98,7 @@ export const Header = () => {
 
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2">
-              <img src="/logo-ekamgift.png" alt="EkamGift" className="h-10 lg:h-12 w-auto object-contain" />
+              <img src="/logo-ekamgift.png" alt="EkamGift" className="h-14 lg:h-16 w-auto object-contain" />
             </Link>
 
             {/* Desktop Navigation */}
