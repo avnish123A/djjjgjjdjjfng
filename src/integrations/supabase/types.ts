@@ -77,6 +77,51 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_queries: {
+        Row: {
+          created_at: string
+          customer_name: string
+          email: string
+          id: string
+          ip_address: string | null
+          message: string
+          phone: string | null
+          source_form: string
+          status: string
+          subject: string | null
+          updated_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_name?: string
+          email: string
+          id?: string
+          ip_address?: string | null
+          message: string
+          phone?: string | null
+          source_form?: string
+          status?: string
+          subject?: string | null
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string
+          email?: string
+          id?: string
+          ip_address?: string | null
+          message?: string
+          phone?: string | null
+          source_form?: string
+          status?: string
+          subject?: string | null
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           auth_user_id: string | null

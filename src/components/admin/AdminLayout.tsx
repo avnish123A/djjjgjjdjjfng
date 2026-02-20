@@ -15,6 +15,7 @@ import {
   PlusCircle,
   List,
   Settings,
+  MessageSquare,
 } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { useInactivityLogout } from '@/hooks/useInactivityLogout';
@@ -42,6 +43,7 @@ const navItems: NavItem[] = [
   { label: 'Customers', icon: Users, path: '/admin/customers' },
   { label: 'Categories', icon: FolderOpen, path: '/admin/categories' },
   { label: 'Coupons', icon: Ticket, path: '/admin/coupons' },
+  { label: 'Queries', icon: MessageSquare, path: '/admin/queries' },
   { label: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
   { label: 'Settings', icon: Settings, path: '/admin/settings' },
 ];
@@ -86,7 +88,7 @@ const AdminLayout: React.FC = () => {
       )}>
         <div className="h-16 flex items-center justify-between px-6 border-b border-border">
           <Link to="/admin/dashboard" className="text-xl font-bold tracking-tight">
-            AUREA <span className="text-accent">Admin</span>
+            EkamGift <span className="text-accent">Admin</span>
           </Link>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden"><X className="h-5 w-5" /></button>
         </div>

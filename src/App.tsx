@@ -32,6 +32,7 @@ const PrivacyPolicy = lazy(() => import("./pages/policies/PrivacyPolicy"));
 const TermsConditions = lazy(() => import("./pages/policies/TermsConditions"));
 const ReturnPolicy = lazy(() => import("./pages/policies/ReturnPolicy"));
 const ShippingPolicy = lazy(() => import("./pages/policies/ShippingPolicy"));
+const ContactUs = lazy(() => import("./pages/ContactUs"));
 
 // Lazy-loaded admin pages
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
@@ -47,6 +48,7 @@ const AdminCategories = lazy(() => import("./pages/admin/AdminCategories"));
 const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminSiteSettings = lazy(() => import("./pages/admin/AdminSiteSettings"));
+const AdminQueries = lazy(() => import("./pages/admin/AdminQueries"));
 
 const queryClient = new QueryClient();
 
@@ -184,6 +186,7 @@ const App = () => {
                 <Route path="/policies/terms" element={<StorefrontRoute><TermsConditions /></StorefrontRoute>} />
                 <Route path="/policies/returns" element={<StorefrontRoute><ReturnPolicy /></StorefrontRoute>} />
                 <Route path="/policies/shipping" element={<StorefrontRoute><ShippingPolicy /></StorefrontRoute>} />
+                <Route path="/contact" element={<StorefrontRoute><ContactUs /></StorefrontRoute>} />
 
                 {/* Redirect old auth routes */}
                 <Route path="/login" element={<Navigate to="/" replace />} />
@@ -225,6 +228,7 @@ const App = () => {
                   <Route path="categories" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCategories /></Suspense>} />
                   <Route path="coupons" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCoupons /></Suspense>} />
                   <Route path="analytics" element={<Suspense fallback={<AdminLoadingFallback />}><AdminAnalytics /></Suspense>} />
+                  <Route path="queries" element={<Suspense fallback={<AdminLoadingFallback />}><AdminQueries /></Suspense>} />
                   <Route path="settings" element={<Suspense fallback={<AdminLoadingFallback />}><AdminSiteSettings /></Suspense>} />
                 </Route>
 
