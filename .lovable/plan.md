@@ -1,68 +1,59 @@
 
+# Fix Maintenance / Coming Soon Mode
 
-# High-Tech Admin Login Panel Upgrade
+## Problems Found
 
-## Overview
-Redesign the admin login page into a premium, high-tech experience with smooth animations, enhanced features, and a polished UI that matches the AUREA luxury brand.
+1. **Storefront flashes before maintenance page appears** -- When site mode is loading from the database, `MaintenanceGuard` shows the full storefront instead of a blank/loading screen. Non-admin visitors briefly see the store before seeing the maintenance page.
 
-## What You'll Get
+2. **Admin Settings page shows wrong initial selection** -- The `AdminSiteSettings` component uses `useState(siteMode)` which captures the default value (`'live'`) if the real mode hasn't loaded yet. The radio selection never updates to match the actual database value.
 
-### 1. Stunning Visual Redesign
-- Dark gradient background with animated floating particles/grid pattern
-- Frosted glass (glassmorphism) login card with subtle glow effects
-- Animated AUREA logo with gold shimmer effect
-- Smooth fade-in and slide-up entrance animations using Framer Motion
+3. **Admin users may see a maintenance flash** -- The guard doesn't wait for the admin role check to finish. While admin auth is loading, `isAdmin` is false, causing a brief maintenance page flash before the admin role resolves.
 
-### 2. Enhanced Login Features
-- **Show/Hide Password Toggle** -- eye icon to reveal password
-- **Remember Me Checkbox** -- persist email in localStorage
-- **Forgot Password Flow** -- sends a password reset email, with a dedicated reset page
-- **Password Strength Indicator** -- real-time bar showing weak/medium/strong
-- **Input Validation** -- inline error messages with smooth transitions
-- **Loading Spinner** -- animated gold spinner during authentication
+---
 
-### 3. Smooth Animations
-- Staggered form field entrance (each field slides in sequentially)
-- Button hover glow and press effects
-- Error/success message slide-in animations
-- Mode switch (login/signup) crossfade transition
+## Fix Plan
 
-### 4. Password Reset Flow
-- New "Forgot Password?" link on login form
-- Sends reset email via the authentication system
-- New `/admin/reset-password` route to handle the reset callback
-- Success/error feedback with animations
+### 1. Fix MaintenanceGuard (src/App.tsx)
+
+- Check BOTH `SiteModeContext.isLoading` AND `AdminAuthContext.isLoading`
+- While either is loading, show a neutral loading state (blank screen or simple spinner) instead of the full storefront
+- Only show maintenance page OR storefront once both have resolved
+
+```text
+Before:
+  if (isAdmin) -> show store
+  if (isLoading) -> show store  <-- BUG: flashes store
+  if (not live) -> show maintenance
+
+After:
+  if (siteMode loading OR admin auth loading) -> show blank/spinner
+  if (isAdmin) -> show store
+  if (not live) -> show maintenance
+  if (live) -> show store
+```
+
+### 2. Fix AdminSiteSettings selected state sync (src/pages/admin/AdminSiteSettings.tsx)
+
+- Add a `useEffect` that syncs `selected` whenever `siteMode` changes from the context
+- This ensures the radio buttons reflect the actual database value even if the component mounts before the mode loads
+
+### 3. Fix Maintenance page animation class (src/pages/Maintenance.tsx)
+
+- Verify the `animate-float-gentle` CSS class exists in `index.css`; if not, add it or use a standard Tailwind animation
 
 ---
 
 ## Technical Details
 
-### Files to Create
-1. **`src/pages/admin/AdminResetPassword.tsx`** -- handles the password reset callback, lets user set a new password
+### File: src/App.tsx
+- Update `MaintenanceGuard` to destructure `isLoading` from both `useSiteMode()` and `useAdminAuth()`
+- Rename to avoid collision (e.g., `isSiteLoading` and `isAuthLoading`)
+- Show a minimal full-screen loader while either is loading
+- This prevents both the storefront flash for visitors AND the maintenance flash for admins
 
-### Files to Modify
-1. **`src/pages/admin/AdminLogin.tsx`** -- complete redesign with:
-   - Framer Motion animations (already installed)
-   - Glassmorphism card styling
-   - Animated background with CSS gradients and floating orbs
-   - Show/hide password toggle
-   - Remember me checkbox
-   - Forgot password link
-   - Password strength meter (for signup mode)
-   - Staggered field animations
+### File: src/pages/admin/AdminSiteSettings.tsx
+- Add `useEffect(() => { setSelected(siteMode); }, [siteMode]);`
+- This keeps the radio selection in sync with real-time updates
 
-2. **`src/App.tsx`** -- add `/admin/reset-password` route
-
-3. **`src/index.css`** -- add keyframes for floating orb animation and glassmorphism utilities
-
-### Libraries Used (already installed)
-- `framer-motion` for entrance/exit animations
-- `lucide-react` for icons (Eye, EyeOff, Check, Shield)
-- `@radix-ui/react-checkbox` for Remember Me
-
-### Authentication Flow
-- Login: existing `supabase.auth.signInWithPassword` + admin role check
-- Signup: existing `supabase.auth.signUp` with email verification
-- Forgot Password: `supabase.auth.resetPasswordForEmail` with redirect to `/admin/reset-password`
-- Reset Password: `supabase.auth.updateUser({ password })` on the reset page
-
+### File: src/index.css (if needed)
+- Add `animate-float-gentle` keyframes if not already present for the Maintenance page gift icon animation
