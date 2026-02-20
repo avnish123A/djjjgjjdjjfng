@@ -18,7 +18,7 @@ const slides = [
   {
     image: heroCurated,
     label: 'CURATED COLLECTION',
-    headline: 'Luxury,\nRedefined',
+    headline: 'Premium,\nRedefined',
     subtitle: 'Handpicked lifestyle pieces crafted for the discerning.',
     cta: 'Shop Collection',
     link: '/products',
@@ -71,7 +71,7 @@ export const HeroCarousel = () => {
                       </p>
                       <Link
                         to={slide.link}
-                        className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-10 py-4 rounded-none text-sm font-semibold uppercase tracking-[2px] hover:bg-accent/90 transition-all"
+                        className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-10 py-4 rounded-lg text-sm font-semibold uppercase tracking-[2px] hover:bg-primary/90 transition-all"
                       >
                         {slide.cta}
                       </Link>
@@ -82,8 +82,8 @@ export const HeroCarousel = () => {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="left-4 lg:left-8 h-10 w-10 bg-white/10 border-0 text-white backdrop-blur-sm hover:bg-white/20 rounded-none" />
-        <CarouselNext className="right-4 lg:right-8 h-10 w-10 bg-white/10 border-0 text-white backdrop-blur-sm hover:bg-white/20 rounded-none" />
+        <CarouselPrevious className="left-4 lg:left-8 h-10 w-10 bg-white/10 border-0 text-white backdrop-blur-sm hover:bg-white/20 rounded-lg" />
+        <CarouselNext className="right-4 lg:right-8 h-10 w-10 bg-white/10 border-0 text-white backdrop-blur-sm hover:bg-white/20 rounded-lg" />
       </Carousel>
     </section>
   );

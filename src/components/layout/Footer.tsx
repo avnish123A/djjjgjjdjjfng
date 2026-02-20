@@ -50,7 +50,7 @@ export const Footer = () => {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-6">
             {trustBadges.map((badge) => (
               <div key={badge.label} className="flex items-center gap-2.5 text-background/60">
-                <badge.icon className="h-4 w-4 text-accent shrink-0" />
+                <badge.icon className="h-4 w-4 text-primary shrink-0" />
                 <span className="text-xs font-medium leading-tight">{badge.label}</span>
               </div>
             ))}
@@ -63,16 +63,16 @@ export const Footer = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <h3 className="font-display text-xl font-bold mb-4 tracking-wide">
-              AUREA
-            </h3>
+            <div className="mb-4">
+              <img src="/logo-ekamgift.jpeg" alt="EkamGift" className="h-8 w-auto object-contain brightness-0 invert" />
+            </div>
             <p className="text-background/40 text-sm leading-relaxed mb-6 max-w-xs">
-              Curated gifts and luxury lifestyle products for every occasion. Thoughtfully selected, beautifully delivered.
+              Curated gifts and premium lifestyle products for every occasion. Thoughtfully selected, beautifully delivered.
             </p>
             <div className="space-y-2.5 text-sm text-background/40">
               <div className="flex items-center gap-2.5">
                 <Mail className="h-4 w-4 shrink-0" />
-                <span>hello@aurea.in</span>
+                <span>hello@ekamgift.com</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="h-4 w-4 shrink-0" />
@@ -80,13 +80,13 @@ export const Footer = () => {
               </div>
               <div className="flex items-center gap-2.5">
                 <MapPin className="h-4 w-4 shrink-0" />
-                <span>Mumbai, India</span>
+                <span>India</span>
               </div>
             </div>
             <div className="flex items-center gap-2 mt-6">
               <a
                 href="#"
-                className="p-2 border border-background/10 hover:border-accent hover:text-accent transition-all duration-200"
+                className="p-2 border border-background/10 rounded-lg hover:border-primary hover:text-primary transition-all duration-200"
                 aria-label="Instagram"
               >
                 <Instagram className="h-4 w-4" />
@@ -102,7 +102,7 @@ export const Footer = () => {
                 <Link
                   key={link.label}
                   to={link.href}
-                  className="block text-sm text-background/35 hover:text-accent transition-colors"
+                  className="block text-sm text-background/35 hover:text-primary transition-colors"
                 >
                   {link.label}
                 </Link>
@@ -118,7 +118,7 @@ export const Footer = () => {
                 <Link
                   key={link.label}
                   to={link.href}
-                  className="block text-sm text-background/35 hover:text-accent transition-colors"
+                  className="block text-sm text-background/35 hover:text-primary transition-colors"
                 >
                   {link.label}
                 </Link>
@@ -134,7 +134,7 @@ export const Footer = () => {
                 <Link
                   key={link.label}
                   to={link.href}
-                  className="block text-sm text-background/35 hover:text-accent transition-colors"
+                  className="block text-sm text-background/35 hover:text-primary transition-colors"
                 >
                   {link.label}
                 </Link>
@@ -144,19 +144,19 @@ export const Footer = () => {
         </div>
       </div>
 
-      {/* Bottom Bar with Real Payment Logos */}
+      {/* Bottom Bar */}
       <div className="border-t border-background/8">
         <div className="container mx-auto px-4 py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-background/25">
-              © 2026 AUREA. All rights reserved.
+              © 2026 EkamGift. All rights reserved.
             </p>
             <div className="flex items-center gap-3">
               <span className="text-[10px] text-background/20 uppercase tracking-wider mr-1">We Accept</span>
               {paymentLogos.map((logo) => (
                 <div
                   key={logo.name}
-                  className="h-6 w-auto px-1.5 py-0.5 bg-background/10 border border-background/5 flex items-center justify-center"
+                  className="h-6 w-auto px-1.5 py-0.5 bg-background/10 border border-background/5 rounded flex items-center justify-center"
                 >
                   <img
                     src={logo.src}

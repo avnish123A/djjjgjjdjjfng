@@ -23,10 +23,8 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-5 border-b border-border">
-            <span className="font-display text-lg font-bold tracking-wide">
-              AUREA
-            </span>
-            <button onClick={onClose} className="p-1.5 hover:bg-secondary transition-colors">
+            <img src="/logo-ekamgift.jpeg" alt="EkamGift" className="h-7 w-auto object-contain" />
+            <button onClick={onClose} className="p-1.5 hover:bg-secondary rounded-lg transition-colors">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -38,7 +36,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
               <input
                 type="text"
                 placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2.5 bg-secondary text-sm focus:outline-none focus:ring-1 focus:ring-accent/30"
+                className="w-full pl-10 pr-4 py-2.5 bg-secondary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
           </div>
@@ -55,7 +53,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
                     key={cat.id}
                     to={`/products?category=${cat.slug}`}
                     onClick={onClose}
-                    className="flex items-center justify-between py-3 px-3 text-sm font-medium hover:bg-secondary transition-colors"
+                    className="flex items-center justify-between py-3 px-3 text-sm font-medium hover:bg-secondary rounded-lg transition-colors"
                   >
                     {cat.name}
                     <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
@@ -64,7 +62,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
                 <Link
                   to="/products"
                   onClick={onClose}
-                  className="flex items-center justify-between py-3 px-3 text-sm font-semibold text-accent hover:bg-secondary transition-colors"
+                  className="flex items-center justify-between py-3 px-3 text-sm font-semibold text-primary hover:bg-secondary rounded-lg transition-colors"
                 >
                   View All
                   <ChevronRight className="h-3.5 w-3.5" />
@@ -84,7 +82,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
                     key={item.label}
                     to={item.href}
                     onClick={onClose}
-                    className="flex items-center gap-3 py-3 px-3 text-sm font-medium hover:bg-secondary transition-colors"
+                    className="flex items-center gap-3 py-3 px-3 text-sm font-medium hover:bg-secondary rounded-lg transition-colors"
                   >
                     <item.icon className="h-4 w-4 text-muted-foreground" />
                     {item.label}

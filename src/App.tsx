@@ -11,6 +11,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { BackToTop } from "@/components/layout/BackToTop";
+import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import Index from "./pages/Index";
 import ProductListing from "./pages/ProductListing";
 import ProductDetail from "./pages/ProductDetail";
@@ -123,6 +124,7 @@ const App = () => {
       <CartProvider>
         <AdminAuthProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               {/* Storefront routes */}
               <Route path="/" element={<StorefrontLayout><Index /></StorefrontLayout>} />
