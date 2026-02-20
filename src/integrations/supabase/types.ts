@@ -291,6 +291,7 @@ export type Database = {
           id: string
           images: string[] | null
           is_active: boolean
+          low_stock_threshold: number
           original_price: number | null
           price: number
           rating: number | null
@@ -298,6 +299,7 @@ export type Database = {
           sizes: string[] | null
           stock: number
           title: string
+          track_inventory: boolean
           updated_at: string
         }
         Insert: {
@@ -310,6 +312,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           is_active?: boolean
+          low_stock_threshold?: number
           original_price?: number | null
           price?: number
           rating?: number | null
@@ -317,6 +320,7 @@ export type Database = {
           sizes?: string[] | null
           stock?: number
           title: string
+          track_inventory?: boolean
           updated_at?: string
         }
         Update: {
@@ -329,6 +333,7 @@ export type Database = {
           id?: string
           images?: string[] | null
           is_active?: boolean
+          low_stock_threshold?: number
           original_price?: number | null
           price?: number
           rating?: number | null
@@ -336,6 +341,7 @@ export type Database = {
           sizes?: string[] | null
           stock?: number
           title?: string
+          track_inventory?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -347,6 +353,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      site_pages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_published: boolean
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_published?: boolean
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       site_settings: {
         Row: {

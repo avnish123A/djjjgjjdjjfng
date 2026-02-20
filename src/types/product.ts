@@ -16,6 +16,8 @@ export interface Product {
   inStock: boolean;
   stock: number;
   description: string;
+  lowStockThreshold?: number;
+  trackInventory?: boolean;
 }
 
 export interface Category {
