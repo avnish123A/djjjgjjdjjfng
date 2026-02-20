@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
@@ -19,26 +19,51 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  // Cache admin status per user ID to avoid repeated RPC calls
+  const adminCacheRef = useRef<Map<string, boolean>>(new Map());
 
-  const checkAdminRole = useCallback(async (userId: string) => {
-    const { data } = await supabase.rpc('has_role', {
-      _user_id: userId,
-      _role: 'admin',
-    });
-    return !!data;
+  const checkAdminRole = useCallback(async (userId: string): Promise<boolean> => {
+    // Return cached result if available
+    const cached = adminCacheRef.current.get(userId);
+    if (cached !== undefined) return cached;
+
+    try {
+      const rpcPromise = supabase.rpc('has_role', {
+        _user_id: userId,
+        _role: 'admin',
+      });
+      const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
+        setTimeout(() => resolve({ data: null, error: new Error('RPC timeout') }), 5000)
+      );
+      const { data, error } = await Promise.race([rpcPromise, timeoutPromise]);
+      if (error) {
+        console.error('checkAdminRole error:', error);
+        // Don't cache failures so we can retry
+        return false;
+      }
+      const result = !!data;
+      adminCacheRef.current.set(userId, result);
+      return result;
+    } catch (err) {
+      console.error('checkAdminRole failed:', err);
+      return false;
+    }
   }, []);
 
   useEffect(() => {
-    // Timeout fallback — if auth never responds, stop loading after 5s
+    // Timeout fallback — if auth never responds, stop loading after 3s
     const timeout = setTimeout(() => {
-      setIsLoading(false);
-    }, 5000);
+      setIsLoading((prev) => {
+        if (prev) console.warn('Auth timeout — forcing isLoading=false');
+        return false;
+      });
+    }, 3000);
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      clearTimeout(timeout);
       try {
         if (session?.user) {
           setUser(session.user);
+          // Use cached admin status; only RPC if not cached
           const adminStatus = await checkAdminRole(session.user.id);
           setIsAdmin(adminStatus);
         } else {
@@ -54,7 +79,6 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      clearTimeout(timeout);
       try {
         if (session?.user) {
           setUser(session.user);
@@ -77,25 +101,34 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      setIsLoading(false);
-      return { success: false, error: error.message };
-    }
-
-    if (data.user) {
-      const adminStatus = await checkAdminRole(data.user.id);
-      if (!adminStatus) {
-        await supabase.auth.signOut();
+      if (error) {
         setIsLoading(false);
-        return { success: false, error: 'You do not have admin access' };
+        return { success: false, error: error.message };
       }
-      setIsAdmin(true);
-    }
 
-    setIsLoading(false);
-    return { success: true };
+      if (data.user) {
+        const adminStatus = await checkAdminRole(data.user.id);
+        if (!adminStatus) {
+          await supabase.auth.signOut();
+          setIsLoading(false);
+          return { success: false, error: 'You do not have admin access' };
+        }
+        // Cache and set admin status so subsequent auth state changes use the cache
+        adminCacheRef.current.set(data.user.id, true);
+        setUser(data.user);
+        setIsAdmin(true);
+      }
+
+      setIsLoading(false);
+      return { success: true };
+    } catch (err) {
+      console.error('Login error:', err);
+      setIsLoading(false);
+      return { success: false, error: 'Login failed. Please try again.' };
+    }
   }, [checkAdminRole]);
 
   const signup = useCallback(async (email: string, password: string) => {
@@ -114,6 +147,7 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   const logout = useCallback(async () => {
+    adminCacheRef.current.clear();
     await supabase.auth.signOut();
     setUser(null);
     setIsAdmin(false);
