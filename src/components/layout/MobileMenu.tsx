@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { X, ChevronRight, User, Heart, Package, Search } from 'lucide-react';
+import { X, ChevronRight, Package, Search } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useCategories } from '@/hooks/useCategories';
 
@@ -7,12 +7,6 @@ interface MobileMenuProps {
   open: boolean;
   onClose: () => void;
 }
-
-const accountLinks = [
-  { label: 'My Account', href: '#', icon: User },
-  { label: 'Wishlist', href: '#', icon: Heart },
-  { label: 'My Orders', href: '#', icon: Package },
-];
 
 export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
   const { data: categories = [] } = useCategories();
@@ -74,20 +68,17 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
 
             <div className="px-5 py-4">
               <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[3px] mb-3">
-                Account
+                Quick Links
               </p>
               <nav className="space-y-0.5">
-                {accountLinks.map((item) => (
-                  <Link
-                    key={item.label}
-                    to={item.href}
-                    onClick={onClose}
-                    className="flex items-center gap-3 py-3 px-3 text-sm font-medium hover:bg-secondary rounded-lg transition-colors"
-                  >
-                    <item.icon className="h-4 w-4 text-muted-foreground" />
-                    {item.label}
-                  </Link>
-                ))}
+                <Link
+                  to="/track-order"
+                  onClick={onClose}
+                  className="flex items-center gap-3 py-3 px-3 text-sm font-medium hover:bg-secondary rounded-lg transition-colors"
+                >
+                  <Package className="h-4 w-4 text-muted-foreground" />
+                  Track Order
+                </Link>
               </nav>
             </div>
 

@@ -1,12 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Grid3X3, Search, Heart, User } from 'lucide-react';
+import { Home, Grid3X3, Search, Package, ShoppingBag } from 'lucide-react';
 
 const navItems = [
   { to: '/', icon: Home, label: 'Home' },
   { to: '/products', icon: Grid3X3, label: 'Shop' },
   { to: '/products?search=', icon: Search, label: 'Search' },
-  { to: '#', icon: Heart, label: 'Wishlist' },
-  { to: '/account', icon: User, label: 'Account' },
+  { to: '/track-order', icon: Package, label: 'Track' },
+  { to: '/cart', icon: ShoppingBag, label: 'Cart' },
 ];
 
 export const BottomNav = () => {

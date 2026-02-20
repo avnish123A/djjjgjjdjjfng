@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, User, Heart, ShoppingBag, X } from 'lucide-react';
+import { Search, Package, ShoppingBag, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useCategories } from '@/hooks/useCategories';
 import { MobileMenu } from './MobileMenu';
@@ -145,18 +145,11 @@ export const Header = () => {
                 <Search className="h-[18px] w-[18px]" />
               </button>
               <Link
-                to="/account"
+                to="/track-order"
                 className="hidden lg:flex p-2.5 hover:bg-secondary rounded-lg transition-colors"
-                aria-label="Account"
+                aria-label="Track Order"
               >
-                <User className="h-[18px] w-[18px]" />
-              </Link>
-              <Link
-                to="#"
-                className="hidden lg:flex p-2.5 hover:bg-secondary rounded-lg transition-colors"
-                aria-label="Wishlist"
-              >
-                <Heart className="h-[18px] w-[18px]" />
+                <Package className="h-[18px] w-[18px]" />
               </Link>
               <Link
                 to="/cart"
