@@ -3,10 +3,12 @@ import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 export const WhatsAppButton = () => {
   const { data: settings = {} } = useSiteSettings();
+  
+  const isEnabled = settings['whatsapp_enabled'] === 'true';
   const whatsappNumber = settings['whatsapp_number']?.replace(/\D/g, '');
   const whatsappMessage = settings['whatsapp_message'] || 'Hi! I have a question about your products.';
 
-  if (!whatsappNumber) return null;
+  if (!isEnabled || !whatsappNumber) return null;
 
   const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
 
