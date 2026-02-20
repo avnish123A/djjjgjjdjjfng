@@ -43,6 +43,7 @@ const navItems: NavItem[] = [
   { label: 'Categories', icon: FolderOpen, path: '/admin/categories' },
   { label: 'Coupons', icon: Ticket, path: '/admin/coupons' },
   { label: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
+  { label: 'Settings', icon: Settings, path: '/admin/settings' },
 ];
 
 const AdminLayout: React.FC = () => {
