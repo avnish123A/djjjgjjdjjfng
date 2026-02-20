@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingBag, Star, Eye } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import { formatPrice } from '@/lib/format';
@@ -33,11 +32,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   const hasSecondaryImage = product.images && product.images.length > 1;
 
   return (
-    <motion.div
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="group"
-    >
+    <div className="group transition-transform duration-300 ease-out hover:-translate-y-0.5">
       <Link to={`/product/${product.id}`} className="block">
         {/* Image Container */}
         <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-xl mb-4">
@@ -203,6 +198,6 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           )}
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 };
