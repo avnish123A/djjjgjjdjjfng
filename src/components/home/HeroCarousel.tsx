@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
-import heroPremium from '@/assets/hero-premium-gift.jpg';
+import heroFallback from '@/assets/hero-premium-gift.jpg';
 
 export const HeroCarousel = () => {
   const { data: s = {} } = useSiteSettings();
@@ -13,6 +13,7 @@ export const HeroCarousel = () => {
   const ctaPrimaryLink = s.hero_cta_primary_link || '/products';
   const ctaSecondaryText = s.hero_cta_secondary_text || 'Personalize a Gift';
   const ctaSecondaryLink = s.hero_cta_secondary_link || '/products?category=personalized-gifts';
+  const heroImage = s.hero_image_url || heroFallback;
 
   // Split title to highlight last word in primary color
   const titleWords = title.split(' ');
@@ -22,7 +23,7 @@ export const HeroCarousel = () => {
   return (
     <section className="relative h-[85vh] min-h-[600px] max-h-[900px] overflow-hidden">
       <img
-        src={heroPremium}
+        src={heroImage}
         alt="Premium curated gift boxes with teal ribbons"
         className="absolute inset-0 w-full h-full object-cover"
         loading="eager"

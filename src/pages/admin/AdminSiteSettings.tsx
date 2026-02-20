@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSiteMode } from '@/contexts/SiteModeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useQueryClient } from '@tanstack/react-query';
-import { Globe, Wrench, Rocket, Loader2, Save, Image, Share2, Phone, Mail, MapPin, Megaphone } from 'lucide-react';
+import { Globe, Wrench, Rocket, Loader2, Save, Image, Share2, Phone, Mail, MapPin, Megaphone, Upload, X } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { HeroImageUpload } from '@/components/admin/HeroImageUpload';
 
 const modes = [
   { id: 'live' as const, label: 'Live', desc: 'Site is fully accessible to all visitors', icon: Globe, color: 'text-green-600 bg-green-50 border-green-200' },
@@ -154,6 +155,26 @@ const AdminSiteSettings: React.FC = () => {
           <div className="bg-card border border-border rounded-xl p-6 space-y-5">
             <h2 className="font-semibold flex items-center gap-2"><Image className="h-4 w-4 text-primary" /> Hero Section</h2>
             <p className="text-xs text-muted-foreground">Edit the main banner content on your homepage</p>
+
+            {/* Hero Image Upload */}
+            <HeroImageUpload
+              currentUrl={formValues['hero_image_url'] || ''}
+              onUploaded={(url) => {
+                updateField('hero_image_url', url);
+                // Auto-save the image URL
+                supabase
+                  .from('site_settings')
+                  .upsert({ key: 'hero_image_url', value: url }, { onConflict: 'key' })
+                  .then(({ error }) => {
+                    if (error) toast.error('Failed to save image URL');
+                    else {
+                      queryClient.invalidateQueries({ queryKey: ['site-settings'] });
+                      toast.success('Hero image updated');
+                    }
+                  });
+              }}
+            />
+
             {heroFields.map((field) => (
               <div key={field.key} className="space-y-1.5">
                 <Label className="text-xs font-medium">{field.label}</Label>
