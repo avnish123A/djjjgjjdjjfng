@@ -13,10 +13,10 @@ export const TrustSection = () => {
   return (
     <section className="py-16 border-t border-border">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-4">
+        <div className="perspective-container grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-4">
           {trustItems.map((item) => (
             <div key={item.title} className="flex items-start gap-4 group">
-              <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-primary/8 flex items-center justify-center group-hover:bg-primary/12 transition-colors">
+              <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-primary/8 flex items-center justify-center icon-3d">
                 <item.icon className="h-5 w-5 text-primary" />
               </div>
               <div>

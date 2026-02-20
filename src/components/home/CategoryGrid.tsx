@@ -36,25 +36,25 @@ export const CategoryGrid = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="perspective-container grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {categories.map((cat, index) => (
             <Link
               key={cat.id}
               to={`/products?category=${cat.slug}`}
-              className="group relative block aspect-[4/3] overflow-hidden rounded-2xl animate-fade-in-up"
+              className="group relative block aspect-[4/3] overflow-hidden rounded-2xl animate-fade-in-up category-3d"
               style={{ animationDelay: `${index * 0.08}s` }}
             >
               <img
                 src={cat.image}
                 alt={cat.name}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out"
                 loading="lazy"
               />
               {/* Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent transition-opacity duration-500 group-hover:from-foreground/80" />
               
               {/* Content */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
+              <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8" style={{ transform: 'translateZ(30px)' }}>
                 <h3 className="text-lg lg:text-xl font-display text-white mb-1">
                   {cat.name}
                 </h3>
