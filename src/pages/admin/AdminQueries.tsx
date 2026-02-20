@@ -68,8 +68,8 @@ const AdminQueries = () => {
   const { data: queries = [], isLoading } = useQuery({
     queryKey: ['admin-queries', statusFilter, sourceFilter, page],
     queryFn: async () => {
-      let q = supabase
-        .from('customer_queries')
+      let q = (supabase
+        .from('customer_queries' as any) as any)
         .select('*')
         .order('created_at', { ascending: false })
         .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
@@ -110,8 +110,8 @@ const AdminQueries = () => {
   // Mutations
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase
-        .from('customer_queries')
+      const { error } = await (supabase
+        .from('customer_queries' as any) as any)
         .update({ status })
         .eq('id', id);
       if (error) throw error;
@@ -121,8 +121,8 @@ const AdminQueries = () => {
 
   const deleteQuery = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('customer_queries')
+      const { error } = await (supabase
+        .from('customer_queries' as any) as any)
         .delete()
         .eq('id', id);
       if (error) throw error;
