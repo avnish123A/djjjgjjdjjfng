@@ -3,7 +3,7 @@ import { useSiteMode } from '@/contexts/SiteModeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useQueryClient } from '@tanstack/react-query';
-import { Globe, Wrench, Rocket, Loader2, Save, Image, Share2, Phone, Mail, MapPin, Megaphone, Upload, X } from 'lucide-react';
+import { Globe, Wrench, Rocket, Loader2, Save, Image, Share2, Phone, Mail, MapPin, Megaphone, Upload, X, Clock } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -115,11 +115,12 @@ const AdminSiteSettings: React.FC = () => {
       </div>
 
       <Tabs defaultValue="hero" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6">
           <TabsTrigger value="announcement" className="gap-1.5"><Megaphone className="h-3.5 w-3.5" /> Banner</TabsTrigger>
           <TabsTrigger value="hero" className="gap-1.5"><Image className="h-3.5 w-3.5" /> Hero</TabsTrigger>
           <TabsTrigger value="social" className="gap-1.5"><Share2 className="h-3.5 w-3.5" /> Social</TabsTrigger>
           <TabsTrigger value="contact" className="gap-1.5"><Phone className="h-3.5 w-3.5" /> Contact</TabsTrigger>
+          <TabsTrigger value="pages" className="gap-1.5"><Clock className="h-3.5 w-3.5" /> Pages</TabsTrigger>
           <TabsTrigger value="mode" className="gap-1.5"><Globe className="h-3.5 w-3.5" /> Mode</TabsTrigger>
         </TabsList>
 
@@ -245,6 +246,46 @@ const AdminSiteSettings: React.FC = () => {
             ))}
             <Button onClick={handleSaveSettings} disabled={savingSettings} className="w-full">
               {savingSettings ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...</> : <><Save className="h-4 w-4 mr-2" /> Save Contact Info</>}
+            </Button>
+          </div>
+        </TabsContent>
+
+        {/* Maintenance & Coming Soon Messages */}
+        <TabsContent value="pages">
+          <div className="bg-card border border-border rounded-xl p-6 space-y-6">
+            <div>
+              <h2 className="font-semibold flex items-center gap-2"><Wrench className="h-4 w-4 text-primary" /> Maintenance Page</h2>
+              <p className="text-xs text-muted-foreground mt-1">Customize the message visitors see when the site is in maintenance mode</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Heading</Label>
+              <Input value={formValues['maintenance_title'] || ''} onChange={(e) => updateField('maintenance_title', e.target.value)} placeholder="We're Polishing Things Up" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Message</Label>
+              <Textarea value={formValues['maintenance_message'] || ''} onChange={(e) => updateField('maintenance_message', e.target.value)} placeholder="We're making improvements..." rows={3} />
+            </div>
+
+            <div className="border-t border-border pt-6">
+              <h2 className="font-semibold flex items-center gap-2"><Rocket className="h-4 w-4 text-primary" /> Coming Soon Page</h2>
+              <p className="text-xs text-muted-foreground mt-1">Customize the coming soon page with a countdown timer</p>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Heading</Label>
+              <Input value={formValues['coming_soon_title'] || ''} onChange={(e) => updateField('coming_soon_title', e.target.value)} placeholder="Something Special is Coming" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Message</Label>
+              <Textarea value={formValues['coming_soon_message'] || ''} onChange={(e) => updateField('coming_soon_message', e.target.value)} placeholder="Our curated gifting experience is almost ready..." rows={3} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Launch Date (for countdown timer)</Label>
+              <Input type="datetime-local" value={formValues['coming_soon_date'] || ''} onChange={(e) => updateField('coming_soon_date', e.target.value)} />
+              <p className="text-[10px] text-muted-foreground">Leave empty to hide the countdown timer</p>
+            </div>
+
+            <Button onClick={handleSaveSettings} disabled={savingSettings} className="w-full">
+              {savingSettings ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...</> : <><Save className="h-4 w-4 mr-2" /> Save Page Settings</>}
             </Button>
           </div>
         </TabsContent>
