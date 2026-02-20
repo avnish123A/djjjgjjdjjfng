@@ -51,6 +51,7 @@ const orderSchema = z.object({
   shipping: z.number().min(0).max(9999),
   discount: z.number().min(0).max(9999999).optional().default(0),
   total: z.number().min(0).max(9999999),
+  codExtraCharge: z.number().min(0).max(9999).optional().default(0),
   couponCode: z.string().max(50).nullable().optional(),
 })
 
@@ -97,7 +98,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    const { orderNumber, customer, shippingAddress, items, paymentMethod, subtotal, shipping, discount, total, couponCode } = parseResult.data
+    const { orderNumber, customer, shippingAddress, items, paymentMethod, subtotal, shipping, discount, total, codExtraCharge, couponCode } = parseResult.data
 
     // Server-side price verification against database
     for (const item of items) {
@@ -135,8 +136,36 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Server-side COD charge verification
+    let validatedCodCharge = 0
+    if (paymentMethod === 'cod' && codExtraCharge > 0) {
+      const { data: codConfig } = await supabase
+        .from('payment_settings')
+        .select('cod_extra_charge, cod_min_order, is_enabled')
+        .eq('gateway_name', 'cod')
+        .eq('is_enabled', true)
+        .maybeSingle()
+
+      if (codConfig) {
+        validatedCodCharge = Number(codConfig.cod_extra_charge) || 0
+        if (Math.abs(validatedCodCharge - codExtraCharge) > 0.01) {
+          return new Response(
+            JSON.stringify({ error: 'COD charge mismatch. Please refresh and try again.' }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+        const codMinOrder = Number(codConfig.cod_min_order) || 0
+        if (codMinOrder > 0 && subtotal < codMinOrder) {
+          return new Response(
+            JSON.stringify({ error: `Minimum order of ₹${codMinOrder} required for COD` }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
+      }
+    }
+
     // Verify total calculation server-side
-    const expectedTotal = subtotal + shipping - discount
+    const expectedTotal = subtotal + shipping - discount + validatedCodCharge
     if (Math.abs(expectedTotal - total) > 0.01) {
       return new Response(
         JSON.stringify({ error: 'Total calculation mismatch. Please refresh and try again.' }),
@@ -267,6 +296,7 @@ Deno.serve(async (req) => {
         shipping,
         discount,
         total,
+        cod_extra_charge: validatedCodCharge,
       })
       .select('id')
       .single()

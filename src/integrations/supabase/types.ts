@@ -208,6 +208,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          cod_extra_charge: number
           courier_name: string | null
           created_at: string
           customer_email: string
@@ -229,6 +230,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cod_extra_charge?: number
           courier_name?: string | null
           created_at?: string
           customer_email: string
@@ -250,6 +252,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cod_extra_charge?: number
           courier_name?: string | null
           created_at?: string
           customer_email?: string
@@ -282,6 +285,8 @@ export type Database = {
       }
       payment_settings: {
         Row: {
+          cod_extra_charge: number
+          cod_min_order: number
           created_at: string
           environment: string
           gateway_name: string
@@ -294,6 +299,8 @@ export type Database = {
           webhook_secret: string | null
         }
         Insert: {
+          cod_extra_charge?: number
+          cod_min_order?: number
           created_at?: string
           environment?: string
           gateway_name: string
@@ -306,6 +313,8 @@ export type Database = {
           webhook_secret?: string | null
         }
         Update: {
+          cod_extra_charge?: number
+          cod_min_order?: number
           created_at?: string
           environment?: string
           gateway_name?: string

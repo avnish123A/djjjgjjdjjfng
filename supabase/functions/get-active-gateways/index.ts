@@ -18,7 +18,7 @@ Deno.serve(async (req) => {
 
     const { data: gateways } = await supabase
       .from('payment_settings')
-      .select('gateway_name, is_enabled, environment, priority')
+      .select('gateway_name, is_enabled, environment, priority, cod_extra_charge, cod_min_order')
       .eq('is_enabled', true)
       .order('priority', { ascending: true })
 
