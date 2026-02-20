@@ -19,81 +19,91 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  // Cache admin status per user ID to avoid repeated RPC calls
   const adminCacheRef = useRef<Map<string, boolean>>(new Map());
+  const initDoneRef = useRef(false);
 
   const checkAdminRole = useCallback(async (userId: string): Promise<boolean> => {
-    // Return cached result if available
     const cached = adminCacheRef.current.get(userId);
     if (cached !== undefined) return cached;
 
     try {
-      const rpcPromise = supabase.rpc('has_role', {
-        _user_id: userId,
-        _role: 'admin',
-      });
-      const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
-        setTimeout(() => resolve({ data: null, error: new Error('RPC timeout') }), 5000)
-      );
-      const { data, error } = await Promise.race([rpcPromise, timeoutPromise]);
+      const { data, error } = await Promise.race([
+        supabase.rpc('has_role', { _user_id: userId, _role: 'admin' as const }),
+        new Promise<{ data: null; error: Error }>((resolve) =>
+          setTimeout(() => resolve({ data: null, error: new Error('RPC timeout') }), 4000)
+        ),
+      ]);
       if (error) {
-        console.error('checkAdminRole error:', error);
-        // Don't cache failures so we can retry
+        console.error('[AdminAuth] checkAdminRole error:', error.message);
         return false;
       }
       const result = !!data;
       adminCacheRef.current.set(userId, result);
       return result;
-    } catch (err) {
-      console.error('checkAdminRole failed:', err);
+    } catch {
       return false;
     }
   }, []);
 
+  // Single initialization: getSession first, then listen for changes
   useEffect(() => {
-    // Timeout fallback — if auth never responds, stop loading after 3s
-    const timeout = setTimeout(() => {
-      setIsLoading((prev) => {
-        if (prev) console.warn('Auth timeout — forcing isLoading=false');
-        return false;
-      });
-    }, 3000);
+    let mounted = true;
 
+    const init = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!mounted) return;
+
+        if (session?.user) {
+          setUser(session.user);
+          const admin = await checkAdminRole(session.user.id);
+          if (mounted) setIsAdmin(admin);
+        }
+      } catch (err) {
+        console.error('[AdminAuth] init error:', err);
+      } finally {
+        if (mounted) {
+          initDoneRef.current = true;
+          setIsLoading(false);
+        }
+      }
+    };
+
+    init();
+
+    // Listen for subsequent auth changes (token refresh, sign out from another tab, etc.)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      try {
-        if (session?.user) {
-          setUser(session.user);
-          // Use cached admin status; only RPC if not cached
-          const adminStatus = await checkAdminRole(session.user.id);
-          setIsAdmin(adminStatus);
-        } else {
-          setUser(null);
-          setIsAdmin(false);
-        }
-      } catch (err) {
-        console.error('Auth state change error:', err);
-        setUser(session?.user ?? null);
+      if (!mounted) return;
+      // Skip until initial load is done to prevent double-processing
+      if (!initDoneRef.current) return;
+
+      console.log('[AdminAuth] auth event:', event);
+
+      if (event === 'SIGNED_OUT') {
+        setUser(null);
         setIsAdmin(false);
+        return;
       }
-      setIsLoading(false);
+
+      if (session?.user) {
+        setUser(session.user);
+        // Only re-check admin if not already cached
+        const admin = await checkAdminRole(session.user.id);
+        if (mounted) setIsAdmin(admin);
+      }
     });
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      try {
-        if (session?.user) {
-          setUser(session.user);
-          const adminStatus = await checkAdminRole(session.user.id);
-          setIsAdmin(adminStatus);
-        }
-      } catch (err) {
-        console.error('Get session error:', err);
-        setUser(session?.user ?? null);
-        setIsAdmin(false);
+    // Safety timeout
+    const timeout = setTimeout(() => {
+      if (mounted && !initDoneRef.current) {
+        console.warn('[AdminAuth] Safety timeout — forcing loaded');
+        initDoneRef.current = true;
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    });
+    }, 5000);
 
     return () => {
+      mounted = false;
       clearTimeout(timeout);
       subscription.unsubscribe();
     };
@@ -106,26 +116,29 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
       if (error) {
         setIsLoading(false);
-        return { success: false, error: error.message };
+        return { success: false, error: 'Invalid email or password' };
       }
 
-      if (data.user) {
-        const adminStatus = await checkAdminRole(data.user.id);
-        if (!adminStatus) {
-          await supabase.auth.signOut();
-          setIsLoading(false);
-          return { success: false, error: 'You do not have admin access' };
-        }
-        // Cache and set admin status so subsequent auth state changes use the cache
-        adminCacheRef.current.set(data.user.id, true);
-        setUser(data.user);
-        setIsAdmin(true);
+      if (!data.user) {
+        setIsLoading(false);
+        return { success: false, error: 'Login failed. Please try again.' };
       }
 
+      const adminStatus = await checkAdminRole(data.user.id);
+      if (!adminStatus) {
+        await supabase.auth.signOut();
+        setUser(null);
+        setIsAdmin(false);
+        setIsLoading(false);
+        return { success: false, error: 'You do not have admin access' };
+      }
+
+      adminCacheRef.current.set(data.user.id, true);
+      setUser(data.user);
+      setIsAdmin(true);
       setIsLoading(false);
       return { success: true };
-    } catch (err) {
-      console.error('Login error:', err);
+    } catch {
       setIsLoading(false);
       return { success: false, error: 'Login failed. Please try again.' };
     }
@@ -138,11 +151,8 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       password,
       options: { emailRedirectTo: window.location.origin },
     });
-
     setIsLoading(false);
-    if (error) {
-      return { success: false, error: error.message };
-    }
+    if (error) return { success: false, error: error.message };
     return { success: true };
   }, []);
 
