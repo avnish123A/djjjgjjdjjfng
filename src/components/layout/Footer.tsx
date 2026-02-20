@@ -12,7 +12,7 @@ const footerLinks = {
     { label: 'Track Order', href: '/track-order' },
     { label: 'Shipping Policy', href: '/policies/shipping' },
     { label: 'Return & Refund', href: '/policies/returns' },
-    { label: 'FAQs', href: '#' },
+    { label: 'FAQs', href: '/faq' },
   ],
   company: [
     { label: 'Our Story', href: '#' },
