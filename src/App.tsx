@@ -39,6 +39,7 @@ const AdminOrderDetail = lazy(() => import("./pages/admin/AdminOrderDetail"));
 const AdminCustomers = lazy(() => import("./pages/admin/AdminCustomers"));
 const AdminCategories = lazy(() => import("./pages/admin/AdminCategories"));
 const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
+const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 
 const queryClient = new QueryClient();
 
@@ -178,6 +179,7 @@ const App = () => {
                 <Route path="customers" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCustomers /></Suspense>} />
                 <Route path="categories" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCategories /></Suspense>} />
                 <Route path="coupons" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCoupons /></Suspense>} />
+                <Route path="analytics" element={<Suspense fallback={<AdminLoadingFallback />}><AdminAnalytics /></Suspense>} />
               </Route>
 
               <Route path="*" element={<StorefrontLayout><NotFound /></StorefrontLayout>} />
