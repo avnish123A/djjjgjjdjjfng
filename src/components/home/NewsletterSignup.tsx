@@ -1,10 +1,37 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export const NewsletterSignup = () => {
-  const handleSubmit = (e: React.FormEvent) => {
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success('Welcome to the EkamGift community!');
+    if (isSubmitting || !email.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('submit-query', {
+        body: {
+          customer_name: '',
+          email,
+          message: 'Newsletter subscription',
+          source_form: 'newsletter',
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast.success('Welcome to the EkamGift community!');
+      setEmail('');
+    } catch {
+      toast.error('Something went wrong. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -19,12 +46,19 @@ export const NewsletterSignup = () => {
           <form onSubmit={handleSubmit} className="flex gap-0 max-w-md mx-auto">
             <input
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Your email address"
               required
+              maxLength={255}
               className="flex-1 px-5 py-3.5 bg-primary-foreground/10 border border-primary-foreground/15 border-r-0 rounded-l-lg text-sm text-primary-foreground placeholder:text-primary-foreground/30 focus:outline-none focus:bg-primary-foreground/15 transition-all"
             />
-            <Button type="submit" className="px-8 rounded-l-none rounded-r-lg bg-foreground text-background hover:bg-foreground/90 uppercase tracking-[2px] text-xs font-semibold">
-              Subscribe
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-8 rounded-l-none rounded-r-lg bg-foreground text-background hover:bg-foreground/90 uppercase tracking-[2px] text-xs font-semibold"
+            >
+              {isSubmitting ? '…' : 'Subscribe'}
             </Button>
           </form>
           <p className="text-xs text-primary-foreground/30 mt-6">
