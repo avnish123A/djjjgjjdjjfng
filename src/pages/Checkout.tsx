@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronRight, ShieldCheck, Truck, Lock, CreditCard, Banknote, Check, Calendar } from 'lucide-react';
+import { ChevronRight, ShieldCheck, Truck, Lock, CreditCard, Banknote, Check, Calendar, Tag, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { formatPrice } from '@/lib/format';
@@ -31,7 +31,7 @@ const steps = [
 ];
 
 const Checkout = () => {
-  const { items, totalPrice, clearCart } = useCart();
+  const { items, totalPrice, clearCart, appliedCoupon, discountAmount, removeCoupon } = useCart();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'razorpay' | 'cashfree'>('cod');
@@ -43,7 +43,7 @@ const Checkout = () => {
   });
 
   const shipping = totalPrice >= 999 ? 0 : 99;
-  const total = totalPrice + shipping;
+  const total = totalPrice + shipping - discountAmount;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -65,7 +65,8 @@ const Checkout = () => {
           customer: { name: form.name, email: form.email, phone: form.phone },
           shippingAddress: { address: form.address, address2: form.address2, city: form.city, state: form.state, pincode: form.pincode },
           items: items.map(item => ({ productId: item.id, title: item.name, price: item.price, quantity: item.quantity, image: item.image })),
-          paymentMethod, subtotal: totalPrice, shipping, discount: 0, total,
+          paymentMethod, subtotal: totalPrice, shipping, discount: discountAmount, total,
+          couponCode: appliedCoupon?.code || null,
         },
       });
       if (orderError) throw orderError;
@@ -267,6 +268,20 @@ const Checkout = () => {
                         {shipping === 0 ? <span className="text-success">FREE</span> : formatPrice(shipping)}
                       </span>
                     </div>
+                    {appliedCoupon && (
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-1.5">
+                          <Tag className="h-3.5 w-3.5 text-success" />
+                          <span className="text-success font-medium">{appliedCoupon.code} (-{appliedCoupon.discount}%)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-success">-{formatPrice(discountAmount)}</span>
+                          <button type="button" onClick={removeCoupon} className="p-0.5 text-muted-foreground hover:text-destructive">
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Estimated Delivery */}

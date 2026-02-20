@@ -1,19 +1,64 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ChevronRight, Lock, ShieldCheck, Truck, Heart, ChevronDown, Calendar } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ChevronRight, Lock, ShieldCheck, Truck, Heart, ChevronDown, Calendar, X, Tag } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { formatPrice } from '@/lib/format';
+import { supabase } from '@/integrations/supabase/client';
 
 const Cart = () => {
-  const { items, updateQuantity, removeItem, totalPrice, totalItems } = useCart();
+  const { items, updateQuantity, removeItem, totalPrice, totalItems, appliedCoupon, discountAmount, applyCoupon, removeCoupon } = useCart();
   const [couponOpen, setCouponOpen] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+
   const shipping = totalPrice >= 999 ? 0 : 99;
-  const total = totalPrice + shipping;
+  const total = totalPrice + shipping - discountAmount;
   const freeShippingRemaining = 999 - totalPrice;
-  const savings = items.reduce((acc, item) => acc, 0); // placeholder for discount tracking
+
+  const handleApplyCoupon = async () => {
+    const code = couponCode.trim().toUpperCase();
+    if (!code) { toast.error('Please enter a coupon code'); return; }
+
+    setCouponLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('code', code)
+        .eq('is_active', true)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (!data) { toast.error('Invalid coupon code'); return; }
+
+      // Check expiry
+      if (data.expiry_date && new Date(data.expiry_date) < new Date()) {
+        toast.error('This coupon has expired');
+        return;
+      }
+
+      // Check min order
+      if (totalPrice < Number(data.min_order)) {
+        toast.error(`Minimum order of ${formatPrice(Number(data.min_order))} required for this coupon`);
+        return;
+      }
+
+      applyCoupon({
+        code: data.code,
+        discount: Number(data.discount),
+        minOrder: Number(data.min_order),
+      });
+      toast.success(`Coupon "${data.code}" applied! ${Number(data.discount)}% off`);
+      setCouponCode('');
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to apply coupon');
+    } finally {
+      setCouponLoading(false);
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -179,35 +224,64 @@ const Cart = () => {
                   </span>
                 </div>
 
+                {/* Applied Coupon */}
+                {appliedCoupon && (
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-1.5">
+                      <Tag className="h-3.5 w-3.5 text-success" />
+                      <span className="text-success font-medium">{appliedCoupon.code} (-{appliedCoupon.discount}%)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-success">-{formatPrice(discountAmount)}</span>
+                      <button onClick={removeCoupon} className="p-0.5 text-muted-foreground hover:text-destructive">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Collapsible Coupon */}
-                <div className="pt-1">
-                  <button
-                    onClick={() => setCouponOpen(!couponOpen)}
-                    className="flex items-center justify-between w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <span>Have a coupon code?</span>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${couponOpen ? 'rotate-180' : ''}`} />
-                  </button>
-                  <AnimatePresence>
-                    {couponOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="flex gap-2 pt-2">
-                          <input
-                            type="text"
-                            placeholder="Coupon code"
-                            className="flex-1 px-3 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent/20"
-                          />
-                          <Button variant="outline" size="sm" className="px-4">Apply</Button>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
+                {!appliedCoupon && (
+                  <div className="pt-1">
+                    <button
+                      onClick={() => setCouponOpen(!couponOpen)}
+                      className="flex items-center justify-between w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <span>Have a coupon code?</span>
+                      <ChevronDown className={`h-4 w-4 transition-transform ${couponOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                    <AnimatePresence>
+                      {couponOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="flex gap-2 pt-2">
+                            <input
+                              type="text"
+                              placeholder="Coupon code"
+                              value={couponCode}
+                              onChange={(e) => setCouponCode(e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
+                              className="flex-1 px-3 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 uppercase"
+                            />
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="px-4"
+                              onClick={handleApplyCoupon}
+                              disabled={couponLoading}
+                            >
+                              {couponLoading ? '...' : 'Apply'}
+                            </Button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
               </div>
 
               <div className="border-t border-border pt-4">
