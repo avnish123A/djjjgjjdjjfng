@@ -6,7 +6,7 @@ const navItems = [
   { to: '/products', icon: Grid3X3, label: 'Shop' },
   { to: '/products?search=', icon: Search, label: 'Search' },
   { to: '#', icon: Heart, label: 'Wishlist' },
-  { to: '#', icon: User, label: 'Account' },
+  { to: '/account', icon: User, label: 'Account' },
 ];
 
 export const BottomNav = () => {

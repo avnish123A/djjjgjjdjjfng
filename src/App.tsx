@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
+import { CustomerAuthProvider, useCustomerAuth } from "@/contexts/CustomerAuthContext";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -39,6 +40,17 @@ const AdminCustomers = lazy(() => import("./pages/admin/AdminCustomers"));
 const AdminCategories = lazy(() => import("./pages/admin/AdminCategories"));
 const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
 
+// Lazy-loaded customer pages
+const CustomerLogin = lazy(() => import("./pages/customer/CustomerLogin"));
+const CustomerSignup = lazy(() => import("./pages/customer/CustomerSignup"));
+const CustomerForgotPassword = lazy(() => import("./pages/customer/CustomerForgotPassword"));
+const CustomerResetPassword = lazy(() => import("./pages/customer/CustomerResetPassword"));
+const AccountLayout = lazy(() => import("./components/customer/AccountLayout"));
+const AccountDashboard = lazy(() => import("./pages/customer/AccountDashboard"));
+const AccountOrders = lazy(() => import("./pages/customer/AccountOrders"));
+const AccountOrderDetail = lazy(() => import("./pages/customer/AccountOrderDetail"));
+const AccountProfile = lazy(() => import("./pages/customer/AccountProfile"));
+
 const queryClient = new QueryClient();
 
 // Admin loading fallback
@@ -47,6 +59,16 @@ const AdminLoadingFallback = () => (
     <div className="flex flex-col items-center gap-3">
       <div className="h-8 w-8 border-3 border-accent border-t-transparent rounded-full animate-spin" />
       <p className="text-sm text-white/40">Loading…</p>
+    </div>
+  </div>
+);
+
+// Customer loading fallback
+const CustomerLoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="flex flex-col items-center gap-3">
+      <div className="h-8 w-8 border-3 border-accent border-t-transparent rounded-full animate-spin" />
+      <p className="text-sm text-muted-foreground">Loading…</p>
     </div>
   </div>
 );
@@ -102,6 +124,35 @@ const AdminLoginGuard = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Customer route guard
+const CustomerGuard = ({ children }: { children: React.ReactNode }) => {
+  const { isLoggedIn, isLoading } = useCustomerAuth();
+  const location = useLocation();
+
+  if (isLoading) return <CustomerLoadingFallback />;
+
+  if (!isLoggedIn) {
+    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+  }
+
+  return <>{children}</>;
+};
+
+// Redirect logged-in customers away from login/signup
+const CustomerAuthRedirect = ({ children }: { children: React.ReactNode }) => {
+  const { isLoggedIn, isLoading } = useCustomerAuth();
+  const location = useLocation();
+
+  if (isLoading) return <CustomerLoadingFallback />;
+
+  if (isLoggedIn) {
+    const from = (location.state as { from?: string })?.from || '/account';
+    return <Navigate to={from} replace />;
+  }
+
+  return <>{children}</>;
+};
+
 // Storefront layout wrapper
 const StorefrontLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="flex flex-col min-h-screen pb-[60px] lg:pb-0">
@@ -123,59 +174,110 @@ const App = () => {
       <Sonner />
       <CartProvider>
         <AdminAuthProvider>
-          <BrowserRouter>
-            <ScrollToTop />
-            <Routes>
-              {/* Storefront routes */}
-              <Route path="/" element={<StorefrontLayout><Index /></StorefrontLayout>} />
-              <Route path="/products" element={<StorefrontLayout><ProductListing /></StorefrontLayout>} />
-              <Route path="/product/:id" element={<StorefrontLayout><ProductDetail /></StorefrontLayout>} />
-              <Route path="/cart" element={<StorefrontLayout><Cart /></StorefrontLayout>} />
-              <Route path="/checkout" element={<StorefrontLayout><Checkout /></StorefrontLayout>} />
-              <Route path="/order-success" element={<StorefrontLayout><OrderSuccess /></StorefrontLayout>} />
+          <CustomerAuthProvider>
+            <BrowserRouter>
+              <ScrollToTop />
+              <Routes>
+                {/* Storefront routes */}
+                <Route path="/" element={<StorefrontLayout><Index /></StorefrontLayout>} />
+                <Route path="/products" element={<StorefrontLayout><ProductListing /></StorefrontLayout>} />
+                <Route path="/product/:id" element={<StorefrontLayout><ProductDetail /></StorefrontLayout>} />
+                <Route path="/cart" element={<StorefrontLayout><Cart /></StorefrontLayout>} />
+                <Route path="/checkout" element={<StorefrontLayout><Checkout /></StorefrontLayout>} />
+                <Route path="/order-success" element={<StorefrontLayout><OrderSuccess /></StorefrontLayout>} />
 
-              {/* Policy pages */}
-              <Route path="/policies/privacy" element={<StorefrontLayout><PrivacyPolicy /></StorefrontLayout>} />
-              <Route path="/policies/terms" element={<StorefrontLayout><TermsConditions /></StorefrontLayout>} />
-              <Route path="/policies/returns" element={<StorefrontLayout><ReturnPolicy /></StorefrontLayout>} />
-              <Route path="/policies/shipping" element={<StorefrontLayout><ShippingPolicy /></StorefrontLayout>} />
+                {/* Policy pages */}
+                <Route path="/policies/privacy" element={<StorefrontLayout><PrivacyPolicy /></StorefrontLayout>} />
+                <Route path="/policies/terms" element={<StorefrontLayout><TermsConditions /></StorefrontLayout>} />
+                <Route path="/policies/returns" element={<StorefrontLayout><ReturnPolicy /></StorefrontLayout>} />
+                <Route path="/policies/shipping" element={<StorefrontLayout><ShippingPolicy /></StorefrontLayout>} />
 
-              {/* Admin routes */}
-              <Route path="/admin/login" element={
-                <Suspense fallback={<AdminLoadingFallback />}>
-                  <AdminLoginGuard><AdminLogin /></AdminLoginGuard>
-                </Suspense>
-              } />
-              <Route path="/admin/reset-password" element={
-                <Suspense fallback={<AdminLoadingFallback />}>
-                  <AdminResetPassword />
-                </Suspense>
-              } />
-              <Route
-                path="/admin"
-                element={
+                {/* Customer auth routes */}
+                <Route path="/login" element={
+                  <StorefrontLayout>
+                    <Suspense fallback={<CustomerLoadingFallback />}>
+                      <CustomerAuthRedirect><CustomerLogin /></CustomerAuthRedirect>
+                    </Suspense>
+                  </StorefrontLayout>
+                } />
+                <Route path="/signup" element={
+                  <StorefrontLayout>
+                    <Suspense fallback={<CustomerLoadingFallback />}>
+                      <CustomerAuthRedirect><CustomerSignup /></CustomerAuthRedirect>
+                    </Suspense>
+                  </StorefrontLayout>
+                } />
+                <Route path="/forgot-password" element={
+                  <StorefrontLayout>
+                    <Suspense fallback={<CustomerLoadingFallback />}>
+                      <CustomerForgotPassword />
+                    </Suspense>
+                  </StorefrontLayout>
+                } />
+                <Route path="/reset-password" element={
+                  <StorefrontLayout>
+                    <Suspense fallback={<CustomerLoadingFallback />}>
+                      <CustomerResetPassword />
+                    </Suspense>
+                  </StorefrontLayout>
+                } />
+
+                {/* Customer account routes */}
+                <Route
+                  path="/account"
+                  element={
+                    <StorefrontLayout>
+                      <Suspense fallback={<CustomerLoadingFallback />}>
+                        <CustomerGuard>
+                          <AccountLayout />
+                        </CustomerGuard>
+                      </Suspense>
+                    </StorefrontLayout>
+                  }
+                >
+                  <Route index element={<Suspense fallback={<CustomerLoadingFallback />}><AccountDashboard /></Suspense>} />
+                  <Route path="orders" element={<Suspense fallback={<CustomerLoadingFallback />}><AccountOrders /></Suspense>} />
+                  <Route path="orders/:id" element={<Suspense fallback={<CustomerLoadingFallback />}><AccountOrderDetail /></Suspense>} />
+                  <Route path="profile" element={<Suspense fallback={<CustomerLoadingFallback />}><AccountProfile /></Suspense>} />
+                </Route>
+
+                {/* Admin routes */}
+                <Route path="/admin/login" element={
                   <Suspense fallback={<AdminLoadingFallback />}>
-                    <AdminGuard>
-                      <AdminLayout />
-                    </AdminGuard>
+                    <AdminLoginGuard><AdminLogin /></AdminLoginGuard>
                   </Suspense>
-                }
-              >
-                <Route index element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="dashboard" element={<Suspense fallback={<AdminLoadingFallback />}><AdminDashboard /></Suspense>} />
-                <Route path="products" element={<Suspense fallback={<AdminLoadingFallback />}><AdminProducts /></Suspense>} />
-                <Route path="products/add" element={<Suspense fallback={<AdminLoadingFallback />}><AdminProductForm /></Suspense>} />
-                <Route path="products/edit/:id" element={<Suspense fallback={<AdminLoadingFallback />}><AdminProductForm /></Suspense>} />
-                <Route path="orders" element={<Suspense fallback={<AdminLoadingFallback />}><AdminOrders /></Suspense>} />
-                <Route path="orders/:id" element={<Suspense fallback={<AdminLoadingFallback />}><AdminOrderDetail /></Suspense>} />
-                <Route path="customers" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCustomers /></Suspense>} />
-                <Route path="categories" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCategories /></Suspense>} />
-                <Route path="coupons" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCoupons /></Suspense>} />
-              </Route>
+                } />
+                <Route path="/admin/reset-password" element={
+                  <Suspense fallback={<AdminLoadingFallback />}>
+                    <AdminResetPassword />
+                  </Suspense>
+                } />
+                <Route
+                  path="/admin"
+                  element={
+                    <Suspense fallback={<AdminLoadingFallback />}>
+                      <AdminGuard>
+                        <AdminLayout />
+                      </AdminGuard>
+                    </Suspense>
+                  }
+                >
+                  <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                  <Route path="dashboard" element={<Suspense fallback={<AdminLoadingFallback />}><AdminDashboard /></Suspense>} />
+                  <Route path="products" element={<Suspense fallback={<AdminLoadingFallback />}><AdminProducts /></Suspense>} />
+                  <Route path="products/add" element={<Suspense fallback={<AdminLoadingFallback />}><AdminProductForm /></Suspense>} />
+                  <Route path="products/edit/:id" element={<Suspense fallback={<AdminLoadingFallback />}><AdminProductForm /></Suspense>} />
+                  <Route path="orders" element={<Suspense fallback={<AdminLoadingFallback />}><AdminOrders /></Suspense>} />
+                  <Route path="orders/:id" element={<Suspense fallback={<AdminLoadingFallback />}><AdminOrderDetail /></Suspense>} />
+                  <Route path="customers" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCustomers /></Suspense>} />
+                  <Route path="categories" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCategories /></Suspense>} />
+                  <Route path="coupons" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCoupons /></Suspense>} />
+                </Route>
 
-              <Route path="*" element={<StorefrontLayout><NotFound /></StorefrontLayout>} />
-            </Routes>
-          </BrowserRouter>
+                <Route path="*" element={<StorefrontLayout><NotFound /></StorefrontLayout>} />
+              </Routes>
+            </BrowserRouter>
+          </CustomerAuthProvider>
         </AdminAuthProvider>
       </CartProvider>
     </TooltipProvider>

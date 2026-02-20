@@ -145,7 +145,7 @@ export const Header = () => {
                 <Search className="h-[18px] w-[18px]" />
               </button>
               <Link
-                to="#"
+                to="/account"
                 className="hidden lg:flex p-2.5 hover:bg-secondary rounded-lg transition-colors"
                 aria-label="Account"
               >
