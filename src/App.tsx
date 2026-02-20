@@ -53,7 +53,19 @@ const AdminQueries = lazy(() => import("./pages/admin/AdminQueries"));
 const AdminPages = lazy(() => import("./pages/admin/AdminPages"));
 const AdminPageEditor = lazy(() => import("./pages/admin/AdminPageEditor"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      staleTime: 30_000,
+      refetchOnWindowFocus: false,
+      // Prevent infinite loading — queries fail gracefully after retries
+    },
+    mutations: {
+      retry: 1,
+    },
+  },
+});
 
 // Admin loading fallback
 const AdminLoadingFallback = () => (
