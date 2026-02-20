@@ -43,7 +43,11 @@ const socialFields = [
 const contactFields = [
   { key: 'contact_email', label: 'Email', placeholder: 'hello@ekamgift.com', icon: Mail },
   { key: 'contact_phone', label: 'Phone', placeholder: '+91 98765 43210', icon: Phone },
-  { key: 'contact_location', label: 'Location', placeholder: 'India', icon: MapPin },
+  { key: 'contact_location', label: 'Address', placeholder: 'India', icon: MapPin },
+  { key: 'contact_page_title', label: 'Page Heading', placeholder: 'Get in Touch', icon: Mail },
+  { key: 'contact_page_description', label: 'Page Description', placeholder: 'Have a question? We\'d love to hear from you.', icon: Mail },
+  { key: 'contact_business_hours', label: 'Business Hours', placeholder: 'Mon – Sat: 10 AM – 7 PM IST', icon: Phone },
+  { key: 'contact_off_day', label: 'Off Day', placeholder: 'Sunday: Closed', icon: Phone },
 ];
 
 const AdminSiteSettings: React.FC = () => {
