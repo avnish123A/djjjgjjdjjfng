@@ -1,10 +1,12 @@
-import { Truck, ShieldCheck, Gift, Headphones } from 'lucide-react';
+import { Truck, ShieldCheck, Gift, Headphones, RotateCcw, CreditCard } from 'lucide-react';
 
 const trustItems = [
-  { icon: Truck, title: 'Fast Shipping', description: 'Free on orders above ₹999' },
-  { icon: ShieldCheck, title: 'Secure Checkout', description: 'SSL encrypted payments' },
-  { icon: Gift, title: 'Premium Quality', description: 'Handpicked, quality-assured' },
-  { icon: Headphones, title: '24/7 Support', description: 'We\'re here to help' },
+  { icon: Truck, title: 'Free Shipping', description: 'On orders above ₹999 across India' },
+  { icon: ShieldCheck, title: '100% Genuine', description: 'Verified & quality-checked products' },
+  { icon: RotateCcw, title: '7-Day Returns', description: 'Easy hassle-free return policy' },
+  { icon: CreditCard, title: 'Secure Payments', description: 'SSL encrypted, PCI-DSS compliant' },
+  { icon: Gift, title: 'Gift Wrapping', description: 'Premium packaging on every order' },
+  { icon: Headphones, title: 'Dedicated Support', description: 'Mon–Sat 10AM–7PM IST' },
 ];
 
 export const TrustSection = () => {

@@ -1,30 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, Loader2, Download } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
 
-function exportCSV(data: any[], filename: string) {
-  if (!data.length) return;
-  const keys = Object.keys(data[0]);
-  const csv = [
-    keys.join(','),
-    ...data.map(row => keys.map(k => {
-      const val = row[k];
-      const str = val === null || val === undefined ? '' : String(val);
-      return `"${str.replace(/"/g, '""')}"`;
-    }).join(','))
-  ].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 
 const AdminCustomers: React.FC = () => {
   const [search, setSearch] = useState('');
@@ -47,18 +26,6 @@ const AdminCustomers: React.FC = () => {
     (c.phone || '').includes(search)
   ), [customers, search]);
 
-  const handleExport = () => {
-    const exportData = filtered.map((c: any) => ({
-      name: c.name,
-      email: c.email,
-      phone: c.phone || '',
-      total_orders: c.total_orders,
-      total_spent: c.total_spent,
-      joined: new Date(c.created_at).toLocaleDateString(),
-    }));
-    exportCSV(exportData, `customers-${new Date().toISOString().split('T')[0]}.csv`);
-    toast.success('Customers exported');
-  };
 
   if (isLoading) {
     return (
@@ -75,9 +42,6 @@ const AdminCustomers: React.FC = () => {
           <h1 className="text-2xl font-bold">Customers</h1>
           <p className="text-sm text-muted-foreground mt-1">{customers.length} total customers</p>
         </div>
-        <Button variant="outline" size="sm" className="gap-2" onClick={handleExport}>
-          <Download className="h-4 w-4" /> Export CSV
-        </Button>
       </div>
 
       <div className="relative max-w-sm">
