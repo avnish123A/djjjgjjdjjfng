@@ -37,7 +37,7 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
   const hasSecondaryImage = product.images && product.images.length > 1;
 
   return (
-    <div ref={ref} className="group transition-all duration-300 ease-out hover:-translate-y-1">
+    <div ref={ref} className="group product-3d perspective-container">
       <Link to={`/product/${product.id}`} className="block">
         {/* Image Container */}
         <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-2xl mb-4 shadow-soft hover:shadow-card-hover transition-shadow duration-500">

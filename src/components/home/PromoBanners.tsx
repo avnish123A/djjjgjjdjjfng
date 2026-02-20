@@ -8,9 +8,9 @@ export const PromoBanners = () => {
   return (
     <section className="py-20 lg:py-28">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+        <div className="perspective-container grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
           {/* Sale Banner */}
-          <div className="relative overflow-hidden bg-primary rounded-2xl p-8 lg:p-10 h-full min-h-[280px] flex flex-col justify-between">
+          <div className="relative overflow-hidden bg-primary rounded-2xl p-8 lg:p-10 h-full min-h-[280px] flex flex-col justify-between promo-3d card-3d-left">
             <div>
               <span className="inline-block px-4 py-1.5 bg-primary-foreground/15 text-primary-foreground text-[10px] font-semibold uppercase tracking-[3px] rounded-full mb-6">
                 Limited Time
@@ -32,7 +32,7 @@ export const PromoBanners = () => {
           </div>
 
           {/* Free Delivery Banner */}
-          <div className="relative overflow-hidden bg-card border border-border rounded-2xl p-8 lg:p-10 h-full min-h-[280px] flex flex-col justify-between">
+          <div className="relative overflow-hidden bg-card border border-border rounded-2xl p-8 lg:p-10 h-full min-h-[280px] flex flex-col justify-between promo-3d card-3d-right">
             <div>
               <span className="inline-block px-4 py-1.5 bg-foreground text-background text-[10px] font-semibold uppercase tracking-[3px] rounded-full mb-6">
                 This Weekend
