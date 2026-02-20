@@ -49,6 +49,7 @@ const AdminCategories = lazy(() => import("./pages/admin/AdminCategories"));
 const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminSiteSettings = lazy(() => import("./pages/admin/AdminSiteSettings"));
+const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
 const AdminQueries = lazy(() => import("./pages/admin/AdminQueries"));
 const AdminPages = lazy(() => import("./pages/admin/AdminPages"));
 const AdminPageEditor = lazy(() => import("./pages/admin/AdminPageEditor"));
@@ -251,6 +252,7 @@ const App = () => {
                   <Route path="pages/new" element={<Suspense fallback={<AdminLoadingFallback />}><AdminPageEditor /></Suspense>} />
                   <Route path="pages/edit/:id" element={<Suspense fallback={<AdminLoadingFallback />}><AdminPageEditor /></Suspense>} />
                   <Route path="settings" element={<Suspense fallback={<AdminLoadingFallback />}><AdminSiteSettings /></Suspense>} />
+                  <Route path="payments" element={<Suspense fallback={<AdminLoadingFallback />}><AdminPayments /></Suspense>} />
                 </Route>
 
                 <Route path="*" element={<StorefrontRoute><NotFound /></StorefrontRoute>} />
