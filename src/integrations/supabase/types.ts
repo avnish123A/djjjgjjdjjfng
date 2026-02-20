@@ -280,6 +280,98 @@ export type Database = {
           },
         ]
       }
+      payment_settings: {
+        Row: {
+          created_at: string
+          environment: string
+          gateway_name: string
+          id: string
+          is_enabled: boolean
+          key_id: string | null
+          key_secret: string | null
+          priority: number
+          updated_at: string
+          webhook_secret: string | null
+        }
+        Insert: {
+          created_at?: string
+          environment?: string
+          gateway_name: string
+          id?: string
+          is_enabled?: boolean
+          key_id?: string | null
+          key_secret?: string | null
+          priority?: number
+          updated_at?: string
+          webhook_secret?: string | null
+        }
+        Update: {
+          created_at?: string
+          environment?: string
+          gateway_name?: string
+          id?: string
+          is_enabled?: boolean
+          key_id?: string | null
+          key_secret?: string | null
+          priority?: number
+          updated_at?: string
+          webhook_secret?: string | null
+        }
+        Relationships: []
+      }
+      payment_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          gateway: string
+          gateway_order_id: string | null
+          gateway_payment_id: string | null
+          id: string
+          order_id: string
+          raw_response: Json | null
+          status: string
+          updated_at: string
+          verified: boolean
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          gateway: string
+          gateway_order_id?: string | null
+          gateway_payment_id?: string | null
+          id?: string
+          order_id: string
+          raw_response?: Json | null
+          status?: string
+          updated_at?: string
+          verified?: boolean
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          gateway?: string
+          gateway_order_id?: string | null
+          gateway_payment_id?: string | null
+          id?: string
+          order_id?: string
+          raw_response?: Json | null
+          status?: string
+          updated_at?: string
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           badge: string | null
