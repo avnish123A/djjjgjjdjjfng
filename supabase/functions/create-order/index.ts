@@ -329,20 +329,23 @@ Deno.serve(async (req) => {
       console.error('Order items error:', itemsError)
     }
 
-    // Update product stock
+    // Update product stock atomically (prevents race conditions)
     for (const item of items) {
       if (item.productId) {
-        const { data: product } = await supabase
-          .from('products')
-          .select('stock')
-          .eq('id', item.productId)
-          .single()
+        const { data: stockResult, error: stockError } = await supabase
+          .rpc('decrement_product_stock', {
+            p_product_id: item.productId,
+            p_quantity: item.quantity,
+          })
 
-        if (product) {
-          await supabase
-            .from('products')
-            .update({ stock: Math.max(0, product.stock - item.quantity) })
-            .eq('id', item.productId)
+        if (stockError || !stockResult?.[0]?.success) {
+          // Rollback: delete order items and order
+          await supabase.from('order_items').delete().eq('order_id', order.id)
+          await supabase.from('orders').delete().eq('id', order.id)
+          return new Response(
+            JSON.stringify({ error: `Insufficient stock for ${item.title}. Please refresh and try again.` }),
+            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
         }
       }
     }
