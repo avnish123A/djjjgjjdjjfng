@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, ArrowRight, Clock } from 'lucide-react';
+import { Mail, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useSiteMode } from '@/contexts/SiteModeContext';
@@ -13,16 +13,40 @@ const Maintenance = () => {
 
   const isComingSoon = siteMode === 'coming_soon';
 
-  // Admin-editable content
   const title = isComingSoon
     ? (settings['coming_soon_title'] || 'Something Special is Coming')
     : (settings['maintenance_title'] || "We're Polishing Things Up");
   const subtitle = isComingSoon
     ? (settings['coming_soon_message'] || 'Our curated gifting experience is almost ready. Be the first to know when we launch.')
     : (settings['maintenance_message'] || "We're making improvements to give you a better experience. We'll be back shortly.");
-
-  // Countdown
   const countdownDate = settings['coming_soon_date'] || '';
+
+  // SEO meta tags
+  useEffect(() => {
+    const pageTitle = isComingSoon ? 'Coming Soon — EkamGift' : 'Under Maintenance — EkamGift';
+    const pageDesc = isComingSoon
+      ? 'EkamGift is launching soon! Premium curated gifts for every occasion. Sign up to be notified.'
+      : 'EkamGift is currently under maintenance. We\'ll be back shortly with an even better experience.';
+    
+    document.title = pageTitle;
+    
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute('content', pageDesc);
+
+    // noindex during maintenance
+    let metaRobots = document.querySelector('meta[name="robots"]');
+    if (!metaRobots) {
+      metaRobots = document.createElement('meta');
+      metaRobots.setAttribute('name', 'robots');
+      document.head.appendChild(metaRobots);
+    }
+    metaRobots.setAttribute('content', 'noindex, nofollow');
+
+    return () => {
+      // Clean up robots meta on unmount
+      metaRobots?.remove();
+    };
+  }, [isComingSoon]);
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4 relative overflow-hidden">
@@ -42,57 +66,49 @@ const Maintenance = () => {
         }}
       />
 
-      <div className="relative z-10 max-w-lg w-full text-center">
-        <div className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 sm:p-12 space-y-8 shadow-[0_8px_60px_-12px_rgba(0,0,0,0.5)]">
+      <main className="relative z-10 max-w-lg w-full text-center" role="main">
+        <article className="rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 sm:p-12 space-y-8 shadow-[0_8px_60px_-12px_rgba(0,0,0,0.5)]">
 
-          {/* 3D Illustration - Animated gift box */}
+          {/* Real Logo with 3D float animation */}
           <div className="flex justify-center">
             <div className="relative" style={{ perspective: '400px' }}>
               <div
-                className="w-28 h-28 rounded-2xl bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-[0_20px_60px_-15px_hsl(var(--primary)/0.4)]"
+                className="w-32 h-32 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-white/10 flex items-center justify-center shadow-[0_20px_60px_-15px_hsl(var(--primary)/0.3)]"
                 style={{
                   animation: 'float3d 4s ease-in-out infinite',
                   transformStyle: 'preserve-3d',
                 }}
               >
-                {isComingSoon ? (
-                  <svg className="w-14 h-14 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M20 12v10H4V12" />
-                    <path d="M2 7h20v5H2z" />
-                    <path d="M12 22V7" />
-                    <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
-                    <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
-                  </svg>
-                ) : (
-                  <svg className="w-14 h-14 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
-                  </svg>
-                )}
+                <img
+                  src="/logo-ekamgift.png"
+                  alt="EkamGift — Premium Curated Gifts"
+                  className="h-20 w-auto object-contain"
+                  loading="eager"
+                />
               </div>
-              {/* Shadow beneath */}
-              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-20 h-3 bg-primary/20 rounded-full blur-md" style={{ animation: 'shadow-pulse 4s ease-in-out infinite' }} />
+              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-3 bg-primary/15 rounded-full blur-md" style={{ animation: 'shadow-pulse 4s ease-in-out infinite' }} />
             </div>
           </div>
 
-          {/* Logo */}
-          <div className="flex justify-center">
-            <img src="/logo-ekamgift.png" alt="EkamGift" className="h-10 w-auto object-contain brightness-0 invert opacity-80" />
-          </div>
-
           {/* Content */}
-          <div className="space-y-3">
+          <header className="space-y-3">
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">{title}</h1>
             <p className="text-white/50 text-sm leading-relaxed max-w-sm mx-auto">{subtitle}</p>
-          </div>
+          </header>
 
           {/* Countdown Timer */}
-          {isComingSoon && countdownDate && <CountdownDisplay targetDate={countdownDate} />}
+          {isComingSoon && countdownDate && (
+            <section aria-label="Launch countdown">
+              <CountdownDisplay targetDate={countdownDate} />
+            </section>
+          )}
 
           {/* Email notify */}
           {isComingSoon && !submitted && (
             <form
               onSubmit={(e) => { e.preventDefault(); if (email.trim()) setSubmitted(true); }}
               className="flex gap-2"
+              aria-label="Get notified when we launch"
             >
               <div className="relative flex-1">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/30" />
@@ -103,6 +119,7 @@ const Maintenance = () => {
                   placeholder="your@email.com"
                   className="pl-10 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-white/25 focus-visible:ring-primary/50"
                   required
+                  aria-label="Email address"
                 />
               </div>
               <Button type="submit" className="gap-1 rounded-xl px-5">
@@ -112,21 +129,21 @@ const Maintenance = () => {
           )}
 
           {submitted && (
-            <div className="bg-primary/10 text-primary text-sm font-medium px-4 py-3 rounded-xl">
+            <div className="bg-primary/10 text-primary text-sm font-medium px-4 py-3 rounded-xl" role="status">
               🎉 You're on the list! We'll notify you when we launch.
             </div>
           )}
 
           {/* Status indicator */}
-          <div className="flex items-center justify-center gap-2 text-xs text-white/40">
+          <div className="flex items-center justify-center gap-2 text-xs text-white/40" aria-live="polite">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
             </span>
             {isComingSoon ? 'Launching soon' : 'Back shortly'}
           </div>
-        </div>
-      </div>
+        </article>
+      </main>
 
       <style>{`
         @keyframes float3d {
@@ -144,7 +161,6 @@ const Maintenance = () => {
   );
 };
 
-/* ── Countdown Display ── */
 const CountdownDisplay = ({ targetDate }: { targetDate: string }) => {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
