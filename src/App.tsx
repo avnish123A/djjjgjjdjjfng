@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+import { useZoomPrevention } from "@/hooks/useZoomPrevention";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -111,7 +112,10 @@ const StorefrontLayout = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-const App = () => (
+const App = () => {
+  useZoomPrevention(true);
+
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -174,6 +178,7 @@ const App = () => (
       </CartProvider>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
