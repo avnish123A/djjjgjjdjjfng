@@ -13,6 +13,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { BackToTop } from "@/components/layout/BackToTop";
+import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import PageLoader from "@/components/layout/PageLoader";
 import Index from "./pages/Index";
@@ -162,6 +163,7 @@ const StorefrontLayout = ({ children }: { children: React.ReactNode }) => (
     <Footer />
     <BottomNav />
     <BackToTop />
+    <WhatsAppButton />
   </div>
 );
 

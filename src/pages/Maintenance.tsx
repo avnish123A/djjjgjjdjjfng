@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useSiteMode } from '@/contexts/SiteModeContext';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 
-const Maintenance = () => {
+const Maintenance: React.FC = () => {
   const { siteMode } = useSiteMode();
   const { data: settings = {} } = useSiteSettings();
   const [email, setEmail] = useState('');
@@ -161,7 +161,7 @@ const Maintenance = () => {
   );
 };
 
-const CountdownDisplay = ({ targetDate }: { targetDate: string }) => {
+const CountdownDisplay: React.FC<{ targetDate: string }> = ({ targetDate }) => {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
