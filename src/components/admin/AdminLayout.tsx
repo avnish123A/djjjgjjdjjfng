@@ -45,7 +45,7 @@ const navItems: NavItem[] = [
   { label: 'Customers', icon: Users, path: '/admin/customers' },
   { label: 'Categories', icon: FolderOpen, path: '/admin/categories' },
   { label: 'Coupons', icon: Ticket, path: '/admin/coupons' },
-  { label: 'Queries', icon: MessageSquare, path: '/admin/queries' },
+  
   { label: 'Pages', icon: FileText, path: '/admin/pages' },
   { label: 'Payments', icon: CreditCard, path: '/admin/payments' },
   { label: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
