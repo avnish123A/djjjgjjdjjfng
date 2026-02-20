@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Search, Package, ShoppingBag, X } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useCategories } from '@/hooks/useCategories';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { MobileMenu } from './MobileMenu';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -18,6 +19,10 @@ export const Header = () => {
   const navigate = useNavigate();
   const { totalItems } = useCart();
   const { data: categories = [] } = useCategories();
+  const { data: settings = {} } = useSiteSettings();
+
+  const announcementEnabled = settings['announcement_enabled'] !== 'false';
+  const announcementText = settings['announcement_text'] || 'Free shipping on orders above ₹999 · Use code WELCOME10 for 10% off';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -53,7 +58,7 @@ export const Header = () => {
     <>
       {/* Announcement Bar */}
       <AnimatePresence>
-        {showAnnouncement && (
+        {showAnnouncement && announcementEnabled && announcementText && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -61,8 +66,7 @@ export const Header = () => {
             className="bg-primary text-primary-foreground text-center text-[12px] py-2.5 px-4 relative"
           >
             <p className="font-medium tracking-[1.5px] uppercase">
-              Free shipping on orders above ₹999 · Use code{' '}
-              <span className="font-bold">WELCOME10</span> for 10% off
+              {announcementText}
             </p>
             <button
               onClick={() => setShowAnnouncement(false)}
