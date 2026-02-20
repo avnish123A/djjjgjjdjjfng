@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
 
 const testimonials = [
@@ -26,25 +25,15 @@ export const Testimonials = () => {
   return (
     <section className="py-20 lg:py-28 bg-card">
       <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-14"
-        >
+        <div className="text-center mb-14">
           <span className="text-[11px] font-medium uppercase tracking-[4px] text-primary mb-3 block">Testimonials</span>
           <h2 className="font-display text-3xl sm:text-4xl tracking-tight">What Our Clients Say</h2>
-        </motion.div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
-          {testimonials.map((testimonial, index) => (
-            <motion.div
+          {testimonials.map((testimonial) => (
+            <div
               key={testimonial.name}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
               className="bg-background border border-border rounded-xl p-8 relative"
             >
               <Quote className="h-6 w-6 text-primary/30 mb-4" />
@@ -58,7 +47,7 @@ export const Testimonials = () => {
               </div>
               <p className="text-sm font-medium">{testimonial.name}</p>
               <p className="text-xs text-muted-foreground">{testimonial.location}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

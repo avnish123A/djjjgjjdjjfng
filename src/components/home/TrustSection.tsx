@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Truck, ShieldCheck, RotateCcw, Headphones, BadgeCheck, CreditCard } from 'lucide-react';
 
 const trustItems = [
@@ -14,25 +13,15 @@ export const TrustSection = () => {
   return (
     <section className="py-20 lg:py-24 border-t border-border">
       <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-14"
-        >
+        <div className="text-center mb-14">
           <span className="text-[11px] font-medium uppercase tracking-[4px] text-primary mb-3 block">Why EkamGift</span>
           <h2 className="font-display text-3xl sm:text-4xl tracking-tight">The EkamGift Promise</h2>
-        </motion.div>
+        </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-4">
-          {trustItems.map((item, index) => (
-            <motion.div
+          {trustItems.map((item) => (
+            <div
               key={item.title}
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: index * 0.05 }}
               className="text-center group"
             >
               <div className="inline-flex items-center justify-center w-12 h-12 mb-4 rounded-xl border border-primary/20 group-hover:border-primary group-hover:bg-primary/5 transition-all duration-300">
@@ -40,7 +29,7 @@ export const TrustSection = () => {
               </div>
               <h3 className="font-medium text-sm mb-1">{item.title}</h3>
               <p className="text-xs text-muted-foreground">{item.description}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

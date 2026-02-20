@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -11,13 +10,7 @@ export const NewsletterSignup = () => {
   return (
     <section className="py-20 lg:py-28 bg-primary relative overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="max-w-xl mx-auto text-center"
-        >
+        <div className="max-w-xl mx-auto text-center">
           <span className="text-[11px] font-medium uppercase tracking-[4px] text-primary-foreground/60 mb-4 block">Newsletter</span>
           <h2 className="font-display text-3xl sm:text-4xl mb-4 text-primary-foreground tracking-tight">Stay in the Know</h2>
           <p className="text-primary-foreground/50 mb-10 text-sm leading-relaxed">
@@ -38,7 +31,7 @@ export const NewsletterSignup = () => {
             No spam, ever. Unsubscribe anytime. Read our{' '}
             <a href="/policies/privacy" className="underline hover:text-primary-foreground/50 transition-colors">Privacy Policy</a>.
           </p>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

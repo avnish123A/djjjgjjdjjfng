@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
@@ -32,13 +31,7 @@ export const FeaturedProducts = () => {
   return (
     <section className="py-20 lg:py-28 bg-card">
       <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="flex items-end justify-between mb-14"
-        >
+        <div className="flex items-end justify-between mb-14">
           <div>
             <span className="text-[11px] font-medium uppercase tracking-[4px] text-primary mb-3 block">New Arrivals</span>
             <h2 className="font-display text-3xl sm:text-4xl tracking-tight">Trending Now</h2>
@@ -49,19 +42,11 @@ export const FeaturedProducts = () => {
           >
             View All <ArrowRight className="h-4 w-4" />
           </Link>
-        </motion.div>
+        </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-          {featured.map((product, index) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: index * 0.04 }}
-            >
-              <ProductCard product={product} />
-            </motion.div>
+          {featured.map((product) => (
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
 

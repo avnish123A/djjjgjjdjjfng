@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
-import { motion } from 'framer-motion';
 import heroGifting from '@/assets/hero-gifting.jpg';
 import heroCurated from '@/assets/hero-curated.jpg';
 import heroOccasion from '@/assets/hero-occasion.jpg';
@@ -54,12 +53,7 @@ export const HeroCarousel = () => {
                 <div className="absolute inset-0 bg-gradient-to-r from-foreground/50 via-foreground/20 to-transparent" />
                 <div className="relative h-full flex items-center">
                   <div className="container mx-auto px-4">
-                    <motion.div
-                      initial={{ opacity: 0, y: 24 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.8, delay: 0.2 }}
-                      className="max-w-xl"
-                    >
+                    <div className="max-w-xl">
                       <span className="inline-block text-[11px] sm:text-xs font-medium uppercase tracking-[5px] text-white/60 mb-5">
                         {slide.label}
                       </span>
@@ -75,7 +69,7 @@ export const HeroCarousel = () => {
                       >
                         {slide.cta}
                       </Link>
-                    </motion.div>
+                    </div>
                   </div>
                 </div>
               </div>
