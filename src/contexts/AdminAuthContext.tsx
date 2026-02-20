@@ -36,12 +36,18 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       clearTimeout(timeout);
-      if (session?.user) {
-        setUser(session.user);
-        const adminStatus = await checkAdminRole(session.user.id);
-        setIsAdmin(adminStatus);
-      } else {
-        setUser(null);
+      try {
+        if (session?.user) {
+          setUser(session.user);
+          const adminStatus = await checkAdminRole(session.user.id);
+          setIsAdmin(adminStatus);
+        } else {
+          setUser(null);
+          setIsAdmin(false);
+        }
+      } catch (err) {
+        console.error('Auth state change error:', err);
+        setUser(session?.user ?? null);
         setIsAdmin(false);
       }
       setIsLoading(false);
@@ -49,10 +55,16 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       clearTimeout(timeout);
-      if (session?.user) {
-        setUser(session.user);
-        const adminStatus = await checkAdminRole(session.user.id);
-        setIsAdmin(adminStatus);
+      try {
+        if (session?.user) {
+          setUser(session.user);
+          const adminStatus = await checkAdminRole(session.user.id);
+          setIsAdmin(adminStatus);
+        }
+      } catch (err) {
+        console.error('Get session error:', err);
+        setUser(session?.user ?? null);
+        setIsAdmin(false);
       }
       setIsLoading(false);
     });
