@@ -22,12 +22,24 @@ interface ActiveGateway {
   is_enabled: boolean;
   environment: string;
   priority: number;
+  cod_extra_charge: number;
+  cod_min_order: number;
 }
 
 const gatewayDisplay: Record<string, { label: string; desc: string; icon: React.ElementType; badge: string | null }> = {
   cod: { label: 'Cash on Delivery', desc: 'Pay when you receive your order', icon: Banknote, badge: 'No extra charge' },
   razorpay: { label: 'Razorpay', desc: 'UPI, Cards, Net Banking, Wallets', icon: CreditCard, badge: 'Recommended' },
   cashfree: { label: 'Cashfree', desc: 'UPI, Cards, Net Banking, EMI', icon: CreditCard, badge: null },
+};
+
+// Helper to get COD charge label dynamically
+const getCodDisplay = (gw: ActiveGateway) => {
+  if (gw.gateway_name !== 'cod') return gatewayDisplay[gw.gateway_name] || { label: gw.gateway_name, desc: '', icon: CreditCard, badge: null };
+  const charge = Number(gw.cod_extra_charge) || 0;
+  return {
+    ...gatewayDisplay.cod,
+    badge: charge > 0 ? `+₹${charge} fee` : 'No extra charge',
+  };
 };
 
 type Step = 'contact' | 'shipping' | 'payment';
@@ -72,8 +84,14 @@ const Checkout = () => {
     fetchGateways();
   }, []);
 
+  // Calculate COD extra charge
+  const codGateway = activeGateways.find(g => g.gateway_name === 'cod');
+  const codExtraCharge = paymentMethod === 'cod' && codGateway ? (Number(codGateway.cod_extra_charge) || 0) : 0;
+  const codMinOrder = codGateway ? (Number(codGateway.cod_min_order) || 0) : 0;
+  const isCodBelowMin = paymentMethod === 'cod' && codMinOrder > 0 && totalPrice < codMinOrder;
+
   const shipping = totalPrice >= 999 ? 0 : 99;
-  const total = totalPrice + shipping - discountAmount;
+  const total = totalPrice + shipping - discountAmount + codExtraCharge;
 
   const stepIndex = stepConfig.findIndex(s => s.key === currentStep);
 
@@ -119,6 +137,7 @@ const Checkout = () => {
     e.preventDefault();
     if (currentStep !== 'payment') { goNext(); return; }
     if (items.length === 0) { toast.error('Your cart is empty'); return; }
+    if (isCodBelowMin) { toast.error(`Minimum order of ₹${codMinOrder} required for COD`); return; }
 
     setIsSubmitting(true);
     try {
@@ -130,6 +149,7 @@ const Checkout = () => {
           shippingAddress: { address: form.address.trim(), address2: form.address2.trim(), city: form.city.trim(), state: form.state, pincode: form.pincode.trim() },
           items: items.map(item => ({ productId: item.id, title: item.name, price: item.price, quantity: item.quantity, image: item.image })),
           paymentMethod, subtotal: totalPrice, shipping, discount: discountAmount, total,
+          codExtraCharge,
           couponCode: appliedCoupon?.code || null,
         },
       });
@@ -543,15 +563,20 @@ const Checkout = () => {
                         <p className="text-sm text-muted-foreground py-4 text-center">No payment methods available. Please try again later.</p>
                       ) : (
                         activeGateways.map((gw) => {
-                          const display = gatewayDisplay[gw.gateway_name] || { label: gw.gateway_name, desc: '', icon: CreditCard, badge: null };
+                          const display = getCodDisplay(gw);
                           const IconComp = display.icon;
+                          const isCodOption = gw.gateway_name === 'cod';
+                          const codMin = Number(gw.cod_min_order) || 0;
+                          const isDisabled = isCodOption && codMin > 0 && totalPrice < codMin;
                           return (
                             <label
                               key={gw.gateway_name}
-                              className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all duration-200 ${
-                                paymentMethod === gw.gateway_name
-                                  ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
-                                  : 'border-border hover:border-muted-foreground/30 hover:bg-secondary/30'
+                              className={`flex items-center gap-3 p-4 border rounded-xl transition-all duration-200 ${
+                                isDisabled
+                                  ? 'border-border opacity-50 cursor-not-allowed'
+                                  : paymentMethod === gw.gateway_name
+                                    ? 'border-primary bg-primary/5 ring-1 ring-primary/20 cursor-pointer'
+                                    : 'border-border hover:border-muted-foreground/30 hover:bg-secondary/30 cursor-pointer'
                               }`}
                             >
                               <input
@@ -559,12 +584,13 @@ const Checkout = () => {
                                 name="payment"
                                 value={gw.gateway_name}
                                 checked={paymentMethod === gw.gateway_name}
-                                onChange={() => setPaymentMethod(gw.gateway_name)}
+                                onChange={() => !isDisabled && setPaymentMethod(gw.gateway_name)}
+                                disabled={isDisabled}
                                 className="accent-primary w-4 h-4"
                               />
                               <IconComp className="h-5 w-5 text-muted-foreground shrink-0" />
                               <div className="flex-1">
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap">
                                   <p className="text-sm font-semibold">{display.label}</p>
                                   {display.badge && (
                                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
@@ -576,8 +602,11 @@ const Checkout = () => {
                                   )}
                                 </div>
                                 <p className="text-xs text-muted-foreground">{display.desc}</p>
+                                {isDisabled && (
+                                  <p className="text-xs text-destructive mt-1">Minimum order ₹{codMin} required for COD</p>
+                                )}
                               </div>
-                              {paymentMethod === gw.gateway_name && <Check className="h-4 w-4 text-primary shrink-0" />}
+                              {paymentMethod === gw.gateway_name && !isDisabled && <Check className="h-4 w-4 text-primary shrink-0" />}
                             </label>
                           );
                         })
@@ -669,6 +698,12 @@ const Checkout = () => {
                           <X className="h-3.5 w-3.5" />
                         </button>
                       </div>
+                    </div>
+                  )}
+                  {codExtraCharge > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-muted-foreground">COD Fee</span>
+                      <span className="font-medium tabular-nums">{formatPrice(codExtraCharge)}</span>
                     </div>
                   )}
                 </div>

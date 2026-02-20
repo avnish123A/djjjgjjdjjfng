@@ -1,24 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { CreditCard, Eye, EyeOff, Loader2, ToggleLeft, ToggleRight, AlertTriangle, CheckCircle2, Webhook } from 'lucide-react';
+import { CreditCard, Eye, EyeOff, Loader2, ToggleLeft, ToggleRight, AlertTriangle, CheckCircle2, Webhook, Banknote, IndianRupee, ShieldAlert, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface GatewayConfig {
   id: string;
   gateway_name: string;
   is_enabled: boolean;
-  environment: 'test' | 'live';
+  environment: string;
   key_id: string;
   key_secret: string;
   webhook_secret: string;
   priority: number;
+  cod_extra_charge: number;
+  cod_min_order: number;
 }
 
-const gatewayMeta: Record<string, { label: string; desc: string; color: string }> = {
-  razorpay: { label: 'Razorpay', desc: 'Accept UPI, Cards, Net Banking, Wallets', color: 'text-blue-600' },
-  cashfree: { label: 'Cashfree', desc: 'Accept UPI, Cards, Net Banking, EMI', color: 'text-purple-600' },
-  cod: { label: 'Cash on Delivery', desc: 'No online payment required', color: 'text-green-600' },
+const gatewayMeta: Record<string, { label: string; desc: string; icon: React.ElementType; color: string }> = {
+  razorpay: { label: 'Razorpay', desc: 'Accept UPI, Cards, Net Banking, Wallets', icon: CreditCard, color: 'text-blue-600' },
+  cashfree: { label: 'Cashfree', desc: 'Accept UPI, Cards, Net Banking, EMI', icon: CreditCard, color: 'text-purple-600' },
+  cod: { label: 'Cash on Delivery', desc: 'Collect payment on delivery', icon: Banknote, color: 'text-green-600' },
 };
 
 const AdminPayments: React.FC = () => {
@@ -58,7 +60,19 @@ const AdminPayments: React.FC = () => {
   };
 
   const handleToggleEnabled = async (gw: GatewayConfig) => {
+    const isCod = gw.gateway_name === 'cod';
     const newVal = !gw.is_enabled;
+
+    // Validation: don't enable gateway without keys
+    if (newVal && !isCod) {
+      const keyId = (getEditValue(gw, 'key_id') as string) || '';
+      const keySecret = (getEditValue(gw, 'key_secret') as string) || '';
+      if (!keyId.trim() || !keySecret.trim()) {
+        toast.error(`Please add API keys before enabling ${gatewayMeta[gw.gateway_name]?.label}`);
+        return;
+      }
+    }
+
     const { error } = await supabase
       .from('payment_settings')
       .update({ is_enabled: newVal })
@@ -71,9 +85,49 @@ const AdminPayments: React.FC = () => {
     }
   };
 
+  const validateGateway = (gw: GatewayConfig, changes: Partial<GatewayConfig>): string | null => {
+    const isCod = gw.gateway_name === 'cod';
+
+    if (isCod) {
+      const extraCharge = Number(changes.cod_extra_charge ?? gw.cod_extra_charge);
+      if (extraCharge < 0) return 'COD extra charge cannot be negative';
+      if (extraCharge > 9999) return 'COD extra charge too high';
+      const minOrder = Number(changes.cod_min_order ?? gw.cod_min_order);
+      if (minOrder < 0) return 'COD minimum order cannot be negative';
+      return null;
+    }
+
+    // Gateway validation
+    const env = (changes.environment ?? gw.environment) as string;
+    const keyId = ((changes.key_id ?? gw.key_id) as string).trim();
+    const keySecret = ((changes.key_secret ?? gw.key_secret) as string).trim();
+
+    // Check test/live key mismatch for Razorpay
+    if (gw.gateway_name === 'razorpay' && keyId) {
+      if (env === 'test' && !keyId.startsWith('rzp_test_')) {
+        return 'Test mode requires keys starting with "rzp_test_". Are you using live keys in test mode?';
+      }
+      if (env === 'live' && !keyId.startsWith('rzp_live_')) {
+        return 'Live mode requires keys starting with "rzp_live_". Are you using test keys in live mode?';
+      }
+    }
+
+    if (gw.is_enabled && (!keyId || !keySecret)) {
+      return 'API keys are required while gateway is enabled';
+    }
+
+    return null;
+  };
+
   const handleSave = async (gw: GatewayConfig) => {
     const changes = editState[gw.id];
     if (!changes || Object.keys(changes).length === 0) return;
+
+    const validationError = validateGateway(gw, changes);
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
 
     setSaving(gw.id);
     const { error } = await supabase
@@ -108,23 +162,50 @@ const AdminPayments: React.FC = () => {
     <div className="max-w-3xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Payment Gateways</h1>
-        <p className="text-sm text-muted-foreground mt-1">Configure payment methods for your store</p>
+        <p className="text-sm text-muted-foreground mt-1">Configure payment methods for your store. Changes apply to checkout instantly.</p>
+      </div>
+
+      {/* Security Notice */}
+      <div className="flex items-start gap-3 bg-blue-50 dark:bg-blue-950/30 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-xl p-4 text-xs">
+        <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5" />
+        <div>
+          <p className="font-semibold mb-1">Security Notice</p>
+          <p>API keys are stored securely and never exposed to the frontend. Only server-side functions use them for payment processing.</p>
+        </div>
       </div>
 
       {gateways.map((gw) => {
-        const meta = gatewayMeta[gw.gateway_name] || { label: gw.gateway_name, desc: '', color: '' };
+        const meta = gatewayMeta[gw.gateway_name] || { label: gw.gateway_name, desc: '', icon: CreditCard, color: '' };
+        const IconComp = meta.icon;
         const isCod = gw.gateway_name === 'cod';
         const env = (getEditValue(gw, 'environment') as string) || 'test';
         const isLive = env === 'live';
 
         return (
-          <div key={gw.id} className="bg-card border border-border rounded-xl overflow-hidden">
+          <div key={gw.id} className={`bg-card border rounded-xl overflow-hidden transition-all ${
+            gw.is_enabled ? 'border-primary/30 shadow-sm' : 'border-border opacity-80'
+          }`}>
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <div className="flex items-center gap-3">
-                <CreditCard className={`h-5 w-5 ${meta.color}`} />
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+                  gw.is_enabled ? 'bg-primary/10' : 'bg-secondary'
+                }`}>
+                  <IconComp className={`h-4.5 w-4.5 ${gw.is_enabled ? meta.color : 'text-muted-foreground'}`} />
+                </div>
                 <div>
-                  <h3 className="font-semibold">{meta.label}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold">{meta.label}</h3>
+                    {!isCod && (
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        isLive
+                          ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
+                          : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400'
+                      }`}>
+                        {isLive ? '🚀 LIVE' : '🧪 TEST'}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground">{meta.desc}</p>
                 </div>
               </div>
@@ -144,7 +225,73 @@ const AdminPayments: React.FC = () => {
               </button>
             </div>
 
-            {/* Body — only show config for non-COD */}
+            {/* COD Configuration */}
+            {isCod && (
+              <div className="px-6 py-5 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5">
+                      <IndianRupee className="h-3.5 w-3.5" /> Extra Charge
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">₹</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={getEditValue(gw, 'cod_extra_charge') as number}
+                        onChange={(e) => setEditField(gw.id, 'cod_extra_charge', Math.max(0, Number(e.target.value)))}
+                        className="w-full pl-7 pr-3 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        placeholder="0"
+                      />
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-1">Set to 0 for no extra charge</p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1.5">Minimum Order for COD</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">₹</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={getEditValue(gw, 'cod_min_order') as number}
+                        onChange={(e) => setEditField(gw.id, 'cod_min_order', Math.max(0, Number(e.target.value)))}
+                        className="w-full pl-7 pr-3 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        placeholder="0"
+                      />
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-1">Set to 0 for no minimum</p>
+                  </div>
+                </div>
+
+                {Number(getEditValue(gw, 'cod_extra_charge')) > 0 && (
+                  <div className="flex items-start gap-2 bg-secondary/70 rounded-lg p-3 text-xs">
+                    <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      Customers will see "Cash on Delivery (+₹{Number(getEditValue(gw, 'cod_extra_charge'))}&nbsp;fee)" at checkout. This charge is added to their order total.
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex justify-end pt-1">
+                  <Button
+                    onClick={() => handleSave(gw)}
+                    disabled={!hasChanges(gw.id) || saving === gw.id}
+                    size="sm"
+                    className="gap-1.5"
+                  >
+                    {saving === gw.id ? (
+                      <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving...</>
+                    ) : (
+                      <><CheckCircle2 className="h-3.5 w-3.5" /> Save Changes</>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Gateway Configuration (Razorpay / Cashfree) */}
             {!isCod && (
               <div className="px-6 py-5 space-y-4">
                 {/* Environment Toggle */}
@@ -153,12 +300,12 @@ const AdminPayments: React.FC = () => {
                     <label className="text-sm font-medium">Environment</label>
                     <p className="text-xs text-muted-foreground">Switch between test and production</p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-0">
                     <button
                       type="button"
                       onClick={() => setEditField(gw.id, 'environment', 'test')}
                       className={`px-3 py-1.5 text-xs font-medium rounded-l-lg border transition-colors ${
-                        !isLive ? 'bg-yellow-100 border-yellow-300 text-yellow-800' : 'border-border text-muted-foreground hover:bg-secondary'
+                        !isLive ? 'bg-yellow-100 border-yellow-300 text-yellow-800 dark:bg-yellow-900/40 dark:border-yellow-700 dark:text-yellow-400' : 'border-border text-muted-foreground hover:bg-secondary'
                       }`}
                     >
                       🧪 Test
@@ -166,8 +313,8 @@ const AdminPayments: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setEditField(gw.id, 'environment', 'live')}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-r-lg border transition-colors ${
-                        isLive ? 'bg-green-100 border-green-300 text-green-800' : 'border-border text-muted-foreground hover:bg-secondary'
+                      className={`px-3 py-1.5 text-xs font-medium rounded-r-lg border-y border-r transition-colors ${
+                        isLive ? 'bg-green-100 border-green-300 text-green-800 dark:bg-green-900/40 dark:border-green-700 dark:text-green-400' : 'border-border text-muted-foreground hover:bg-secondary'
                       }`}
                     >
                       🚀 Live
@@ -176,9 +323,9 @@ const AdminPayments: React.FC = () => {
                 </div>
 
                 {isLive && (
-                  <div className="flex items-start gap-2 bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-lg p-3 text-xs">
+                  <div className="flex items-start gap-2 bg-yellow-50 dark:bg-yellow-950/30 text-yellow-800 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 text-xs">
                     <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-                    <span>Live mode uses production keys. Real payments will be processed.</span>
+                    <span><strong>Warning:</strong> Live mode uses production keys. Real payments will be processed. Ensure keys are correct before enabling.</span>
                   </div>
                 )}
 
@@ -191,8 +338,8 @@ const AdminPayments: React.FC = () => {
                     type="text"
                     value={getEditValue(gw, 'key_id') as string}
                     onChange={(e) => setEditField(gw.id, 'key_id', e.target.value)}
-                    className="w-full px-3 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    placeholder={gw.gateway_name === 'razorpay' ? 'rzp_test_...' : 'your_app_id'}
+                    className="w-full px-3 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-mono"
+                    placeholder={gw.gateway_name === 'razorpay' ? (isLive ? 'rzp_live_...' : 'rzp_test_...') : 'your_app_id'}
                   />
                 </div>
 
@@ -206,7 +353,7 @@ const AdminPayments: React.FC = () => {
                       type={showSecrets[`${gw.id}_secret`] ? 'text' : 'password'}
                       value={getEditValue(gw, 'key_secret') as string}
                       onChange={(e) => setEditField(gw.id, 'key_secret', e.target.value)}
-                      className="w-full px-3 py-2.5 pr-10 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      className="w-full px-3 py-2.5 pr-10 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-mono"
                       placeholder="••••••••••"
                     />
                     <button
@@ -229,7 +376,7 @@ const AdminPayments: React.FC = () => {
                       type={showSecrets[`${gw.id}_webhook`] ? 'text' : 'password'}
                       value={getEditValue(gw, 'webhook_secret') as string}
                       onChange={(e) => setEditField(gw.id, 'webhook_secret', e.target.value)}
-                      className="w-full px-3 py-2.5 pr-10 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      className="w-full px-3 py-2.5 pr-10 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-mono"
                       placeholder="Optional — for webhook signature verification"
                     />
                     <button
@@ -245,11 +392,19 @@ const AdminPayments: React.FC = () => {
                 {/* Webhook URL info */}
                 <div className="bg-secondary/70 rounded-lg p-3 text-xs space-y-1">
                   <p className="font-medium">Webhook URL:</p>
-                  <code className="block text-[11px] break-all text-muted-foreground">
-                    {`https://rwrznilwfczmichtfyyo.supabase.co/functions/v1/${gw.gateway_name}-webhook`}
+                  <code className="block text-[11px] break-all text-muted-foreground font-mono">
+                    {`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${gw.gateway_name}-webhook`}
                   </code>
                   <p className="text-muted-foreground">Add this URL in your {meta.label} dashboard webhook settings.</p>
                 </div>
+
+                {/* Validation warning */}
+                {gw.is_enabled && !(getEditValue(gw, 'key_id') as string)?.trim() && (
+                  <div className="flex items-start gap-2 bg-destructive/10 text-destructive border border-destructive/20 rounded-lg p-3 text-xs">
+                    <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                    <span>Gateway is enabled but missing API keys. Payments will fail until keys are configured.</span>
+                  </div>
+                )}
 
                 {/* Save */}
                 <div className="flex justify-end pt-1">
