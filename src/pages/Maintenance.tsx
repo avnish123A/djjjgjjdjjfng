@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Gift, Mail, ArrowRight, Sparkles } from 'lucide-react';
+import { Mail, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useSiteMode } from '@/contexts/SiteModeContext';
@@ -27,11 +27,15 @@ const Maintenance = () => {
       <div className="relative z-10 max-w-md w-full text-center animate-slide-up">
         {/* Glass card container */}
         <div className="glass-card rounded-3xl p-8 sm:p-10 space-y-7">
-          {/* Animated gift icon */}
+          {/* EkamGift logo */}
           <div className="flex justify-center">
             <div className="relative">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center animate-float-gentle">
-                <Gift className="w-10 h-10 text-primary" />
+              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center animate-float-gentle p-2">
+                <img
+                  src="/logo-ekamgift.png"
+                  alt="EkamGift"
+                  className="h-16 w-auto object-contain"
+                />
               </div>
               {/* Pulse ring */}
               <div className="absolute inset-0 rounded-2xl border-2 border-primary/20 animate-ping" style={{ animationDuration: '2.5s' }} />
@@ -40,11 +44,6 @@ const Maintenance = () => {
 
           {/* Brand */}
           <div className="space-y-3">
-            <div className="flex items-center justify-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              <h2 className="text-xs font-semibold tracking-[0.2em] uppercase text-primary">EkamGift</h2>
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-            </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">{title}</h1>
             <p className="text-muted-foreground text-sm leading-relaxed">{subtitle}</p>
           </div>
