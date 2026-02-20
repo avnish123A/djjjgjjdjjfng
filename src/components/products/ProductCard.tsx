@@ -16,6 +16,10 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!product.inStock) {
+      toast.error('This product is out of stock');
+      return;
+    }
     addItem({
       id: product.id,
       name: product.name,
@@ -70,6 +74,11 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
             {(product.badge === 'Best Seller' || product.badge === 'Featured') && (
               <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-foreground text-background rounded-full">
                 {product.badge}
+              </span>
+            )}
+            {product.inStock && product.stock <= (product.lowStockThreshold || 5) && (
+              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-amber-500 text-white rounded-full">
+                Only {product.stock} left
               </span>
             )}
           </div>

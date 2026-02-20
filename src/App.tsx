@@ -27,11 +27,12 @@ const Checkout = lazy(() => import("./pages/Checkout"));
 const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
 const TrackOrder = lazy(() => import("./pages/TrackOrder"));
 
-// Policy pages (lazy)
+// Policy pages (lazy) - kept as fallback, dynamic CMS pages take priority
 const PrivacyPolicy = lazy(() => import("./pages/policies/PrivacyPolicy"));
 const TermsConditions = lazy(() => import("./pages/policies/TermsConditions"));
 const ReturnPolicy = lazy(() => import("./pages/policies/ReturnPolicy"));
 const ShippingPolicy = lazy(() => import("./pages/policies/ShippingPolicy"));
+const DynamicPage = lazy(() => import("./pages/policies/DynamicPage"));
 const ContactUs = lazy(() => import("./pages/ContactUs"));
 
 // Lazy-loaded admin pages
@@ -49,6 +50,8 @@ const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminSiteSettings = lazy(() => import("./pages/admin/AdminSiteSettings"));
 const AdminQueries = lazy(() => import("./pages/admin/AdminQueries"));
+const AdminPages = lazy(() => import("./pages/admin/AdminPages"));
+const AdminPageEditor = lazy(() => import("./pages/admin/AdminPageEditor"));
 
 const queryClient = new QueryClient();
 
@@ -181,12 +184,15 @@ const App = () => {
                 <Route path="/order-success" element={<StorefrontRoute><OrderSuccess /></StorefrontRoute>} />
                 <Route path="/track-order" element={<StorefrontRoute><TrackOrder /></StorefrontRoute>} />
 
-                {/* Policy pages */}
+                {/* Policy pages — legacy routes kept for backwards compatibility */}
                 <Route path="/policies/privacy" element={<StorefrontRoute><PrivacyPolicy /></StorefrontRoute>} />
                 <Route path="/policies/terms" element={<StorefrontRoute><TermsConditions /></StorefrontRoute>} />
                 <Route path="/policies/returns" element={<StorefrontRoute><ReturnPolicy /></StorefrontRoute>} />
                 <Route path="/policies/shipping" element={<StorefrontRoute><ShippingPolicy /></StorefrontRoute>} />
                 <Route path="/contact" element={<StorefrontRoute><ContactUs /></StorefrontRoute>} />
+
+                {/* Dynamic CMS pages */}
+                <Route path="/page/:slug" element={<StorefrontRoute><DynamicPage /></StorefrontRoute>} />
 
                 {/* Redirect old auth routes */}
                 <Route path="/login" element={<Navigate to="/" replace />} />
@@ -229,6 +235,9 @@ const App = () => {
                   <Route path="coupons" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCoupons /></Suspense>} />
                   <Route path="analytics" element={<Suspense fallback={<AdminLoadingFallback />}><AdminAnalytics /></Suspense>} />
                   <Route path="queries" element={<Suspense fallback={<AdminLoadingFallback />}><AdminQueries /></Suspense>} />
+                  <Route path="pages" element={<Suspense fallback={<AdminLoadingFallback />}><AdminPages /></Suspense>} />
+                  <Route path="pages/new" element={<Suspense fallback={<AdminLoadingFallback />}><AdminPageEditor /></Suspense>} />
+                  <Route path="pages/edit/:id" element={<Suspense fallback={<AdminLoadingFallback />}><AdminPageEditor /></Suspense>} />
                   <Route path="settings" element={<Suspense fallback={<AdminLoadingFallback />}><AdminSiteSettings /></Suspense>} />
                 </Route>
 

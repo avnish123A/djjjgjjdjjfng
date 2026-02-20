@@ -16,6 +16,7 @@ import {
   List,
   Settings,
   MessageSquare,
+  FileText,
 } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { useInactivityLogout } from '@/hooks/useInactivityLogout';
@@ -44,6 +45,7 @@ const navItems: NavItem[] = [
   { label: 'Categories', icon: FolderOpen, path: '/admin/categories' },
   { label: 'Coupons', icon: Ticket, path: '/admin/coupons' },
   { label: 'Queries', icon: MessageSquare, path: '/admin/queries' },
+  { label: 'Pages', icon: FileText, path: '/admin/pages' },
   { label: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
   { label: 'Settings', icon: Settings, path: '/admin/settings' },
 ];

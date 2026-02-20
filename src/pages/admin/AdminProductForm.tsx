@@ -54,6 +54,8 @@ const AdminProductForm: React.FC = () => {
     price: '',
     original_price: '',
     stock: '0',
+    low_stock_threshold: '5',
+    track_inventory: true,
     is_active: true,
     selectedSizes: [] as string[],
     selectedColors: [] as string[],
@@ -72,6 +74,8 @@ const AdminProductForm: React.FC = () => {
         price: existing.price?.toString() || '',
         original_price: existing.original_price?.toString() || '',
         stock: existing.stock?.toString() || '0',
+        low_stock_threshold: (existing as any).low_stock_threshold?.toString() || '5',
+        track_inventory: (existing as any).track_inventory ?? true,
         is_active: existing.is_active ?? true,
         selectedSizes: existing.sizes || [],
         selectedColors: existing.colors || [],
@@ -142,14 +146,31 @@ const AdminProductForm: React.FC = () => {
         imageUrls = [...imageUrls, ...newUrls];
       }
 
+      const priceVal = parseFloat(form.price);
+      const stockVal = parseInt(form.stock) || 0;
+      const thresholdVal = parseInt(form.low_stock_threshold) || 5;
+
+      if (priceVal < 0) {
+        toast.error('Price cannot be negative');
+        setSaving(false);
+        return;
+      }
+      if (stockVal < 0) {
+        toast.error('Stock cannot be negative');
+        setSaving(false);
+        return;
+      }
+
       const productData = {
-        title: form.title,
+        title: form.title.trim(),
         description: form.description,
         category_id: form.category_id || null,
         brand: form.brand,
-        price: parseFloat(form.price),
+        price: priceVal,
         original_price: form.original_price ? parseFloat(form.original_price) : null,
-        stock: parseInt(form.stock) || 0,
+        stock: stockVal,
+        low_stock_threshold: thresholdVal,
+        track_inventory: form.track_inventory,
         is_active: form.is_active,
         sizes: form.selectedSizes,
         colors: form.selectedColors,
@@ -168,6 +189,8 @@ const AdminProductForm: React.FC = () => {
       }
 
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['storefront-products'] });
+      queryClient.invalidateQueries({ queryKey: ['storefront-product'] });
       navigate('/admin/products');
     } catch (err: any) {
       toast.error(err.message || 'Failed to save product');
@@ -234,16 +257,16 @@ const AdminProductForm: React.FC = () => {
           </div>
         </div>
 
-        {/* Pricing */}
+        {/* Pricing & Inventory */}
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-          <h2 className="font-semibold">Pricing & Stock</h2>
+          <h2 className="font-semibold">Pricing & Inventory</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="price">Price (₹) *</Label>
               <Input id="price" type="number" value={form.price} onChange={(e) => updateField('price', e.target.value)} placeholder="0" min="0" step="0.01" required />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="originalPrice">Original Price (₹)</Label>
+              <Label htmlFor="originalPrice">Compare Price (₹)</Label>
               <Input id="originalPrice" type="number" value={form.original_price} onChange={(e) => updateField('original_price', e.target.value)} placeholder="0" min="0" step="0.01" />
             </div>
             <div className="space-y-2">
@@ -251,6 +274,21 @@ const AdminProductForm: React.FC = () => {
               <Input id="stock" type="number" value={form.stock} onChange={(e) => updateField('stock', e.target.value)} placeholder="0" min="0" />
             </div>
           </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="lowStock">Low Stock Alert Threshold</Label>
+              <Input id="lowStock" type="number" value={form.low_stock_threshold} onChange={(e) => updateField('low_stock_threshold', e.target.value)} placeholder="5" min="0" />
+              <p className="text-xs text-muted-foreground">Alert when stock falls below this</p>
+            </div>
+            <div className="space-y-2 flex items-end pb-1">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={form.track_inventory} onChange={(e) => updateField('track_inventory', e.target.checked)} className="accent-accent w-4 h-4" />
+                <span className="text-sm font-medium">Track Inventory</span>
+              </label>
+            </div>
+          </div>
+
           <div className="flex items-center gap-3">
             <Label>Status:</Label>
             <label className="flex items-center gap-2 cursor-pointer">
@@ -262,6 +300,13 @@ const AdminProductForm: React.FC = () => {
               <span className="text-sm">Inactive</span>
             </label>
           </div>
+
+          {/* Low stock warning */}
+          {parseInt(form.stock) > 0 && parseInt(form.stock) <= parseInt(form.low_stock_threshold) && (
+            <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-600 text-sm">
+              <span className="font-medium">⚠ Low stock warning:</span> Current stock ({form.stock}) is at or below threshold ({form.low_stock_threshold})
+            </div>
+          )}
         </div>
 
         {/* Images */}

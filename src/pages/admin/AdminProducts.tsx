@@ -116,7 +116,14 @@ const AdminProducts: React.FC = () => {
                     <span className="text-xs text-muted-foreground line-through ml-2">₹{Number(product.original_price).toLocaleString()}</span>
                   )}
                 </td>
-                <td className="px-6 py-3 text-sm">{product.stock}</td>
+                <td className="px-6 py-3 text-sm">
+                  <span className={product.stock <= (product as any).low_stock_threshold ? 'text-amber-500 font-medium' : ''}>
+                    {product.stock}
+                  </span>
+                  {product.stock <= (product as any).low_stock_threshold && product.stock > 0 && (
+                    <span className="ml-1.5 text-[10px] text-amber-500">Low</span>
+                  )}
+                </td>
                 <td className="px-6 py-3">
                   <button onClick={() => toggleMutation.mutate({ id: product.id, isActive: product.is_active })} className="flex items-center gap-1.5">
                     {product.is_active ? <ToggleRight className="h-6 w-6 text-success" /> : <ToggleLeft className="h-6 w-6 text-muted-foreground" />}
