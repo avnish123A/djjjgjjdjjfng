@@ -14,6 +14,7 @@ import {
   ChevronDown,
   PlusCircle,
   List,
+  Settings,
 } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { useInactivityLogout } from '@/hooks/useInactivityLogout';

@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
+import { SiteModeProvider, useSiteMode } from "@/contexts/SiteModeContext";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -20,6 +21,7 @@ import Checkout from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
 import TrackOrder from "./pages/TrackOrder";
 import NotFound from "./pages/NotFound";
+import Maintenance from "./pages/Maintenance";
 
 // Policy pages
 import PrivacyPolicy from "./pages/policies/PrivacyPolicy";
@@ -40,6 +42,7 @@ const AdminCustomers = lazy(() => import("./pages/admin/AdminCustomers"));
 const AdminCategories = lazy(() => import("./pages/admin/AdminCategories"));
 const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
+const AdminSiteSettings = lazy(() => import("./pages/admin/AdminSiteSettings"));
 
 const queryClient = new QueryClient();
 
@@ -53,18 +56,14 @@ const AdminLoadingFallback = () => (
   </div>
 );
 
-// Protected route wrapper — redirects to login, preserves intended path
+// Protected route wrapper
 const AdminGuard = ({ children }: { children: React.ReactNode }) => {
   const { isLoggedIn, isAdmin, isLoading, user } = useAdminAuth();
   const location = useLocation();
 
-  if (isLoading) {
-    return <AdminLoadingFallback />;
-  }
+  if (isLoading) return <AdminLoadingFallback />;
 
-  if (!user) {
-    return <Navigate to="/admin/login" state={{ from: location.pathname }} replace />;
-  }
+  if (!user) return <Navigate to="/admin/login" state={{ from: location.pathname }} replace />;
 
   if (user && !isAdmin) {
     return (
@@ -75,10 +74,7 @@ const AdminGuard = ({ children }: { children: React.ReactNode }) => {
           </div>
           <h2 className="text-xl font-bold text-white">Access Denied</h2>
           <p className="text-sm text-white/50">You don't have admin privileges. Contact a super admin to get access.</p>
-          <button
-            onClick={() => window.location.href = '/admin/login'}
-            className="text-accent text-sm hover:underline"
-          >
+          <button onClick={() => window.location.href = '/admin/login'} className="text-accent text-sm hover:underline">
             Back to login
           </button>
         </div>
@@ -104,6 +100,20 @@ const AdminLoginGuard = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Maintenance guard — blocks public routes when site isn't live
+const MaintenanceGuard = ({ children }: { children: React.ReactNode }) => {
+  const { siteMode, isLoading } = useSiteMode();
+  const { isAdmin } = useAdminAuth();
+
+  // Admins always bypass
+  if (isAdmin) return <>{children}</>;
+  // While loading, show content (avoids flash)
+  if (isLoading) return <>{children}</>;
+  // If not live, show maintenance
+  if (siteMode !== 'live') return <Maintenance />;
+  return <>{children}</>;
+};
+
 // Storefront layout wrapper
 const StorefrontLayout = ({ children }: { children: React.ReactNode }) => (
   <div className="flex flex-col min-h-screen pb-[60px] lg:pb-0">
@@ -113,6 +123,13 @@ const StorefrontLayout = ({ children }: { children: React.ReactNode }) => (
     <BottomNav />
     <BackToTop />
   </div>
+);
+
+// Storefront route with maintenance guard
+const StorefrontRoute = ({ children }: { children: React.ReactNode }) => (
+  <MaintenanceGuard>
+    <StorefrontLayout>{children}</StorefrontLayout>
+  </MaintenanceGuard>
 );
 
 const App = () => {
@@ -125,66 +142,72 @@ const App = () => {
       <Sonner />
       <CartProvider>
         <AdminAuthProvider>
-          <BrowserRouter>
-            <ScrollToTop />
-            <Routes>
-              {/* Storefront routes */}
-              <Route path="/" element={<StorefrontLayout><Index /></StorefrontLayout>} />
-              <Route path="/products" element={<StorefrontLayout><ProductListing /></StorefrontLayout>} />
-              <Route path="/product/:id" element={<StorefrontLayout><ProductDetail /></StorefrontLayout>} />
-              <Route path="/cart" element={<StorefrontLayout><Cart /></StorefrontLayout>} />
-              <Route path="/checkout" element={<StorefrontLayout><Checkout /></StorefrontLayout>} />
-              <Route path="/order-success" element={<StorefrontLayout><OrderSuccess /></StorefrontLayout>} />
-              <Route path="/track-order" element={<StorefrontLayout><TrackOrder /></StorefrontLayout>} />
+          <SiteModeProvider>
+            <BrowserRouter>
+              <ScrollToTop />
+              <Routes>
+                {/* Storefront routes — guarded by maintenance mode */}
+                <Route path="/" element={<StorefrontRoute><Index /></StorefrontRoute>} />
+                <Route path="/products" element={<StorefrontRoute><ProductListing /></StorefrontRoute>} />
+                <Route path="/product/:id" element={<StorefrontRoute><ProductDetail /></StorefrontRoute>} />
+                <Route path="/cart" element={<StorefrontRoute><Cart /></StorefrontRoute>} />
+                <Route path="/checkout" element={<StorefrontRoute><Checkout /></StorefrontRoute>} />
+                <Route path="/order-success" element={<StorefrontRoute><OrderSuccess /></StorefrontRoute>} />
+                <Route path="/track-order" element={<StorefrontRoute><TrackOrder /></StorefrontRoute>} />
 
-              {/* Policy pages */}
-              <Route path="/policies/privacy" element={<StorefrontLayout><PrivacyPolicy /></StorefrontLayout>} />
-              <Route path="/policies/terms" element={<StorefrontLayout><TermsConditions /></StorefrontLayout>} />
-              <Route path="/policies/returns" element={<StorefrontLayout><ReturnPolicy /></StorefrontLayout>} />
-              <Route path="/policies/shipping" element={<StorefrontLayout><ShippingPolicy /></StorefrontLayout>} />
+                {/* Policy pages */}
+                <Route path="/policies/privacy" element={<StorefrontRoute><PrivacyPolicy /></StorefrontRoute>} />
+                <Route path="/policies/terms" element={<StorefrontRoute><TermsConditions /></StorefrontRoute>} />
+                <Route path="/policies/returns" element={<StorefrontRoute><ReturnPolicy /></StorefrontRoute>} />
+                <Route path="/policies/shipping" element={<StorefrontRoute><ShippingPolicy /></StorefrontRoute>} />
 
-              {/* Redirect old auth routes */}
-              <Route path="/login" element={<Navigate to="/" replace />} />
-              <Route path="/signup" element={<Navigate to="/" replace />} />
-              <Route path="/account/*" element={<Navigate to="/track-order" replace />} />
+                {/* Redirect old auth routes */}
+                <Route path="/login" element={<Navigate to="/" replace />} />
+                <Route path="/signup" element={<Navigate to="/" replace />} />
+                <Route path="/account/*" element={<Navigate to="/track-order" replace />} />
 
-              {/* Admin routes */}
-              <Route path="/admin/login" element={
-                <Suspense fallback={<AdminLoadingFallback />}>
-                  <AdminLoginGuard><AdminLogin /></AdminLoginGuard>
-                </Suspense>
-              } />
-              <Route path="/admin/reset-password" element={
-                <Suspense fallback={<AdminLoadingFallback />}>
-                  <AdminResetPassword />
-                </Suspense>
-              } />
-              <Route
-                path="/admin"
-                element={
+                {/* Maintenance page (direct access) */}
+                <Route path="/maintenance" element={<Maintenance />} />
+
+                {/* Admin routes — never blocked by maintenance */}
+                <Route path="/admin/login" element={
                   <Suspense fallback={<AdminLoadingFallback />}>
-                    <AdminGuard>
-                      <AdminLayout />
-                    </AdminGuard>
+                    <AdminLoginGuard><AdminLogin /></AdminLoginGuard>
                   </Suspense>
-                }
-              >
-                <Route index element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="dashboard" element={<Suspense fallback={<AdminLoadingFallback />}><AdminDashboard /></Suspense>} />
-                <Route path="products" element={<Suspense fallback={<AdminLoadingFallback />}><AdminProducts /></Suspense>} />
-                <Route path="products/add" element={<Suspense fallback={<AdminLoadingFallback />}><AdminProductForm /></Suspense>} />
-                <Route path="products/edit/:id" element={<Suspense fallback={<AdminLoadingFallback />}><AdminProductForm /></Suspense>} />
-                <Route path="orders" element={<Suspense fallback={<AdminLoadingFallback />}><AdminOrders /></Suspense>} />
-                <Route path="orders/:id" element={<Suspense fallback={<AdminLoadingFallback />}><AdminOrderDetail /></Suspense>} />
-                <Route path="customers" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCustomers /></Suspense>} />
-                <Route path="categories" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCategories /></Suspense>} />
-                <Route path="coupons" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCoupons /></Suspense>} />
-                <Route path="analytics" element={<Suspense fallback={<AdminLoadingFallback />}><AdminAnalytics /></Suspense>} />
-              </Route>
+                } />
+                <Route path="/admin/reset-password" element={
+                  <Suspense fallback={<AdminLoadingFallback />}>
+                    <AdminResetPassword />
+                  </Suspense>
+                } />
+                <Route
+                  path="/admin"
+                  element={
+                    <Suspense fallback={<AdminLoadingFallback />}>
+                      <AdminGuard>
+                        <AdminLayout />
+                      </AdminGuard>
+                    </Suspense>
+                  }
+                >
+                  <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                  <Route path="dashboard" element={<Suspense fallback={<AdminLoadingFallback />}><AdminDashboard /></Suspense>} />
+                  <Route path="products" element={<Suspense fallback={<AdminLoadingFallback />}><AdminProducts /></Suspense>} />
+                  <Route path="products/add" element={<Suspense fallback={<AdminLoadingFallback />}><AdminProductForm /></Suspense>} />
+                  <Route path="products/edit/:id" element={<Suspense fallback={<AdminLoadingFallback />}><AdminProductForm /></Suspense>} />
+                  <Route path="orders" element={<Suspense fallback={<AdminLoadingFallback />}><AdminOrders /></Suspense>} />
+                  <Route path="orders/:id" element={<Suspense fallback={<AdminLoadingFallback />}><AdminOrderDetail /></Suspense>} />
+                  <Route path="customers" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCustomers /></Suspense>} />
+                  <Route path="categories" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCategories /></Suspense>} />
+                  <Route path="coupons" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCoupons /></Suspense>} />
+                  <Route path="analytics" element={<Suspense fallback={<AdminLoadingFallback />}><AdminAnalytics /></Suspense>} />
+                  <Route path="settings" element={<Suspense fallback={<AdminLoadingFallback />}><AdminSiteSettings /></Suspense>} />
+                </Route>
 
-              <Route path="*" element={<StorefrontLayout><NotFound /></StorefrontLayout>} />
-            </Routes>
-          </BrowserRouter>
+                <Route path="*" element={<StorefrontRoute><NotFound /></StorefrontRoute>} />
+              </Routes>
+            </BrowserRouter>
+          </SiteModeProvider>
         </AdminAuthProvider>
       </CartProvider>
     </TooltipProvider>

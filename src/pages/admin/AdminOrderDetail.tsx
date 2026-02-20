@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, Printer, Truck, CreditCard, Loader2 } from 'lucide-react';
+import { ArrowLeft, Printer, CreditCard, Loader2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,8 +12,8 @@ const allStatuses = ['placed', 'confirmed', 'packed', 'shipped', 'delivered', 'c
 
 const statusColors: Record<string, string> = {
   placed: 'bg-muted text-muted-foreground',
-  confirmed: 'bg-accent/10 text-accent',
-  packed: 'bg-accent/20 text-accent',
+  confirmed: 'bg-primary/10 text-primary',
+  packed: 'bg-primary/20 text-primary',
   shipped: 'bg-success/10 text-success',
   delivered: 'bg-success/20 text-success',
   cancelled: 'bg-destructive/10 text-destructive',
@@ -21,9 +21,55 @@ const statusColors: Record<string, string> = {
 
 const paymentColors: Record<string, string> = {
   paid: 'bg-success/10 text-success',
-  pending: 'bg-accent/10 text-accent',
+  pending: 'bg-primary/10 text-primary',
   failed: 'bg-destructive/10 text-destructive',
   refunded: 'bg-muted text-muted-foreground',
+};
+
+/* ─── Copy Button Helper ─── */
+const CopyButton: React.FC<{ text: string; label?: string }> = ({ text, label }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button
+      onClick={handleCopy}
+      className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+      title={`Copy ${label || ''}`}
+    >
+      {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3" />}
+      {copied ? 'Copied' : ''}
+    </button>
+  );
+};
+
+/* ─── Format Address ─── */
+const formatAddress = (addr: any): string => {
+  if (!addr) return '—';
+  const parts = [
+    addr.address || addr.street || addr.address_line1,
+    addr.address2 || addr.address_line2,
+    addr.city,
+    addr.state,
+    addr.pincode || addr.postal_code,
+    addr.country,
+  ].filter(Boolean);
+  return parts.join(', ') || '—';
+};
+
+const formatAddressLines = (addr: any): string[] => {
+  if (!addr) return ['—'];
+  const lines: string[] = [];
+  if (addr.address || addr.street || addr.address_line1) lines.push(addr.address || addr.street || addr.address_line1);
+  if (addr.address2 || addr.address_line2) lines.push(addr.address2 || addr.address_line2);
+  const cityState = [addr.city, addr.state].filter(Boolean).join(', ');
+  if (cityState) lines.push(cityState);
+  if (addr.pincode || addr.postal_code) lines.push(addr.pincode || addr.postal_code);
+  if (addr.country) lines.push(addr.country);
+  return lines.length > 0 ? lines : ['—'];
 };
 
 const AdminOrderDetail: React.FC = () => {
@@ -34,11 +80,7 @@ const AdminOrderDetail: React.FC = () => {
   const { data: order, isLoading } = useQuery({
     queryKey: ['admin-order', id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle();
+      const { data, error } = await supabase.from('orders').select('*').eq('id', id).maybeSingle();
       if (error) throw error;
       return data;
     },
@@ -48,10 +90,7 @@ const AdminOrderDetail: React.FC = () => {
   const { data: orderItems = [] } = useQuery({
     queryKey: ['admin-order-items', id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('order_items')
-        .select('*')
-        .eq('order_id', id!);
+      const { data, error } = await supabase.from('order_items').select('*').eq('order_id', id!);
       if (error) throw error;
       return data;
     },
@@ -80,19 +119,13 @@ const AdminOrderDetail: React.FC = () => {
       const { error } = await supabase.from('orders').update(updateData).eq('id', id!);
       if (error) throw error;
 
-      // Fire n8n webhook (best-effort, non-blocking)
       const eventMap: Record<string, string> = {
-        shipped: 'order_shipped',
-        delivered: 'order_delivered',
-        cancelled: 'order_cancelled',
-        confirmed: 'order_confirmed',
-        packed: 'order_packed',
+        shipped: 'order_shipped', delivered: 'order_delivered', cancelled: 'order_cancelled',
+        confirmed: 'order_confirmed', packed: 'order_packed',
       };
       const event = eventMap[status];
       if (event) {
-        supabase.functions.invoke('n8n-webhook', {
-          body: { event, order_id: id },
-        }).catch(() => {});
+        supabase.functions.invoke('n8n-webhook', { body: { event, order_id: id } }).catch(() => {});
       }
     },
     onSuccess: () => {
@@ -133,9 +166,11 @@ const AdminOrderDetail: React.FC = () => {
   }
 
   const address = order.shipping_address as any;
+  const addressStr = formatAddress(address);
 
   return (
     <div className="space-y-6 max-w-5xl">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/admin/orders')} className="p-2 hover:bg-secondary rounded-lg">
@@ -191,20 +226,26 @@ const AdminOrderDetail: React.FC = () => {
                 <p className="font-medium mt-1">{order.customer_name}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Email</p>
+                <p className="text-muted-foreground flex items-center gap-2">
+                  Email <CopyButton text={order.customer_email} label="email" />
+                </p>
                 <p className="font-medium mt-1">{order.customer_email}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Phone</p>
+                <p className="text-muted-foreground flex items-center gap-2">
+                  Phone <CopyButton text={order.customer_phone || ''} label="phone" />
+                </p>
                 <p className="font-medium mt-1">{order.customer_phone || '—'}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Shipping Address</p>
-                <p className="font-medium mt-1">
-                  {address?.street && `${address.street}, `}{address?.city && `${address.city}, `}
-                  {address?.state && `${address.state}`}{address?.pincode && ` - ${address.pincode}`}
-                  {!address?.street && '—'}
+                <p className="text-muted-foreground flex items-center gap-2">
+                  Shipping Address <CopyButton text={addressStr} label="address" />
                 </p>
+                <div className="font-medium mt-1 space-y-0.5">
+                  {formatAddressLines(address).map((line, i) => (
+                    <p key={i}>{line}</p>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -215,32 +256,34 @@ const AdminOrderDetail: React.FC = () => {
               <h2 className="font-semibold">Items ({orderItems.length})</h2>
             </div>
             {orderItems.length > 0 ? (
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="text-left text-xs font-medium text-muted-foreground px-6 py-3">Product</th>
-                    <th className="text-left text-xs font-medium text-muted-foreground px-6 py-3">Size/Color</th>
-                    <th className="text-left text-xs font-medium text-muted-foreground px-6 py-3">Qty</th>
-                    <th className="text-left text-xs font-medium text-muted-foreground px-6 py-3">Price</th>
-                    <th className="text-left text-xs font-medium text-muted-foreground px-6 py-3">Subtotal</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {orderItems.map((item: any) => (
-                    <tr key={item.id} className="border-b border-border last:border-0">
-                      <td className="px-6 py-4 text-sm font-medium">{item.title}</td>
-                      <td className="px-6 py-4 text-sm text-muted-foreground">
-                        {item.size || '—'} / {item.color ? (
-                          <span className="inline-block w-3 h-3 rounded-full border border-border align-middle" style={{ backgroundColor: item.color }} />
-                        ) : '—'}
-                      </td>
-                      <td className="px-6 py-4 text-sm">{item.quantity}</td>
-                      <td className="px-6 py-4 text-sm">₹{Number(item.price).toLocaleString()}</td>
-                      <td className="px-6 py-4 text-sm font-medium">₹{(Number(item.price) * item.quantity).toLocaleString()}</td>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left text-xs font-medium text-muted-foreground px-6 py-3">Product</th>
+                      <th className="text-left text-xs font-medium text-muted-foreground px-6 py-3">Size/Color</th>
+                      <th className="text-left text-xs font-medium text-muted-foreground px-6 py-3">Qty</th>
+                      <th className="text-left text-xs font-medium text-muted-foreground px-6 py-3">Price</th>
+                      <th className="text-left text-xs font-medium text-muted-foreground px-6 py-3">Subtotal</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {orderItems.map((item: any) => (
+                      <tr key={item.id} className="border-b border-border last:border-0">
+                        <td className="px-6 py-4 text-sm font-medium">{item.title}</td>
+                        <td className="px-6 py-4 text-sm text-muted-foreground">
+                          {item.size || '—'} / {item.color ? (
+                            <span className="inline-block w-3 h-3 rounded-full border border-border align-middle" style={{ backgroundColor: item.color }} />
+                          ) : '—'}
+                        </td>
+                        <td className="px-6 py-4 text-sm">{item.quantity}</td>
+                        <td className="px-6 py-4 text-sm">₹{Number(item.price).toLocaleString()}</td>
+                        <td className="px-6 py-4 text-sm font-medium">₹{(Number(item.price) * item.quantity).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             ) : (
               <div className="text-center py-8 text-muted-foreground">No items</div>
             )}
@@ -301,7 +344,7 @@ const AdminOrderDetail: React.FC = () => {
                 </div>
               </div>
             )}
-            <Button variant="accent" className="w-full" onClick={() => updateStatusMutation.mutate()} disabled={updateStatusMutation.isPending}>
+            <Button className="w-full" onClick={() => updateStatusMutation.mutate()} disabled={updateStatusMutation.isPending}>
               {updateStatusMutation.isPending ? 'Updating...' : 'Update Status'}
             </Button>
           </div>
