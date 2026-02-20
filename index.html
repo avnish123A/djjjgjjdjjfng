@@ -19,18 +19,14 @@
   </head>
   <body>
     <div id="root">
-      <div id="initial-loader" style="position:fixed;inset:0;z-index:99999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
-        <div style="width:56px;height:56px;perspective:120px;">
-          <div style="width:100%;height:100%;border-radius:12px;background:linear-gradient(135deg,hsl(174,60%,51%),hsl(174,60%,35%));animation:cube-spin 1.4s ease-in-out infinite;"></div>
-        </div>
-        <img src="/logo-ekamgift.png" alt="EkamGift" style="height:36px;width:auto;opacity:.85;" />
+      <div id="initial-loader" style="position:fixed;inset:0;z-index:99999;background:#000;display:flex;align-items:center;justify-content:center;">
+        <img src="/logo-ekamgift.png" alt="EkamGift" style="height:48px;width:auto;animation:logo-pulse 1.8s ease-in-out infinite;" />
       </div>
     </div>
     <style>
-      @keyframes cube-spin {
-        0%   { transform: rotateX(0deg) rotateY(0deg); }
-        50%  { transform: rotateX(180deg) rotateY(90deg); }
-        100% { transform: rotateX(360deg) rotateY(180deg); }
+      @keyframes logo-pulse {
+        0%, 100% { opacity: .4; }
+        50% { opacity: 1; }
       }
     </style>
     <script type="module" src="/src/main.tsx"></script>
