@@ -16,18 +16,27 @@ export const SiteModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetch = async () => {
+    let mounted = true;
+
+    const fetchMode = async () => {
       try {
-        const { data } = await supabase
-          .from('site_settings')
-          .select('value')
-          .eq('key', 'site_mode')
-          .maybeSingle();
-        if (data?.value) setSiteModeState(data.value as SiteMode);
-      } catch { /* default to live */ }
-      setIsLoading(false);
+        const result = await Promise.race([
+          supabase
+            .from('site_settings')
+            .select('value')
+            .eq('key', 'site_mode')
+            .maybeSingle(),
+          new Promise<{ data: null; error: Error }>((resolve) =>
+            setTimeout(() => resolve({ data: null, error: new Error('Timeout') }), 3000)
+          ),
+        ]);
+        if (mounted && result.data?.value) setSiteModeState(result.data.value as SiteMode);
+      } catch {
+        // Default to 'live' on any failure — never block the site
+      }
+      if (mounted) setIsLoading(false);
     };
-    fetch();
+    fetchMode();
 
     // Subscribe to realtime changes
     const channel = supabase
@@ -44,7 +53,7 @@ export const SiteModeProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { mounted = false; supabase.removeChannel(channel); };
   }, []);
 
   const setSiteMode = useCallback(async (mode: SiteMode) => {
