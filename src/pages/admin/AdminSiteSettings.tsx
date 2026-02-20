@@ -3,7 +3,8 @@ import { useSiteMode } from '@/contexts/SiteModeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useQueryClient } from '@tanstack/react-query';
-import { Globe, Wrench, Rocket, Loader2, Save, Image, Share2, Phone, Mail, MapPin } from 'lucide-react';
+import { Globe, Wrench, Rocket, Loader2, Save, Image, Share2, Phone, Mail, MapPin, Megaphone } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +17,10 @@ const modes = [
   { id: 'maintenance' as const, label: 'Maintenance', desc: 'Shows maintenance page to visitors.', icon: Wrench, color: 'text-yellow-600 bg-yellow-50 border-yellow-200' },
   { id: 'coming_soon' as const, label: 'Coming Soon', desc: 'Shows a coming soon page with email signup.', icon: Rocket, color: 'text-primary bg-primary/10 border-primary/20' },
 ] as const;
+
+const announcementFields = [
+  { key: 'announcement_text', label: 'Banner Text', placeholder: 'e.g. Free shipping on orders above ₹999' },
+];
 
 const heroFields = [
   { key: 'hero_subtitle', label: 'Subtitle Tag', placeholder: 'e.g. The Art of Gifting' },
@@ -105,12 +110,44 @@ const AdminSiteSettings: React.FC = () => {
       </div>
 
       <Tabs defaultValue="hero" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="announcement" className="gap-1.5"><Megaphone className="h-3.5 w-3.5" /> Banner</TabsTrigger>
           <TabsTrigger value="hero" className="gap-1.5"><Image className="h-3.5 w-3.5" /> Hero</TabsTrigger>
           <TabsTrigger value="social" className="gap-1.5"><Share2 className="h-3.5 w-3.5" /> Social</TabsTrigger>
           <TabsTrigger value="contact" className="gap-1.5"><Phone className="h-3.5 w-3.5" /> Contact</TabsTrigger>
           <TabsTrigger value="mode" className="gap-1.5"><Globe className="h-3.5 w-3.5" /> Mode</TabsTrigger>
         </TabsList>
+
+        {/* Announcement Bar */}
+        <TabsContent value="announcement">
+          <div className="bg-card border border-border rounded-xl p-6 space-y-5">
+            <h2 className="font-semibold flex items-center gap-2"><Megaphone className="h-4 w-4 text-primary" /> Announcement Bar</h2>
+            <p className="text-xs text-muted-foreground">The promotional banner shown at the top of every page</p>
+            <div className="flex items-center justify-between p-4 border border-border rounded-lg">
+              <div>
+                <Label className="text-sm font-medium">Enable Banner</Label>
+                <p className="text-xs text-muted-foreground mt-0.5">Show or hide the announcement bar</p>
+              </div>
+              <Switch
+                checked={formValues['announcement_enabled'] === 'true'}
+                onCheckedChange={(checked) => updateField('announcement_enabled', checked ? 'true' : 'false')}
+              />
+            </div>
+            {announcementFields.map((field) => (
+              <div key={field.key} className="space-y-1.5">
+                <Label className="text-xs font-medium">{field.label}</Label>
+                <Input
+                  value={formValues[field.key] || ''}
+                  onChange={(e) => updateField(field.key, e.target.value)}
+                  placeholder={field.placeholder}
+                />
+              </div>
+            ))}
+            <Button onClick={handleSaveSettings} disabled={savingSettings} className="w-full">
+              {savingSettings ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...</> : <><Save className="h-4 w-4 mr-2" /> Save Banner Settings</>}
+            </Button>
+          </div>
+        </TabsContent>
 
         {/* Hero Section */}
         <TabsContent value="hero">
