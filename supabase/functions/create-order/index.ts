@@ -51,6 +51,7 @@ const orderSchema = z.object({
   shipping: z.number().min(0).max(9999),
   discount: z.number().min(0).max(9999999).optional().default(0),
   total: z.number().min(0).max(9999999),
+  couponCode: z.string().max(50).nullable().optional(),
 })
 
 Deno.serve(async (req) => {
@@ -96,7 +97,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    const { orderNumber, customer, shippingAddress, items, paymentMethod, subtotal, shipping, discount, total } = parseResult.data
+    const { orderNumber, customer, shippingAddress, items, paymentMethod, subtotal, shipping, discount, total, couponCode } = parseResult.data
 
     // Server-side price verification against database
     for (const item of items) {
@@ -148,6 +149,54 @@ Deno.serve(async (req) => {
     if (Math.abs(calculatedSubtotal - subtotal) > 0.01) {
       return new Response(
         JSON.stringify({ error: 'Subtotal mismatch. Please refresh and try again.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Server-side coupon validation
+    let validatedDiscount = 0
+    if (couponCode) {
+      const { data: coupon } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('code', couponCode)
+        .eq('is_active', true)
+        .maybeSingle()
+
+      if (!coupon) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid or inactive coupon code' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      if (coupon.expiry_date && new Date(coupon.expiry_date) < new Date()) {
+        return new Response(
+          JSON.stringify({ error: 'This coupon has expired' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      if (subtotal < Number(coupon.min_order)) {
+        return new Response(
+          JSON.stringify({ error: `Minimum order of ₹${Number(coupon.min_order)} required` }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      validatedDiscount = Math.round((subtotal * Number(coupon.discount)) / 100)
+      if (Math.abs(validatedDiscount - discount) > 1) {
+        return new Response(
+          JSON.stringify({ error: 'Discount calculation mismatch. Please refresh and try again.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+
+      // Increment used_count
+      await supabase
+        .from('coupons')
+        .update({ used_count: coupon.used_count + 1 })
+        .eq('id', coupon.id)
+    } else if (discount > 0) {
+      return new Response(
+        JSON.stringify({ error: 'Discount applied without a coupon code' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
