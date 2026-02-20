@@ -43,19 +43,6 @@ const paymentLogos = [
 export const Footer = () => {
   return (
     <footer className="bg-foreground text-background">
-      {/* Trust Badges Strip */}
-      <div className="border-b border-background/8">
-        <div className="container mx-auto px-4 py-5">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 lg:gap-6">
-            {trustBadges.map((badge) => (
-              <div key={badge.label} className="flex items-center gap-2.5 text-background/60">
-                <badge.icon className="h-4 w-4 text-primary shrink-0" />
-                <span className="text-xs font-medium leading-tight">{badge.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* Main Footer */}
       <div className="container mx-auto px-4 py-14 lg:py-16">
