@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, Eye, Loader2, Download, CheckSquare, Square, ChevronDown } from 'lucide-react';
+import { Search, Eye, Loader2, Download, CheckSquare, Square, ChevronDown, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -49,7 +49,6 @@ const AdminOrders: React.FC = () => {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [bulkStatus, setBulkStatus] = useState('');
   const [showBulkMenu, setShowBulkMenu] = useState(false);
   const queryClient = useQueryClient();
 
@@ -101,7 +100,6 @@ const AdminOrders: React.FC = () => {
         .in('id', ids);
       if (error) throw error;
 
-      // Fire n8n webhooks for each order (async, best-effort)
       const eventMap: Record<string, string> = {
         shipped: 'order_shipped',
         delivered: 'order_delivered',
@@ -124,6 +122,43 @@ const AdminOrders: React.FC = () => {
     },
     onError: (err: Error) => toast.error(err.message),
   });
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: async () => {
+      const ids = Array.from(selected);
+      // Delete related order_items first
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .delete()
+        .in('order_id', ids);
+      if (itemsError) throw itemsError;
+      // Delete related payment_transactions
+      const { error: txError } = await supabase
+        .from('payment_transactions')
+        .delete()
+        .in('order_id', ids);
+      if (txError) throw txError;
+      // Delete orders
+      const { error } = await supabase
+        .from('orders')
+        .delete()
+        .in('id', ids);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      const count = selected.size;
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+      setSelected(new Set());
+      toast.success(`${count} orders deleted`);
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
+  const handleBulkDelete = () => {
+    if (confirm(`Delete ${selected.size} orders? This cannot be undone.`)) {
+      bulkDeleteMutation.mutate();
+    }
+  };
 
   const handleExport = () => {
     const exportData = filtered.map((o: any) => ({
@@ -197,6 +232,9 @@ const AdminOrders: React.FC = () => {
               </div>
             )}
           </div>
+          <Button variant="destructive" size="sm" className="gap-2" onClick={handleBulkDelete} disabled={bulkDeleteMutation.isPending}>
+            <Trash2 className="h-3 w-3" /> Delete
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => { setSelected(new Set()); setShowBulkMenu(false); }}>
             Clear
           </Button>

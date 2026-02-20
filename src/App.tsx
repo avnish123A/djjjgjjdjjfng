@@ -26,6 +26,7 @@ const Cart = lazy(() => import("./pages/Cart"));
 const Checkout = lazy(() => import("./pages/Checkout"));
 const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
 const TrackOrder = lazy(() => import("./pages/TrackOrder"));
+const ContactUs = lazy(() => import("./pages/ContactUs"));
 
 // Policy pages (lazy) - kept as fallback, dynamic CMS pages take priority
 const PrivacyPolicy = lazy(() => import("./pages/policies/PrivacyPolicy"));
@@ -50,6 +51,7 @@ const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
 const AdminSiteSettings = lazy(() => import("./pages/admin/AdminSiteSettings"));
 const AdminPayments = lazy(() => import("./pages/admin/AdminPayments"));
+const AdminTransactions = lazy(() => import("./pages/admin/AdminTransactions"));
 
 const AdminPages = lazy(() => import("./pages/admin/AdminPages"));
 const AdminPageEditor = lazy(() => import("./pages/admin/AdminPageEditor"));
@@ -196,6 +198,7 @@ const App = () => {
                 <Route path="/checkout" element={<StorefrontRoute><Checkout /></StorefrontRoute>} />
                 <Route path="/order-success" element={<StorefrontRoute><OrderSuccess /></StorefrontRoute>} />
                 <Route path="/track-order" element={<StorefrontRoute><TrackOrder /></StorefrontRoute>} />
+                <Route path="/contact" element={<StorefrontRoute><ContactUs /></StorefrontRoute>} />
 
                 {/* Policy pages — legacy routes kept for backwards compatibility */}
                 <Route path="/policies/privacy" element={<StorefrontRoute><PrivacyPolicy /></StorefrontRoute>} />
@@ -253,6 +256,7 @@ const App = () => {
                   <Route path="pages/edit/:id" element={<Suspense fallback={<AdminLoadingFallback />}><AdminPageEditor /></Suspense>} />
                   <Route path="settings" element={<Suspense fallback={<AdminLoadingFallback />}><AdminSiteSettings /></Suspense>} />
                   <Route path="payments" element={<Suspense fallback={<AdminLoadingFallback />}><AdminPayments /></Suspense>} />
+                  <Route path="transactions" element={<Suspense fallback={<AdminLoadingFallback />}><AdminTransactions /></Suspense>} />
                 </Route>
 
                 <Route path="*" element={<StorefrontRoute><NotFound /></StorefrontRoute>} />
