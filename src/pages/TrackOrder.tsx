@@ -1,12 +1,11 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, Search, ShieldCheck, Headphones, Package, Truck, CheckCircle, Clock, MapPin, ArrowRight } from 'lucide-react';
+import { Mail, Phone, Search, ShieldCheck, Headphones, Package, Truck, CheckCircle, Clock, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { formatPrice } from '@/lib/format';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { motion, AnimatePresence } from 'framer-motion';
 import giftImage from '@/assets/3d-gift-tracking.png';
 
 interface TrackedOrder {
@@ -41,19 +40,97 @@ const statusSteps = [
   { key: 'shipped', label: 'Shipped', icon: Truck },
   { key: 'out_for_delivery', label: 'Out for Delivery', icon: MapPin },
   { key: 'delivered', label: 'Delivered', icon: CheckCircle },
-];
+] as const;
 
 const getStepIndex = (status: string): number => {
-  const map: Record<string, number> = {
-    placed: 0,
-    processing: 1,
-    shipped: 2,
-    out_for_delivery: 3,
-    delivered: 4,
-    cancelled: -1,
-  };
+  const map: Record<string, number> = { placed: 0, processing: 1, shipped: 2, out_for_delivery: 3, delivered: 4, cancelled: -1 };
   return map[status] ?? 0;
 };
+
+/* ─── Memoized Sub-components ─── */
+
+const OrderItem = memo(({ item }: { item: TrackedOrder['items'][0] }) => (
+  <div className="flex gap-3 p-3 rounded-xl bg-secondary/50">
+    {item.image && (
+      <div className="w-14 h-14 rounded-lg overflow-hidden bg-secondary shrink-0">
+        <img src={item.image} alt={item.title} className="w-full h-full object-cover" loading="lazy" />
+      </div>
+    )}
+    <div className="flex-1 min-w-0">
+      <p className="text-sm font-medium line-clamp-1">{item.title}</p>
+      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+        <span>Qty: {item.quantity}</span>
+        {item.color && <span>· {item.color}</span>}
+        {item.size && <span>· {item.size}</span>}
+      </div>
+    </div>
+    <span className="text-sm font-semibold shrink-0">{formatPrice(item.price * item.quantity)}</span>
+  </div>
+));
+OrderItem.displayName = 'OrderItem';
+
+const DesktopStepper = memo(({ currentStep }: { currentStep: number }) => (
+  <div className="hidden sm:flex items-center justify-between relative">
+    <div className="absolute top-5 left-0 right-0 h-0.5 bg-border" />
+    <div
+      className="absolute top-5 left-0 h-0.5 bg-primary transition-all duration-700 ease-out"
+      style={{ width: `${Math.max(0, (currentStep / (statusSteps.length - 1)) * 100)}%` }}
+    />
+    {statusSteps.map((step, i) => {
+      const isComplete = i <= currentStep;
+      const isCurrent = i === currentStep;
+      const Icon = step.icon;
+      return (
+        <div key={step.key} className="relative z-10 flex flex-col items-center">
+          <div
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+              isComplete
+                ? 'bg-primary text-primary-foreground shadow-md'
+                : 'bg-background border-2 border-border text-muted-foreground'
+            } ${isCurrent ? 'scale-110 ring-2 ring-primary/30' : ''}`}
+          >
+            <Icon className="h-4 w-4" />
+          </div>
+          <span className={`text-[11px] font-medium mt-2 transition-colors ${isComplete ? 'text-primary' : 'text-muted-foreground'}`}>
+            {step.label}
+          </span>
+        </div>
+      );
+    })}
+  </div>
+));
+DesktopStepper.displayName = 'DesktopStepper';
+
+const MobileStepper = memo(({ currentStep }: { currentStep: number }) => (
+  <div className="sm:hidden space-y-0">
+    {statusSteps.map((step, i) => {
+      const isComplete = i <= currentStep;
+      const isCurrent = i === currentStep;
+      const isLast = i === statusSteps.length - 1;
+      const Icon = step.icon;
+      return (
+        <div key={step.key} className="flex gap-3">
+          <div className="flex flex-col items-center">
+            <div
+              className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ${
+                isComplete ? 'bg-primary text-primary-foreground' : 'bg-background border-2 border-border text-muted-foreground'
+              } ${isCurrent ? 'scale-110 ring-2 ring-primary/30' : ''}`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+            </div>
+            {!isLast && <div className={`w-0.5 h-6 transition-colors duration-500 ${isComplete ? 'bg-primary' : 'bg-border'}`} />}
+          </div>
+          <div className="pb-6">
+            <p className={`text-sm font-medium ${isComplete ? 'text-foreground' : 'text-muted-foreground'}`}>{step.label}</p>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+));
+MobileStepper.displayName = 'MobileStepper';
+
+/* ─── Main Page ─── */
 
 const TrackOrder = () => {
   const [email, setEmail] = useState('');
@@ -62,39 +139,96 @@ const TrackOrder = () => {
   const [orders, setOrders] = useState<TrackedOrder[] | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<TrackedOrder | null>(null);
   const [error, setError] = useState('');
+  const [showResults, setShowResults] = useState(false);
+  const resultsRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const refreshInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const handleTrack = async (e: React.FormEvent) => {
+  // Auto-refresh every 30s when results are visible
+  const startAutoRefresh = useCallback((emailVal: string, phoneVal: string) => {
+    if (refreshInterval.current) clearInterval(refreshInterval.current);
+    refreshInterval.current = setInterval(() => {
+      fetchOrders(emailVal, phoneVal, true);
+    }, 30_000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (refreshInterval.current) clearInterval(refreshInterval.current);
+      if (abortRef.current) abortRef.current.abort();
+    };
+  }, []);
+
+  const fetchOrders = useCallback(async (emailVal: string, phoneVal: string, silent = false) => {
+    if (abortRef.current) abortRef.current.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    // 5s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    if (!silent) setLoading(true);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('track-order', {
+        body: { email: emailVal, phone: phoneVal },
+      });
+
+      if (controller.signal.aborted) return;
+      clearTimeout(timeoutId);
+
+      if (fnError) throw fnError;
+      if (data?.error) {
+        if (!silent) setError(data.error);
+        return;
+      }
+
+      if (data?.orders?.length > 0) {
+        setOrders(data.orders);
+        // Preserve selection if refreshing
+        setSelectedOrder(prev => {
+          if (prev) {
+            const updated = data.orders.find((o: TrackedOrder) => o.id === prev.id);
+            return updated || data.orders[0];
+          }
+          return data.orders[0];
+        });
+        if (!silent) {
+          setShowResults(true);
+          setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+        }
+      } else if (!silent) {
+        setError('No orders found. Please check your details.');
+      }
+    } catch (err: any) {
+      if (controller.signal.aborted && !silent) {
+        setError('Request timed out. Please try again.');
+      } else if (!silent) {
+        setError(err?.message || 'Something went wrong. Please try again.');
+      }
+    } finally {
+      clearTimeout(timeoutId);
+      if (!silent) setLoading(false);
+    }
+  }, []);
+
+  const handleTrack = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setShowResults(false);
     setOrders(null);
     setSelectedOrder(null);
 
-    if (!email.trim() || !phone.trim()) {
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedPhone = phone.trim();
+
+    if (!trimmedEmail || !trimmedPhone) {
       setError('Please enter both email and phone number.');
       return;
     }
 
-    setLoading(true);
-    try {
-      const { data, error: fnError } = await supabase.functions.invoke('track-order', {
-        body: { email: email.trim(), phone: phone.trim() },
-      });
-
-      if (fnError) throw fnError;
-      if (data?.error) {
-        setError(data.error);
-      } else if (data?.orders?.length > 0) {
-        setOrders(data.orders);
-        setSelectedOrder(data.orders[0]);
-      } else {
-        setError('No orders found. Please check your details.');
-      }
-    } catch (err: any) {
-      setError(err?.message || 'Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    await fetchOrders(trimmedEmail, trimmedPhone);
+    startAutoRefresh(trimmedEmail, trimmedPhone);
+  }, [email, phone, fetchOrders, startAutoRefresh]);
 
   const currentStep = selectedOrder ? getStepIndex(selectedOrder.order_status) : -1;
   const isCancelled = selectedOrder?.order_status === 'cancelled';
@@ -104,35 +238,19 @@ const TrackOrder = () => {
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-12 lg:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center max-w-6xl mx-auto">
-          {/* Left: 3D Illustration */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="flex justify-center order-1 lg:order-1"
-          >
-            <motion.img
+          {/* Left: 3D Illustration — CSS animation only */}
+          <div className="flex justify-center animate-fade-in">
+            <img
               src={giftImage}
               alt="Track your gift"
-              className="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 object-contain drop-shadow-2xl"
-              animate={{ y: [0, -12, 0] }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
-              style={{ willChange: 'transform' }}
-              loading="lazy"
+              className="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 object-contain drop-shadow-2xl animate-float-gentle"
+              loading="eager"
+              fetchPriority="high"
             />
-          </motion.div>
+          </div>
 
           {/* Right: Tracking Form */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="order-2 lg:order-2"
-          >
+          <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
             <div className="bg-background border border-border rounded-2xl p-6 sm:p-8 shadow-sm">
               <div className="mb-6">
                 <h1 className="text-2xl sm:text-3xl font-bold tracking-tight mb-2">Track Your Order</h1>
@@ -141,18 +259,11 @@ const TrackOrder = () => {
                 </p>
               </div>
 
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0 }}
-                    className="mb-5 text-sm text-destructive bg-destructive/10 border border-destructive/20 px-4 py-3 rounded-lg"
-                  >
-                    {error}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {error && (
+                <div className="mb-5 text-sm text-destructive bg-destructive/10 border border-destructive/20 px-4 py-3 rounded-lg animate-fade-in">
+                  {error}
+                </div>
+              )}
 
               <form onSubmit={handleTrack} className="space-y-4">
                 <div className="space-y-1.5">
@@ -217,214 +328,121 @@ const TrackOrder = () => {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* Order Results */}
-      <AnimatePresence>
-        {orders && orders.length > 0 && selectedOrder && (
-          <motion.section
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-            className="container mx-auto px-4 pb-16"
-          >
-            <div className="max-w-4xl mx-auto space-y-6">
-              {/* Order selector (if multiple) */}
-              {orders.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                  {orders.map((o) => (
-                    <button
-                      key={o.id}
-                      onClick={() => setSelectedOrder(o)}
-                      className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-all ${
-                        selectedOrder.id === o.id
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-background border-border text-muted-foreground hover:border-primary/30'
-                      }`}
-                    >
-                      {o.order_number}
-                    </button>
-                  ))}
+      {showResults && orders && orders.length > 0 && selectedOrder && (
+        <section ref={resultsRef} className="container mx-auto px-4 pb-16 animate-fade-in">
+          <div className="max-w-4xl mx-auto space-y-6">
+            {/* Order selector (if multiple) */}
+            {orders.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                {orders.map((o) => (
+                  <button
+                    key={o.id}
+                    onClick={() => setSelectedOrder(o)}
+                    className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-all ${
+                      selectedOrder.id === o.id
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'bg-background border-border text-muted-foreground hover:border-primary/30'
+                    }`}
+                  >
+                    {o.order_number}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Order Header */}
+            <div className="bg-background border border-border rounded-2xl p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                  <h2 className="text-lg font-bold">{selectedOrder.order_number}</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Placed on {new Date(selectedOrder.created_at).toLocaleDateString('en-IN', {
+                      day: 'numeric', month: 'long', year: 'numeric',
+                    })}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {selectedOrder.tracking_number && (
+                    <span className="text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-full">
+                      {selectedOrder.courier_name}: {selectedOrder.tracking_number}
+                    </span>
+                  )}
+                  <span className={`text-xs font-semibold px-3 py-1.5 rounded-full capitalize ${
+                    isCancelled ? 'bg-destructive/10 text-destructive' :
+                    selectedOrder.order_status === 'delivered' ? 'bg-green-100 text-green-700' :
+                    'bg-primary/10 text-primary'
+                  }`}>
+                    {selectedOrder.order_status.replace('_', ' ')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Status Stepper */}
+              {!isCancelled ? (
+                <>
+                  <DesktopStepper currentStep={currentStep} />
+                  <MobileStepper currentStep={currentStep} />
+                </>
+              ) : (
+                <div className="text-center py-4 text-sm text-destructive bg-destructive/5 rounded-xl">
+                  This order has been cancelled.
                 </div>
               )}
+            </div>
 
-              {/* Order Header */}
-              <div className="bg-background border border-border rounded-2xl p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                  <div>
-                    <h2 className="text-lg font-bold">{selectedOrder.order_number}</h2>
-                    <p className="text-sm text-muted-foreground">
-                      Placed on {new Date(selectedOrder.created_at).toLocaleDateString('en-IN', {
-                        day: 'numeric', month: 'long', year: 'numeric',
-                      })}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    {selectedOrder.tracking_number && (
-                      <span className="text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-full">
-                        {selectedOrder.courier_name}: {selectedOrder.tracking_number}
-                      </span>
-                    )}
-                    <span className={`text-xs font-semibold px-3 py-1.5 rounded-full capitalize ${
-                      isCancelled ? 'bg-destructive/10 text-destructive' :
-                      selectedOrder.order_status === 'delivered' ? 'bg-green-100 text-green-700' :
-                      'bg-primary/10 text-primary'
-                    }`}>
-                      {selectedOrder.order_status.replace('_', ' ')}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Status Stepper */}
-                {!isCancelled && (
-                  <>
-                    {/* Desktop Horizontal Stepper */}
-                    <div className="hidden sm:flex items-center justify-between relative">
-                      {/* Progress line */}
-                      <div className="absolute top-5 left-0 right-0 h-0.5 bg-border" />
-                      <motion.div
-                        className="absolute top-5 left-0 h-0.5 bg-primary"
-                        initial={{ width: '0%' }}
-                        animate={{ width: `${Math.max(0, (currentStep / (statusSteps.length - 1)) * 100)}%` }}
-                        transition={{ duration: 0.8, ease: 'easeOut' }}
-                      />
-
-                      {statusSteps.map((step, i) => {
-                        const isComplete = i <= currentStep;
-                        const isCurrent = i === currentStep;
-                        return (
-                          <div key={step.key} className="relative z-10 flex flex-col items-center">
-                            <motion.div
-                              initial={{ scale: 0.8 }}
-                              animate={{ scale: isCurrent ? 1.1 : 1 }}
-                              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                                isComplete
-                                  ? 'bg-primary text-primary-foreground shadow-md'
-                                  : 'bg-background border-2 border-border text-muted-foreground'
-                              }`}
-                            >
-                              <step.icon className="h-4 w-4" />
-                            </motion.div>
-                            <span className={`text-[11px] font-medium mt-2 ${
-                              isComplete ? 'text-primary' : 'text-muted-foreground'
-                            }`}>
-                              {step.label}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Mobile Vertical Stepper */}
-                    <div className="sm:hidden space-y-0">
-                      {statusSteps.map((step, i) => {
-                        const isComplete = i <= currentStep;
-                        const isCurrent = i === currentStep;
-                        const isLast = i === statusSteps.length - 1;
-                        return (
-                          <div key={step.key} className="flex gap-3">
-                            <div className="flex flex-col items-center">
-                              <motion.div
-                                initial={{ scale: 0.8 }}
-                                animate={{ scale: isCurrent ? 1.1 : 1 }}
-                                className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                                  isComplete
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'bg-background border-2 border-border text-muted-foreground'
-                                }`}
-                              >
-                                <step.icon className="h-3.5 w-3.5" />
-                              </motion.div>
-                              {!isLast && (
-                                <div className={`w-0.5 h-6 ${isComplete ? 'bg-primary' : 'bg-border'}`} />
-                              )}
-                            </div>
-                            <div className="pb-6">
-                              <p className={`text-sm font-medium ${isComplete ? 'text-foreground' : 'text-muted-foreground'}`}>
-                                {step.label}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
-
-                {isCancelled && (
-                  <div className="text-center py-4 text-sm text-destructive bg-destructive/5 rounded-xl">
-                    This order has been cancelled.
-                  </div>
-                )}
+            {/* Items */}
+            <div className="bg-background border border-border rounded-2xl p-6">
+              <h3 className="font-bold text-base mb-4">Order Items</h3>
+              <div className="space-y-3">
+                {selectedOrder.items.map((item, i) => (
+                  <OrderItem key={i} item={item} />
+                ))}
               </div>
 
-              {/* Items */}
-              <div className="bg-background border border-border rounded-2xl p-6">
-                <h3 className="font-bold text-base mb-4">Order Items</h3>
-                <div className="space-y-3">
-                  {selectedOrder.items.map((item, i) => (
-                    <div key={i} className="flex gap-3 p-3 rounded-xl bg-secondary/50">
-                      {item.image && (
-                        <div className="w-14 h-14 rounded-lg overflow-hidden bg-secondary shrink-0">
-                          <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium line-clamp-1">{item.title}</p>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                          <span>Qty: {item.quantity}</span>
-                          {item.color && <span>· {item.color}</span>}
-                          {item.size && <span>· {item.size}</span>}
-                        </div>
-                      </div>
-                      <span className="text-sm font-semibold shrink-0">{formatPrice(item.price * item.quantity)}</span>
-                    </div>
-                  ))}
+              {/* Totals */}
+              <div className="border-t border-border mt-4 pt-4 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span>{formatPrice(selectedOrder.subtotal)}</span>
                 </div>
-
-                {/* Totals */}
-                <div className="border-t border-border mt-4 pt-4 space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>{formatPrice(selectedOrder.subtotal)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Shipping</span>
-                    <span>{selectedOrder.shipping === 0 ? 'FREE' : formatPrice(selectedOrder.shipping)}</span>
-                  </div>
-                  {selectedOrder.discount > 0 && (
-                    <div className="flex justify-between text-primary">
-                      <span>Discount</span>
-                      <span>-{formatPrice(selectedOrder.discount)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between font-bold text-base pt-2 border-t border-border">
-                    <span>Total</span>
-                    <span>{formatPrice(selectedOrder.total)}</span>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Shipping</span>
+                  <span>{selectedOrder.shipping === 0 ? 'FREE' : formatPrice(selectedOrder.shipping)}</span>
                 </div>
-              </div>
-
-              {/* Payment Info */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="bg-background border border-border rounded-2xl p-5">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Payment Method</p>
-                  <p className="font-semibold text-sm capitalize">{selectedOrder.payment_method === 'cod' ? 'Cash on Delivery' : selectedOrder.payment_method}</p>
-                </div>
-                <div className="bg-background border border-border rounded-2xl p-5">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Payment Status</p>
-                  <p className={`font-semibold text-sm capitalize ${
-                    selectedOrder.payment_status === 'paid' ? 'text-green-600' : 'text-yellow-600'
-                  }`}>{selectedOrder.payment_status}</p>
+                {selectedOrder.discount > 0 && (
+                  <div className="flex justify-between text-primary">
+                    <span>Discount</span>
+                    <span>-{formatPrice(selectedOrder.discount)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between font-bold text-base pt-2 border-t border-border">
+                  <span>Total</span>
+                  <span>{formatPrice(selectedOrder.total)}</span>
                 </div>
               </div>
             </div>
-          </motion.section>
-        )}
-      </AnimatePresence>
+
+            {/* Payment Info */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-background border border-border rounded-2xl p-5">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Payment Method</p>
+                <p className="font-semibold text-sm capitalize">{selectedOrder.payment_method === 'cod' ? 'Cash on Delivery' : selectedOrder.payment_method}</p>
+              </div>
+              <div className="bg-background border border-border rounded-2xl p-5">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Payment Status</p>
+                <p className={`font-semibold text-sm capitalize ${
+                  selectedOrder.payment_status === 'paid' ? 'text-green-600' : 'text-yellow-600'
+                }`}>{selectedOrder.payment_status}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
     </main>
   );
 };
