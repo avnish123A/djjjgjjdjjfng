@@ -5,8 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 const ContactUs = () => {
+  const { data: settings = {} } = useSiteSettings();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
     name: '',
@@ -15,6 +17,14 @@ const ContactUs = () => {
     subject: '',
     message: '',
   });
+
+  const email = settings['contact_email'] || 'hello@ekamgift.com';
+  const phone = settings['contact_phone'] || '+91 98765 43210';
+  const address = settings['contact_location'] || 'India';
+  const pageTitle = settings['contact_page_title'] || 'Get in Touch';
+  const pageDescription = settings['contact_page_description'] || 'Have a question, suggestion, or need help with an order? We\'d love to hear from you.';
+  const businessHours = settings['contact_business_hours'] || 'Mon – Sat: 10 AM – 7 PM IST';
+  const offDay = settings['contact_off_day'] || 'Sunday: Closed';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -30,8 +40,7 @@ const ContactUs = () => {
     }
 
     setIsSubmitting(true);
-    // Simple mailto approach — no backend storage
-    const mailtoLink = `mailto:support@ekamgift.com?subject=${encodeURIComponent(form.subject || 'Contact Form')}&body=${encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}\n\n${form.message}`)}`;
+    const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(form.subject || 'Contact Form')}&body=${encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}\n\n${form.message}`)}`;
     window.open(mailtoLink, '_blank');
     
     toast({ title: '✅ Opening email client!', description: 'Send your message via email.' });
@@ -51,10 +60,8 @@ const ContactUs = () => {
 
       <div className="container mx-auto px-4 pb-16 max-w-5xl">
         <div className="text-center mb-12">
-          <h1 className="text-3xl font-bold mb-3">Get in Touch</h1>
-          <p className="text-muted-foreground max-w-lg mx-auto">
-            Have a question, suggestion, or need help with an order? We'd love to hear from you.
-          </p>
+          <h1 className="text-3xl font-bold mb-3">{pageTitle}</h1>
+          <p className="text-muted-foreground max-w-lg mx-auto">{pageDescription}</p>
         </div>
 
         <div className="grid lg:grid-cols-5 gap-10">
@@ -69,29 +76,29 @@ const ContactUs = () => {
                   <Mail className="h-4 w-4 mt-0.5 text-primary shrink-0" />
                   <div>
                     <p className="font-medium text-foreground">Email</p>
-                    <a href="mailto:support@ekamgift.com" className="text-primary hover:underline">support@ekamgift.com</a>
+                    <a href={`mailto:${email}`} className="text-primary hover:underline">{email}</a>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Phone className="h-4 w-4 mt-0.5 text-primary shrink-0" />
                   <div>
                     <p className="font-medium text-foreground">Phone</p>
-                    <p>+91 98765 43210</p>
+                    <p>{phone}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <MapPin className="h-4 w-4 mt-0.5 text-primary shrink-0" />
                   <div>
                     <p className="font-medium text-foreground">Address</p>
-                    <p>India</p>
+                    <p>{address}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <Clock className="h-4 w-4 mt-0.5 text-primary shrink-0" />
                   <div>
                     <p className="font-medium text-foreground">Business Hours</p>
-                    <p>Mon – Sat: 10 AM – 7 PM IST</p>
-                    <p>Sunday: Closed</p>
+                    <p>{businessHours}</p>
+                    <p>{offDay}</p>
                   </div>
                 </div>
               </div>
