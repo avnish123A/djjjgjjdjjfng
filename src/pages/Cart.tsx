@@ -151,10 +151,15 @@ const Cart = () => {
                         >
                           {item.name}
                         </Link>
+                        {item.variantSelections && Object.keys(item.variantSelections).length > 0 && (
+                          <p className="text-[11px] text-muted-foreground mt-0.5">
+                            {Object.entries(item.variantSelections).map(([k, v]) => `${k}: ${v}`).join(' · ')}
+                          </p>
+                        )}
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
                         <button
-                          onClick={() => { removeItem(item.id); toast('Item removed'); }}
+                          onClick={() => { removeItem(item.variantKey || item.id); toast('Item removed'); }}
                           className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
                           aria-label="Remove item"
                         >
@@ -173,7 +178,7 @@ const Cart = () => {
                     <div className="flex items-end justify-between mt-3">
                       <div className="inline-flex items-center border border-border rounded-lg">
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.variantKey || item.id, item.quantity - 1)}
                           className="p-2 hover:bg-secondary transition-colors"
                           aria-label="Decrease"
                         >
@@ -181,7 +186,7 @@ const Cart = () => {
                         </button>
                         <span className="px-3 text-sm font-semibold tabular-nums">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.variantKey || item.id, item.quantity + 1)}
                           className="p-2 hover:bg-secondary transition-colors"
                           aria-label="Increase"
                         >

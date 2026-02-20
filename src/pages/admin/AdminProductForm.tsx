@@ -8,18 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-
-const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-const colorOptions = [
-  { name: 'Black', value: '#1A1A1A' },
-  { name: 'White', value: '#F5F5F5' },
-  { name: 'Red', value: '#EF4444' },
-  { name: 'Blue', value: '#3B82F6' },
-  { name: 'Green', value: '#22C55E' },
-  { name: 'Brown', value: '#8B4513' },
-  { name: 'Gold', value: '#D4874D' },
-  { name: 'Silver', value: '#C0C0C0' },
-];
+import ProductAttributeEditor, { type AttributeFormData } from '@/components/admin/ProductAttributeEditor';
+import { PRODUCT_TYPES, getProductType } from '@/data/productTypes';
 
 const AdminProductForm: React.FC = () => {
   const { id } = useParams();
@@ -46,6 +36,31 @@ const AdminProductForm: React.FC = () => {
     enabled: isEdit,
   });
 
+  // Load existing attributes
+  const { data: existingAttrs = [] } = useQuery({
+    queryKey: ['admin-product-attrs', id],
+    queryFn: async () => {
+      if (!id) return [];
+      const { data: attrs } = await supabase
+        .from('product_attributes')
+        .select('*')
+        .eq('product_id', id)
+        .order('sort_order');
+      if (!attrs || attrs.length === 0) return [];
+      const attrIds = attrs.map(a => a.id);
+      const { data: values } = await supabase
+        .from('product_attribute_values')
+        .select('*')
+        .in('attribute_id', attrIds)
+        .order('sort_order');
+      return attrs.map(a => ({
+        ...a,
+        values: (values || []).filter(v => v.attribute_id === a.id),
+      }));
+    },
+    enabled: isEdit,
+  });
+
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -57,12 +72,13 @@ const AdminProductForm: React.FC = () => {
     low_stock_threshold: '5',
     track_inventory: true,
     is_active: true,
-    selectedSizes: [] as string[],
-    selectedColors: [] as string[],
     badge: '',
+    product_type: 'standard',
     images: [] as File[],
     existingImages: [] as string[],
   });
+
+  const [attributes, setAttributes] = useState<AttributeFormData[]>([]);
 
   useEffect(() => {
     if (existing) {
@@ -77,31 +93,61 @@ const AdminProductForm: React.FC = () => {
         low_stock_threshold: (existing as any).low_stock_threshold?.toString() || '5',
         track_inventory: (existing as any).track_inventory ?? true,
         is_active: existing.is_active ?? true,
-        selectedSizes: existing.sizes || [],
-        selectedColors: existing.colors || [],
         badge: existing.badge || '',
+        product_type: (existing as any).product_type || 'standard',
         images: [],
         existingImages: existing.images || [],
       });
     }
   }, [existing]);
 
+  // Load existing attributes into form
+  useEffect(() => {
+    if (existingAttrs.length > 0) {
+      setAttributes(existingAttrs.map((a: any) => ({
+        id: a.id,
+        attribute_name: a.attribute_name,
+        attribute_label: a.attribute_label,
+        attribute_type: a.attribute_type,
+        is_required: a.is_required,
+        sort_order: a.sort_order,
+        values: (a.values || []).map((v: any) => ({
+          id: v.id,
+          value: v.value,
+          price_modifier: Number(v.price_modifier) || 0,
+          stock_quantity: v.stock_quantity || 0,
+          sku: v.sku || '',
+          is_active: v.is_active,
+          sort_order: v.sort_order,
+        })),
+      })));
+    }
+  }, [existingAttrs]);
+
   const updateField = (field: string, value: any) => {
     setForm(prev => ({ ...prev, [field]: value }));
   };
 
-  const toggleSize = (size: string) => {
-    setForm(prev => ({
-      ...prev,
-      selectedSizes: prev.selectedSizes.includes(size) ? prev.selectedSizes.filter(s => s !== size) : [...prev.selectedSizes, size],
-    }));
-  };
-
-  const toggleColor = (color: string) => {
-    setForm(prev => ({
-      ...prev,
-      selectedColors: prev.selectedColors.includes(color) ? prev.selectedColors.filter(c => c !== color) : [...prev.selectedColors, color],
-    }));
+  const handleProductTypeChange = (typeId: string) => {
+    updateField('product_type', typeId);
+    const pType = getProductType(typeId);
+    if (pType && pType.suggestedAttributes.length > 0 && attributes.length === 0) {
+      setAttributes(pType.suggestedAttributes.map((sa, i) => ({
+        attribute_name: sa.name,
+        attribute_label: sa.label,
+        attribute_type: sa.type,
+        is_required: true,
+        sort_order: i,
+        values: (sa.values || []).map((v, vi) => ({
+          value: v,
+          price_modifier: 0,
+          stock_quantity: 0,
+          sku: '',
+          is_active: true,
+          sort_order: vi,
+        })),
+      })));
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,7 +185,6 @@ const AdminProductForm: React.FC = () => {
 
     setSaving(true);
     try {
-      // Upload new images
       let imageUrls = [...form.existingImages];
       if (form.images.length > 0) {
         const newUrls = await uploadImages(form.images);
@@ -150,16 +195,8 @@ const AdminProductForm: React.FC = () => {
       const stockVal = parseInt(form.stock) || 0;
       const thresholdVal = parseInt(form.low_stock_threshold) || 5;
 
-      if (priceVal < 0) {
-        toast.error('Price cannot be negative');
-        setSaving(false);
-        return;
-      }
-      if (stockVal < 0) {
-        toast.error('Stock cannot be negative');
-        setSaving(false);
-        return;
-      }
+      if (priceVal < 0) { toast.error('Price cannot be negative'); setSaving(false); return; }
+      if (stockVal < 0) { toast.error('Stock cannot be negative'); setSaving(false); return; }
 
       const productData = {
         title: form.title.trim(),
@@ -172,25 +209,69 @@ const AdminProductForm: React.FC = () => {
         low_stock_threshold: thresholdVal,
         track_inventory: form.track_inventory,
         is_active: form.is_active,
-        sizes: form.selectedSizes,
-        colors: form.selectedColors,
         badge: form.badge || null,
         images: imageUrls,
+        product_type: form.product_type,
+        sizes: [] as string[],
+        colors: [] as string[],
       };
 
+      let productId = id;
+
       if (isEdit && id) {
-        const { error } = await supabase.from('products').update(productData).eq('id', id);
+        const { error } = await supabase.from('products').update(productData as any).eq('id', id);
         if (error) throw error;
-        toast.success('Product updated successfully');
       } else {
-        const { error } = await supabase.from('products').insert(productData);
+        const { data: newProduct, error } = await supabase.from('products').insert(productData as any).select('id').single();
         if (error) throw error;
-        toast.success('Product added successfully');
+        productId = newProduct.id;
       }
 
+      // Save attributes
+      if (productId) {
+        // Delete old attributes (cascade deletes values)
+        if (isEdit) {
+          await supabase.from('product_attributes').delete().eq('product_id', productId);
+        }
+
+        for (let ai = 0; ai < attributes.length; ai++) {
+          const attr = attributes[ai];
+          const { data: savedAttr, error: attrErr } = await supabase
+            .from('product_attributes')
+            .insert({
+              product_id: productId,
+              attribute_name: attr.attribute_name,
+              attribute_label: attr.attribute_label,
+              attribute_type: attr.attribute_type,
+              is_required: attr.is_required,
+              sort_order: ai,
+            })
+            .select('id')
+            .single();
+
+          if (attrErr) throw attrErr;
+
+          if (savedAttr && attr.values.length > 0) {
+            const valInserts = attr.values.map((v, vi) => ({
+              attribute_id: savedAttr.id,
+              value: v.value,
+              price_modifier: v.price_modifier,
+              stock_quantity: v.stock_quantity,
+              sku: v.sku || null,
+              is_active: v.is_active,
+              sort_order: vi,
+            }));
+            const { error: valErr } = await supabase.from('product_attribute_values').insert(valInserts);
+            if (valErr) throw valErr;
+          }
+        }
+      }
+
+      toast.success(isEdit ? 'Product updated successfully' : 'Product added successfully');
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       queryClient.invalidateQueries({ queryKey: ['storefront-products'] });
       queryClient.invalidateQueries({ queryKey: ['storefront-product'] });
+      queryClient.invalidateQueries({ queryKey: ['product-attributes'] });
       navigate('/admin/products');
     } catch (err: any) {
       toast.error(err.message || 'Failed to save product');
@@ -220,6 +301,27 @@ const AdminProductForm: React.FC = () => {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Product Type */}
+        <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+          <h2 className="font-semibold">Product Type</h2>
+          <div className="flex flex-wrap gap-2">
+            {PRODUCT_TYPES.map(pt => (
+              <button
+                key={pt.id}
+                type="button"
+                onClick={() => handleProductTypeChange(pt.id)}
+                className={`px-4 py-2.5 rounded-xl border text-sm font-medium transition-colors ${
+                  form.product_type === pt.id
+                    ? 'border-accent bg-accent/10 text-accent'
+                    : 'border-border hover:border-accent/50'
+                }`}
+              >
+                {pt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Basic Info */}
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
           <h2 className="font-semibold">Basic Information</h2>
@@ -236,9 +338,7 @@ const AdminProductForm: React.FC = () => {
               <Label htmlFor="category">Category</Label>
               <select id="category" value={form.category_id} onChange={(e) => updateField('category_id', e.target.value)} className="w-full h-10 px-3 border border-input rounded-md bg-background text-sm">
                 <option value="">No category</option>
-                {categories.map((c: any) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
+                {categories.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
             <div className="space-y-2">
@@ -262,7 +362,7 @@ const AdminProductForm: React.FC = () => {
           <h2 className="font-semibold">Pricing & Inventory</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price">Price (₹) *</Label>
+              <Label htmlFor="price">Base Price (₹) *</Label>
               <Input id="price" type="number" value={form.price} onChange={(e) => updateField('price', e.target.value)} placeholder="0" min="0" step="0.01" required />
             </div>
             <div className="space-y-2">
@@ -270,16 +370,18 @@ const AdminProductForm: React.FC = () => {
               <Input id="originalPrice" type="number" value={form.original_price} onChange={(e) => updateField('original_price', e.target.value)} placeholder="0" min="0" step="0.01" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="stock">Stock Quantity</Label>
+              <Label htmlFor="stock">Base Stock</Label>
               <Input id="stock" type="number" value={form.stock} onChange={(e) => updateField('stock', e.target.value)} placeholder="0" min="0" />
+              {attributes.length > 0 && (
+                <p className="text-[10px] text-muted-foreground">Variant stock is managed per attribute value below</p>
+              )}
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="lowStock">Low Stock Alert Threshold</Label>
+              <Label htmlFor="lowStock">Low Stock Threshold</Label>
               <Input id="lowStock" type="number" value={form.low_stock_threshold} onChange={(e) => updateField('low_stock_threshold', e.target.value)} placeholder="5" min="0" />
-              <p className="text-xs text-muted-foreground">Alert when stock falls below this</p>
             </div>
             <div className="space-y-2 flex items-end pb-1">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -301,7 +403,6 @@ const AdminProductForm: React.FC = () => {
             </label>
           </div>
 
-          {/* Low stock warning */}
           {parseInt(form.stock) > 0 && parseInt(form.stock) <= parseInt(form.low_stock_threshold) && (
             <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-600 text-sm">
               <span className="font-medium">⚠ Low stock warning:</span> Current stock ({form.stock}) is at or below threshold ({form.low_stock_threshold})
@@ -337,30 +438,13 @@ const AdminProductForm: React.FC = () => {
           </div>
         </div>
 
-        {/* Variants */}
+        {/* Dynamic Attributes */}
         <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-          <h2 className="font-semibold">Variants</h2>
-          <div className="space-y-3">
-            <Label>Sizes</Label>
-            <div className="flex flex-wrap gap-2">
-              {sizes.map(size => (
-                <button key={size} type="button" onClick={() => toggleSize(size)} className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${form.selectedSizes.includes(size) ? 'border-accent bg-accent/10 text-accent' : 'border-border hover:border-accent/50'}`}>
-                  {size}
-                </button>
-              ))}
-            </div>
+          <div>
+            <h2 className="font-semibold">Product Attributes & Variants</h2>
+            <p className="text-xs text-muted-foreground mt-1">Add size, weight, color, or any custom attribute. Each value can have its own price modifier and stock.</p>
           </div>
-          <div className="space-y-3">
-            <Label>Colors</Label>
-            <div className="flex flex-wrap gap-3">
-              {colorOptions.map(color => (
-                <button key={color.value} type="button" onClick={() => toggleColor(color.value)} className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-colors ${form.selectedColors.includes(color.value) ? 'border-accent bg-accent/10' : 'border-border hover:border-accent/50'}`}>
-                  <span className="w-4 h-4 rounded-full border border-border" style={{ backgroundColor: color.value }} />
-                  {color.name}
-                </button>
-              ))}
-            </div>
-          </div>
+          <ProductAttributeEditor attributes={attributes} onChange={setAttributes} />
         </div>
 
         {/* Actions */}

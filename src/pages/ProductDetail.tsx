@@ -2,12 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronRight, Star, Heart, Minus, Plus, ShoppingBag, Truck, RotateCcw, ShieldCheck, Check, MapPin, Zap, ChevronDown } from 'lucide-react';
 import { useProduct, useProducts } from '@/hooks/useProducts';
+import { useProductAttributes } from '@/hooks/useProductAttributes';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { ProductCard } from '@/components/products/ProductCard';
 import { formatPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import DynamicProductOptions from '@/components/products/DynamicProductOptions';
 
 /* ── Accordion Item ─────────────────────────────────────── */
 const AccordionItem = ({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) => {
@@ -33,6 +35,7 @@ const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { data: product, isLoading } = useProduct(id || '');
   const { data: allProducts = [] } = useProducts();
+  const { data: dynamicAttributes = [] } = useProductAttributes(id || '');
   const { addItem } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -41,8 +44,9 @@ const ProductDetail = () => {
   const [pincode, setPincode] = useState('');
   const [pincodeChecked, setPincodeChecked] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
-
-  // Sticky CTA visibility
+  const [variantSelections, setVariantSelections] = useState<Record<string, string>>({});
+  const [priceModifier, setPriceModifier] = useState(0);
+  const hasDynamicAttrs = dynamicAttributes.length > 0;
   const ctaRef = useRef<HTMLDivElement>(null);
   const [showSticky, setShowSticky] = useState(false);
 
@@ -61,6 +65,8 @@ const ProductDetail = () => {
     setSelectedColor(null);
     setPincode('');
     setPincodeChecked(false);
+    setVariantSelections({});
+    setPriceModifier(0);
   }, [id]);
 
   if (isLoading) {
@@ -82,10 +88,32 @@ const ProductDetail = () => {
     );
   }
 
+  // Check required attributes are selected
+  const requiredMissing = hasDynamicAttrs && dynamicAttributes
+    .filter(a => a.is_required && a.attribute_type !== 'text')
+    .some(a => !variantSelections[a.attribute_name]);
+
+  const finalPrice = product.price + priceModifier;
+  const variantKey = hasDynamicAttrs
+    ? `${product.id}-${Object.entries(variantSelections).sort().map(([k,v]) => `${k}:${v}`).join('|')}`
+    : product.id;
+
   const handleAddToCart = () => {
+    if (requiredMissing) {
+      toast.error('Please select all required options');
+      return;
+    }
     setAddingToCart(true);
     setTimeout(() => {
-      addItem({ id: product.id, name: product.name, price: product.price, image: product.image, brand: product.brand });
+      addItem({
+        id: product.id,
+        name: product.name,
+        price: finalPrice,
+        image: product.image,
+        brand: product.brand,
+        variantSelections: hasDynamicAttrs ? variantSelections : undefined,
+        variantKey,
+      });
       toast.success(`${product.name} added to cart`);
       setTimeout(() => setAddingToCart(false), 1200);
     }, 400);
@@ -180,11 +208,12 @@ const ProductDetail = () => {
 
               {/* Price */}
               <div className="flex items-baseline gap-3">
-                <span className="text-2xl lg:text-3xl font-bold">{formatPrice(product.price)}</span>
-                {product.originalPrice && (
+                <span className="text-2xl lg:text-3xl font-bold">{formatPrice(finalPrice)}</span>
+                {(product.originalPrice || priceModifier !== 0) && (
                   <>
-                    <span className="text-base text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>
-                    <span className="px-2.5 py-0.5 bg-success/10 text-success text-sm font-semibold rounded-full">{discount}% off</span>
+                    {product.originalPrice && <span className="text-base text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>}
+                    {!product.originalPrice && priceModifier !== 0 && <span className="text-base text-muted-foreground line-through">{formatPrice(product.price)}</span>}
+                    {discount && <span className="px-2.5 py-0.5 bg-success/10 text-success text-sm font-semibold rounded-full">{discount}% off</span>}
                   </>
                 )}
               </div>
@@ -199,48 +228,62 @@ const ProductDetail = () => {
               </span>
             </div>
 
-            {/* Sizes */}
-            {product.sizes && product.sizes.length > 0 && (
-              <div>
-                <p className="text-sm font-semibold mb-3">Size: {selectedSize || 'Select'}</p>
-                <div className="flex gap-2 flex-wrap">
-                  {product.sizes.map((size) => (
-                    <button
-                      key={size}
-                      onClick={() => setSelectedSize(size)}
-                      className={cn(
-                        'min-w-[56px] px-4 py-2.5 border rounded-xl text-sm font-medium transition-all',
-                        selectedSize === size ? 'border-foreground bg-foreground text-background' : 'border-border hover:border-foreground'
-                      )}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Dynamic Attributes */}
+            {hasDynamicAttrs ? (
+              <DynamicProductOptions
+                attributes={dynamicAttributes}
+                basePrice={product.price}
+                onSelectionChange={(sels, mod) => {
+                  setVariantSelections(sels);
+                  setPriceModifier(mod);
+                }}
+              />
+            ) : (
+              <>
+                {/* Legacy Sizes */}
+                {product.sizes && product.sizes.length > 0 && (
+                  <div>
+                    <p className="text-sm font-semibold mb-3">Size: {selectedSize || 'Select'}</p>
+                    <div className="flex gap-2 flex-wrap">
+                      {product.sizes.map((size) => (
+                        <button
+                          key={size}
+                          onClick={() => setSelectedSize(size)}
+                          className={cn(
+                            'min-w-[56px] px-4 py-2.5 border rounded-xl text-sm font-medium transition-all',
+                            selectedSize === size ? 'border-foreground bg-foreground text-background' : 'border-border hover:border-foreground'
+                          )}
+                        >
+                          {size}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-            {/* Colors */}
-            {product.colors && product.colors.length > 0 && (
-              <div>
-                <p className="text-sm font-semibold mb-3">Color</p>
-                <div className="flex gap-2.5">
-                  {product.colors.map((color, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedColor(color)}
-                      className={cn(
-                        'w-9 h-9 rounded-full border-2 transition-all',
-                        selectedColor === color ? 'border-foreground ring-2 ring-foreground/20' : 'border-border hover:border-foreground'
-                      )}
-                      style={{ backgroundColor: color }}
-                      aria-label={`Color ${i + 1}`}
-                    >
-                      {selectedColor === color && <Check className="h-4 w-4 mx-auto text-background drop-shadow" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
+                {/* Legacy Colors */}
+                {product.colors && product.colors.length > 0 && (
+                  <div>
+                    <p className="text-sm font-semibold mb-3">Color</p>
+                    <div className="flex gap-2.5">
+                      {product.colors.map((color, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setSelectedColor(color)}
+                          className={cn(
+                            'w-9 h-9 rounded-full border-2 transition-all',
+                            selectedColor === color ? 'border-foreground ring-2 ring-foreground/20' : 'border-border hover:border-foreground'
+                          )}
+                          style={{ backgroundColor: color }}
+                          aria-label={`Color ${i + 1}`}
+                        >
+                          {selectedColor === color && <Check className="h-4 w-4 mx-auto text-background drop-shadow" />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             {/* Quantity */}
@@ -418,7 +461,7 @@ const ProductDetail = () => {
             <div className="min-w-0">
               <p className="text-sm font-semibold truncate">{product.name}</p>
               <div className="flex items-center gap-2">
-                <span className="font-bold">{formatPrice(product.price)}</span>
+                <span className="font-bold">{formatPrice(finalPrice)}</span>
                 {product.originalPrice && <span className="text-xs text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>}
               </div>
             </div>
@@ -440,7 +483,7 @@ const ProductDetail = () => {
       <div className="lg:hidden fixed bottom-[60px] left-0 right-0 bg-background/95 backdrop-blur-md border-t border-border p-3 z-40" style={{ height: '64px' }}>
         <div className="flex items-center gap-3 h-full">
           <div className="shrink-0">
-            <span className="text-lg font-bold">{formatPrice(product.price)}</span>
+            <span className="text-lg font-bold">{formatPrice(finalPrice)}</span>
           </div>
           <Button variant="outline" className="h-10 px-3 rounded-xl shrink-0 border-border">
             <Heart className="h-5 w-5" />

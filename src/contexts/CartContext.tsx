@@ -7,6 +7,8 @@ export interface CartItem {
   image: string;
   quantity: number;
   brand: string;
+  variantSelections?: Record<string, string>;
+  variantKey?: string; // unique key for variant combo
 }
 
 interface AppliedCoupon {
@@ -37,23 +39,24 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addItem = useCallback((item: Omit<CartItem, 'quantity'>) => {
     setItems(prev => {
-      const existing = prev.find(i => i.id === item.id);
+      const itemKey = item.variantKey || item.id;
+      const existing = prev.find(i => (i.variantKey || i.id) === itemKey);
       if (existing) {
-        return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
+        return prev.map(i => (i.variantKey || i.id) === itemKey ? { ...i, quantity: i.quantity + 1 } : i);
       }
       return [...prev, { ...item, quantity: 1 }];
     });
   }, []);
 
   const removeItem = useCallback((id: string) => {
-    setItems(prev => prev.filter(i => i.id !== id));
+    setItems(prev => prev.filter(i => (i.variantKey || i.id) !== id));
   }, []);
 
   const updateQuantity = useCallback((id: string, quantity: number) => {
     if (quantity <= 0) {
-      setItems(prev => prev.filter(i => i.id !== id));
+      setItems(prev => prev.filter(i => (i.variantKey || i.id) !== id));
     } else {
-      setItems(prev => prev.map(i => i.id === id ? { ...i, quantity } : i));
+      setItems(prev => prev.map(i => (i.variantKey || i.id) === id ? { ...i, quantity } : i));
     }
   }, []);
 

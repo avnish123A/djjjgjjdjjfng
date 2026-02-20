@@ -429,6 +429,91 @@ export type Database = {
           },
         ]
       }
+      product_attribute_values: {
+        Row: {
+          attribute_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          price_modifier: number
+          sku: string | null
+          sort_order: number
+          stock_quantity: number
+          value: string
+        }
+        Insert: {
+          attribute_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          price_modifier?: number
+          sku?: string | null
+          sort_order?: number
+          stock_quantity?: number
+          value: string
+        }
+        Update: {
+          attribute_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          price_modifier?: number
+          sku?: string | null
+          sort_order?: number
+          stock_quantity?: number
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_attribute_values_attribute_id_fkey"
+            columns: ["attribute_id"]
+            isOneToOne: false
+            referencedRelation: "product_attributes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_attributes: {
+        Row: {
+          attribute_label: string
+          attribute_name: string
+          attribute_type: string
+          created_at: string
+          id: string
+          is_required: boolean
+          product_id: string
+          sort_order: number
+        }
+        Insert: {
+          attribute_label: string
+          attribute_name: string
+          attribute_type?: string
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          product_id: string
+          sort_order?: number
+        }
+        Update: {
+          attribute_label?: string
+          attribute_name?: string
+          attribute_type?: string
+          created_at?: string
+          id?: string
+          is_required?: boolean
+          product_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_attributes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           badge: string | null
@@ -443,6 +528,7 @@ export type Database = {
           low_stock_threshold: number
           original_price: number | null
           price: number
+          product_type: string
           rating: number | null
           review_count: number | null
           sizes: string[] | null
@@ -464,6 +550,7 @@ export type Database = {
           low_stock_threshold?: number
           original_price?: number | null
           price?: number
+          product_type?: string
           rating?: number | null
           review_count?: number | null
           sizes?: string[] | null
@@ -485,6 +572,7 @@ export type Database = {
           low_stock_threshold?: number
           original_price?: number | null
           price?: number
+          product_type?: string
           rating?: number | null
           review_count?: number | null
           sizes?: string[] | null
