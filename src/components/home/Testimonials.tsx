@@ -6,47 +6,61 @@ const testimonials = [
     location: 'Mumbai',
     text: 'The packaging was exquisite. My mother was moved to tears when she opened her birthday gift from EkamGift.',
     rating: 5,
+    initials: 'PS',
   },
   {
     name: 'Arjun K.',
     location: 'Bangalore',
     text: 'Finally, a gifting brand that understands quality without being ostentatious. Every detail is considered.',
     rating: 5,
+    initials: 'AK',
   },
   {
     name: 'Meera R.',
     location: 'Delhi',
     text: 'I\'ve ordered three times now. The quality is consistent, delivery is prompt, and the curation is impeccable.',
     rating: 5,
+    initials: 'MR',
   },
 ];
 
 export const Testimonials = () => {
   return (
-    <section className="py-20 lg:py-28 bg-card">
+    <section className="py-24 lg:py-32 bg-secondary/50">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-14">
-          <span className="text-[11px] font-medium uppercase tracking-[4px] text-primary mb-3 block">Testimonials</span>
+        <div className="text-center mb-16">
+          <span className="text-[11px] font-medium uppercase tracking-[5px] text-primary mb-4 block">Social Proof</span>
           <h2 className="font-display text-3xl sm:text-4xl tracking-tight">What Our Clients Say</h2>
+          <p className="text-muted-foreground mt-4 max-w-md mx-auto text-sm">
+            Trusted by thousands of happy gifters across India
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 max-w-5xl mx-auto">
-          {testimonials.map((testimonial) => (
+          {testimonials.map((testimonial, i) => (
             <div
               key={testimonial.name}
-              className="bg-background border border-border rounded-xl p-8 relative"
+              className="bg-card border border-border/60 rounded-2xl p-8 relative hover:shadow-card-hover transition-shadow duration-500 animate-fade-in-up"
+              style={{ animationDelay: `${i * 0.1}s` }}
             >
-              <Quote className="h-6 w-6 text-primary/30 mb-4" />
-              <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+              <Quote className="h-8 w-8 text-primary/15 mb-5" />
+              <p className="text-sm text-foreground/80 leading-relaxed mb-8">
                 "{testimonial.text}"
               </p>
-              <div className="flex items-center gap-1 mb-3">
+              <div className="flex items-center gap-1 mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                  <Star key={i} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
                 ))}
               </div>
-              <p className="text-sm font-medium">{testimonial.name}</p>
-              <p className="text-xs text-muted-foreground">{testimonial.location}</p>
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-semibold">
+                  {testimonial.initials}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">{testimonial.name}</p>
+                  <p className="text-xs text-muted-foreground">{testimonial.location}</p>
+                </div>
+              </div>
             </div>
           ))}
         </div>

@@ -11,12 +11,12 @@ const Index = () => {
   return (
     <main>
       <HeroCarousel />
+      <TrustSection />
       <CategoryGrid />
       <FeaturedProducts />
       <PromoBanners />
       <BestSellers />
       <Testimonials />
-      <TrustSection />
       <NewsletterSignup />
     </main>
   );
