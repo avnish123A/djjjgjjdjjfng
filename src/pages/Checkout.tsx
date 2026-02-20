@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ChevronRight, ShieldCheck, Truck, Lock, CreditCard, Banknote, Check, Calendar, Tag, X, ArrowLeft, MapPin, User, Package } from 'lucide-react';
+import { ChevronRight, ShieldCheck, Truck, Lock, CreditCard, Banknote, Check, Calendar, Tag, X, ArrowLeft, MapPin, User, Package, Loader2 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { formatPrice } from '@/lib/format';
@@ -17,11 +17,18 @@ const indianStates = [
   'Delhi', 'Chandigarh', 'Jammu & Kashmir', 'Ladakh',
 ];
 
-const paymentOptions = [
-  { id: 'cod' as const, label: 'Cash on Delivery', desc: 'Pay when you receive your order', icon: Banknote, badge: 'No extra charge' },
-  { id: 'razorpay' as const, label: 'Razorpay', desc: 'UPI, Cards, Net Banking, Wallets', icon: CreditCard, badge: 'Recommended' },
-  { id: 'cashfree' as const, label: 'Cashfree', desc: 'UPI, Cards, Net Banking, EMI', icon: CreditCard, badge: null },
-];
+interface ActiveGateway {
+  gateway_name: string;
+  is_enabled: boolean;
+  environment: string;
+  priority: number;
+}
+
+const gatewayDisplay: Record<string, { label: string; desc: string; icon: React.ElementType; badge: string | null }> = {
+  cod: { label: 'Cash on Delivery', desc: 'Pay when you receive your order', icon: Banknote, badge: 'No extra charge' },
+  razorpay: { label: 'Razorpay', desc: 'UPI, Cards, Net Banking, Wallets', icon: CreditCard, badge: 'Recommended' },
+  cashfree: { label: 'Cashfree', desc: 'UPI, Cards, Net Banking, EMI', icon: CreditCard, badge: null },
+};
 
 type Step = 'contact' | 'shipping' | 'payment';
 
@@ -35,14 +42,35 @@ const Checkout = () => {
   const { items, totalPrice, clearCart, appliedCoupon, discountAmount, removeCoupon } = useCart();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'razorpay' | 'cashfree'>('cod');
+  const [paymentMethod, setPaymentMethod] = useState<string>('cod');
   const [currentStep, setCurrentStep] = useState<Step>('contact');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [activeGateways, setActiveGateways] = useState<ActiveGateway[]>([]);
+  const [gatewaysLoading, setGatewaysLoading] = useState(true);
 
   const [form, setForm] = useState({
     name: '', email: '', phone: '',
     address: '', address2: '', city: '', state: '', pincode: '',
   });
+
+  // Fetch active gateways on mount
+  useEffect(() => {
+    const fetchGateways = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('get-active-gateways');
+        if (!error && data?.gateways) {
+          setActiveGateways(data.gateways);
+          // Set default to first non-cod gateway, or cod
+          const first = data.gateways[0];
+          if (first) setPaymentMethod(first.gateway_name);
+        }
+      } catch {
+        // Fallback to COD
+      }
+      setGatewaysLoading(false);
+    };
+    fetchGateways();
+  }, []);
 
   const shipping = totalPrice >= 999 ? 0 : 99;
   const total = totalPrice + shipping - discountAmount;
@@ -94,6 +122,7 @@ const Checkout = () => {
 
     setIsSubmitting(true);
     try {
+      // Step 1: Create order via edge function
       const { data, error: orderError } = await supabase.functions.invoke('create-order', {
         body: {
           orderNumber: 'pending',
@@ -106,12 +135,152 @@ const Checkout = () => {
       });
       if (orderError) throw orderError;
       if (data?.error) throw new Error(data.error);
+
+      const { orderId, orderNumber } = data;
+
+      // Step 2: If online payment, initiate payment flow
+      if (paymentMethod === 'razorpay' || paymentMethod === 'cashfree') {
+        const { data: paymentData, error: payErr } = await supabase.functions.invoke('create-payment', {
+          body: { orderId, gateway: paymentMethod },
+        });
+        if (payErr || paymentData?.error) {
+          throw new Error(paymentData?.error || 'Payment initiation failed');
+        }
+
+        if (paymentMethod === 'razorpay') {
+          await openRazorpay(paymentData, orderId, orderNumber);
+          return; // Don't clear cart until payment verified
+        } else if (paymentMethod === 'cashfree') {
+          await openCashfree(paymentData, orderId, orderNumber);
+          return;
+        }
+      }
+
+      // COD — order complete
       clearCart();
       toast.success('Order placed successfully!');
-      navigate(`/order-success?order=${data.orderNumber}`);
+      navigate(`/order-success?order=${orderNumber}`);
     } catch (error: any) {
       console.error('Order error:', error);
       toast.error(error?.message || 'Failed to place order. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const openRazorpay = (paymentData: any, orderId: string, orderNumber: string) => {
+    return new Promise<void>((resolve, reject) => {
+      // Load Razorpay script if not loaded
+      const loadScript = () => {
+        if ((window as any).Razorpay) return Promise.resolve();
+        return new Promise<void>((res, rej) => {
+          const script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.onload = () => res();
+          script.onerror = () => rej(new Error('Failed to load Razorpay SDK'));
+          document.body.appendChild(script);
+        });
+      };
+
+      loadScript().then(() => {
+        const options = {
+          key: paymentData.razorpayKeyId,
+          amount: paymentData.amount,
+          currency: paymentData.currency,
+          name: 'EkamGift',
+          description: `Order ${orderNumber}`,
+          order_id: paymentData.razorpayOrderId,
+          prefill: {
+            name: paymentData.customerName,
+            email: paymentData.customerEmail,
+            contact: paymentData.customerPhone,
+          },
+          handler: async (response: any) => {
+            try {
+              const { data: verifyData } = await supabase.functions.invoke('verify-payment', {
+                body: {
+                  gateway: 'razorpay',
+                  orderId,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpayOrderId: response.razorpay_order_id,
+                  razorpaySignature: response.razorpay_signature,
+                },
+              });
+              if (verifyData?.success) {
+                clearCart();
+                toast.success('Payment successful! Order confirmed.');
+                navigate(`/order-success?order=${orderNumber}`);
+              } else {
+                toast.error('Payment verification failed. Please contact support.');
+              }
+            } catch {
+              toast.error('Payment verification failed. Please contact support.');
+            }
+            setIsSubmitting(false);
+            resolve();
+          },
+          modal: {
+            ondismiss: () => {
+              toast.info('Payment cancelled. Your order is saved — you can retry payment.');
+              setIsSubmitting(false);
+              resolve();
+            },
+          },
+          theme: { color: '#000000' },
+        };
+
+        const rzp = new (window as any).Razorpay(options);
+        rzp.on('payment.failed', (response: any) => {
+          console.error('Razorpay payment failed:', response.error);
+          toast.error(response.error?.description || 'Payment failed. Please try again.');
+          setIsSubmitting(false);
+          resolve();
+        });
+        rzp.open();
+      }).catch(reject);
+    });
+  };
+
+  const openCashfree = async (paymentData: any, orderId: string, orderNumber: string) => {
+    try {
+      // Load Cashfree SDK
+      if (!(window as any).Cashfree) {
+        const script = document.createElement('script');
+        script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+        await new Promise<void>((res, rej) => {
+          script.onload = () => res();
+          script.onerror = () => rej(new Error('Failed to load Cashfree SDK'));
+          document.body.appendChild(script);
+        });
+      }
+
+      const cashfree = new (window as any).Cashfree({
+        mode: paymentData.isTest ? 'sandbox' : 'production',
+      });
+
+      const result = await cashfree.checkout({
+        paymentSessionId: paymentData.paymentSessionId,
+        redirectTarget: '_modal',
+      });
+
+      // Verify after modal closes
+      if (result?.paymentDetails || result?.error === undefined) {
+        const { data: verifyData } = await supabase.functions.invoke('verify-payment', {
+          body: { gateway: 'cashfree', orderId },
+        });
+        if (verifyData?.success) {
+          clearCart();
+          toast.success('Payment successful! Order confirmed.');
+          navigate(`/order-success?order=${orderNumber}`);
+        } else {
+          toast.error('Payment verification failed. Please contact support.');
+        }
+      } else {
+        toast.info('Payment cancelled or failed.');
+      }
+    } catch (err: any) {
+      console.error('Cashfree error:', err);
+      toast.error('Payment failed. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -365,38 +534,54 @@ const Checkout = () => {
                     </div>
 
                     <div className="space-y-2.5">
-                      {paymentOptions.map((opt) => (
-                        <label
-                          key={opt.id}
-                          className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all duration-200 ${
-                            paymentMethod === opt.id
-                              ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
-                              : 'border-border hover:border-muted-foreground/30 hover:bg-secondary/30'
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="payment"
-                            value={opt.id}
-                            checked={paymentMethod === opt.id}
-                            onChange={() => setPaymentMethod(opt.id)}
-                            className="accent-primary w-4 h-4"
-                          />
-                          <opt.icon className="h-5 w-5 text-muted-foreground shrink-0" />
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <p className="text-sm font-semibold">{opt.label}</p>
-                              {opt.badge && (
-                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                                  opt.badge === 'Recommended' ? 'bg-primary/10 text-primary' : 'bg-secondary text-muted-foreground'
-                                }`}>{opt.badge}</span>
-                              )}
-                            </div>
-                            <p className="text-xs text-muted-foreground">{opt.desc}</p>
-                          </div>
-                          {paymentMethod === opt.id && <Check className="h-4 w-4 text-primary shrink-0" />}
-                        </label>
-                      ))}
+                      {gatewaysLoading ? (
+                        <div className="flex items-center justify-center py-6">
+                          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                          <span className="ml-2 text-sm text-muted-foreground">Loading payment methods...</span>
+                        </div>
+                      ) : activeGateways.length === 0 ? (
+                        <p className="text-sm text-muted-foreground py-4 text-center">No payment methods available. Please try again later.</p>
+                      ) : (
+                        activeGateways.map((gw) => {
+                          const display = gatewayDisplay[gw.gateway_name] || { label: gw.gateway_name, desc: '', icon: CreditCard, badge: null };
+                          const IconComp = display.icon;
+                          return (
+                            <label
+                              key={gw.gateway_name}
+                              className={`flex items-center gap-3 p-4 border rounded-xl cursor-pointer transition-all duration-200 ${
+                                paymentMethod === gw.gateway_name
+                                  ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
+                                  : 'border-border hover:border-muted-foreground/30 hover:bg-secondary/30'
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="payment"
+                                value={gw.gateway_name}
+                                checked={paymentMethod === gw.gateway_name}
+                                onChange={() => setPaymentMethod(gw.gateway_name)}
+                                className="accent-primary w-4 h-4"
+                              />
+                              <IconComp className="h-5 w-5 text-muted-foreground shrink-0" />
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-semibold">{display.label}</p>
+                                  {display.badge && (
+                                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                                      display.badge === 'Recommended' ? 'bg-primary/10 text-primary' : 'bg-secondary text-muted-foreground'
+                                    }`}>{display.badge}</span>
+                                  )}
+                                  {gw.environment === 'test' && (
+                                    <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">Test</span>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground">{display.desc}</p>
+                              </div>
+                              {paymentMethod === gw.gateway_name && <Check className="h-4 w-4 text-primary shrink-0" />}
+                            </label>
+                          );
+                        })
+                      )}
                     </div>
 
                     <div className="flex justify-between pt-2">
