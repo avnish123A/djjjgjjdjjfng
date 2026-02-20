@@ -47,7 +47,7 @@ const AdminLogin: React.FC = () => {
   const from = (location.state as { from?: string })?.from || '/admin/dashboard';
 
   useEffect(() => {
-    const saved = localStorage.getItem('aurea_admin_email');
+    const saved = localStorage.getItem('ekamgift_admin_email');
     if (saved) {
       setEmail(saved);
       setRememberMe(true);
@@ -85,9 +85,9 @@ const AdminLogin: React.FC = () => {
 
     // login
     if (rememberMe) {
-      localStorage.setItem('aurea_admin_email', email);
+      localStorage.setItem('ekamgift_admin_email', email);
     } else {
-      localStorage.removeItem('aurea_admin_email');
+      localStorage.removeItem('ekamgift_admin_email');
     }
     const result = await login(email, password);
     setLoading(false);
@@ -134,7 +134,7 @@ const AdminLogin: React.FC = () => {
             <motion.div variants={item} className="inline-flex items-center gap-2 mb-2">
               <Shield className="h-5 w-5 text-accent" />
               <h1 className="text-2xl font-bold tracking-[0.15em] text-white">
-                AUREA <span className="text-accent font-normal tracking-normal text-lg">Admin</span>
+                EkamGift <span className="text-accent font-normal tracking-normal text-lg">Admin</span>
               </h1>
             </motion.div>
             <motion.p variants={item} className="text-sm text-white/50">

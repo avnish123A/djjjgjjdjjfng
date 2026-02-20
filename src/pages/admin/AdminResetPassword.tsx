@@ -82,7 +82,7 @@ const AdminResetPassword: React.FC = () => {
             <div className="inline-flex items-center gap-2 mb-2">
               <Shield className="h-5 w-5 text-accent" />
               <h1 className="text-2xl font-bold tracking-[0.15em] text-white">
-                AUREA <span className="text-accent font-normal tracking-normal text-lg">Admin</span>
+                EkamGift <span className="text-accent font-normal tracking-normal text-lg">Admin</span>
               </h1>
             </div>
             <p className="text-sm text-white/50">Set your new password</p>
