@@ -168,8 +168,48 @@
     animation: float-gentle 4s ease-in-out infinite;
     will-change: transform;
   }
+
+  /* Stepper pulse for current step */
+  @keyframes stepper-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4); }
+    50% { box-shadow: 0 0 0 8px hsl(var(--primary) / 0); }
+  }
+  .animate-stepper-pulse {
+    animation: stepper-pulse 2s ease-in-out infinite;
+  }
+
+  /* Slide-up entrance */
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-slide-up {
+    animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Scale-in entrance */
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .animate-scale-in {
+    animation: scale-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  /* Glass card for premium sections */
+  .glass-card {
+    background: hsl(var(--card) / 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid hsl(var(--border) / 0.6);
+    box-shadow: 0 8px 32px hsl(var(--foreground) / 0.04), 0 1px 2px hsl(var(--foreground) / 0.02);
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .animate-float-gentle {
+    .animate-float-gentle,
+    .animate-stepper-pulse,
+    .animate-slide-up,
+    .animate-scale-in {
       animation: none;
     }
   }
