@@ -79,6 +79,21 @@ const AdminOrderDetail: React.FC = () => {
       }
       const { error } = await supabase.from('orders').update(updateData).eq('id', id!);
       if (error) throw error;
+
+      // Fire n8n webhook (best-effort, non-blocking)
+      const eventMap: Record<string, string> = {
+        shipped: 'order_shipped',
+        delivered: 'order_delivered',
+        cancelled: 'order_cancelled',
+        confirmed: 'order_confirmed',
+        packed: 'order_packed',
+      };
+      const event = eventMap[status];
+      if (event) {
+        supabase.functions.invoke('n8n-webhook', {
+          body: { event, order_id: id },
+        }).catch(() => {});
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-order', id] });

@@ -7,6 +7,7 @@ import {
   Users,
   FolderOpen,
   Ticket,
+  BarChart3,
   LogOut,
   Menu,
   X,
@@ -40,6 +41,7 @@ const navItems: NavItem[] = [
   { label: 'Customers', icon: Users, path: '/admin/customers' },
   { label: 'Categories', icon: FolderOpen, path: '/admin/categories' },
   { label: 'Coupons', icon: Ticket, path: '/admin/coupons' },
+  { label: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
 ];
 
 const AdminLayout: React.FC = () => {
