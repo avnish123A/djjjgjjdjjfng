@@ -9,7 +9,7 @@ const footerLinks = {
     { label: 'All Products', href: '/products' },
   ],
   support: [
-    { label: 'Track Order', href: '#' },
+    { label: 'Track Order', href: '/track-order' },
     { label: 'Shipping Policy', href: '/policies/shipping' },
     { label: 'Return & Refund', href: '/policies/returns' },
     { label: 'FAQs', href: '#' },

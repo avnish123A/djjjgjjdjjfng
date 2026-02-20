@@ -1,24 +1,22 @@
 import { useEffect, useRef, useCallback } from 'react';
 
-const EVENTS = ['mousedown', 'keydown', 'touchstart', 'scroll'] as const;
+export const useInactivityLogout = (onInactive: () => void, timeoutMs = 30 * 60 * 1000) => {
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const callbackRef = useRef(onInactive);
+  callbackRef.current = onInactive;
 
-export function useInactivityLogout(
-  onLogout: () => void,
-  timeoutMs = 30 * 60 * 1000 // 30 min default
-) {
-  const timer = useRef<ReturnType<typeof setTimeout>>();
-
-  const reset = useCallback(() => {
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(onLogout, timeoutMs);
-  }, [onLogout, timeoutMs]);
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => callbackRef.current(), timeoutMs);
+  }, [timeoutMs]);
 
   useEffect(() => {
-    reset();
-    EVENTS.forEach(e => window.addEventListener(e, reset, { passive: true }));
+    const events = ['mousedown', 'keydown', 'touchstart', 'scroll'];
+    events.forEach((e) => window.addEventListener(e, resetTimer, { passive: true }));
+    resetTimer();
     return () => {
-      if (timer.current) clearTimeout(timer.current);
-      EVENTS.forEach(e => window.removeEventListener(e, reset));
+      events.forEach((e) => window.removeEventListener(e, resetTimer));
+      if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [reset]);
-}
+  }, [resetTimer]);
+};
