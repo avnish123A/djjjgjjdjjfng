@@ -22,6 +22,7 @@ interface TrackedOrder {
   created_at: string;
   tracking_number: string | null;
   courier_name: string | null;
+  estimated_delivery_date: string | null;
   customer_name: string;
   customer_email: string;
   customer_phone: string;
@@ -428,6 +429,13 @@ const TrackOrder = () => {
                       day: 'numeric', month: 'long', year: 'numeric',
                     })}
                   </p>
+                  {selectedOrder.estimated_delivery_date && selectedOrder.order_status !== 'delivered' && selectedOrder.order_status !== 'cancelled' && (
+                    <p className="text-xs text-primary font-medium mt-1">
+                      📦 Estimated Delivery: {new Date(selectedOrder.estimated_delivery_date).toLocaleDateString('en-IN', {
+                        day: 'numeric', month: 'long', year: 'numeric',
+                      })}
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-3">
                   {selectedOrder.tracking_number && (
