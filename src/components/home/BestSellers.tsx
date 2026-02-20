@@ -22,12 +22,12 @@ export const BestSellers = () => {
           className="flex items-end justify-between mb-14"
         >
           <div>
-            <span className="text-[11px] font-medium uppercase tracking-[4px] text-accent mb-3 block">Most Loved</span>
+            <span className="text-[11px] font-medium uppercase tracking-[4px] text-primary mb-3 block">Most Loved</span>
             <h2 className="font-display text-3xl sm:text-4xl tracking-tight">Best Sellers</h2>
           </div>
           <Link
             to="/products"
-            className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent hover:gap-2.5 transition-all uppercase tracking-wider"
+            className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary hover:gap-2.5 transition-all uppercase tracking-wider"
           >
             View All <ArrowRight className="h-4 w-4" />
           </Link>

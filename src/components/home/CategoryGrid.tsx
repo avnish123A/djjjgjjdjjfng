@@ -11,7 +11,7 @@ export const CategoryGrid = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="animate-pulse aspect-[3/4] bg-secondary" />
+              <div key={i} className="animate-pulse aspect-[3/4] bg-secondary rounded-xl" />
             ))}
           </div>
         </div>
@@ -31,7 +31,7 @@ export const CategoryGrid = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-14"
         >
-          <span className="text-[11px] font-medium uppercase tracking-[4px] text-accent mb-3 block">Collections</span>
+          <span className="text-[11px] font-medium uppercase tracking-[4px] text-primary mb-3 block">Collections</span>
           <h2 className="font-display text-3xl sm:text-4xl tracking-tight">Shop by Category</h2>
         </motion.div>
 
@@ -46,7 +46,7 @@ export const CategoryGrid = () => {
             >
               <Link
                 to={`/products?category=${cat.slug}`}
-                className="group relative block aspect-[3/4] overflow-hidden"
+                className="group relative block aspect-[3/4] overflow-hidden rounded-xl"
               >
                 <img
                   src={cat.image}

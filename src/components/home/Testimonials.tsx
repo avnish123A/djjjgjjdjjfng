@@ -5,13 +5,13 @@ const testimonials = [
   {
     name: 'Priya S.',
     location: 'Mumbai',
-    text: 'The packaging was exquisite. My mother was moved to tears when she opened her birthday gift from AUREA.',
+    text: 'The packaging was exquisite. My mother was moved to tears when she opened her birthday gift from EkamGift.',
     rating: 5,
   },
   {
     name: 'Arjun K.',
     location: 'Bangalore',
-    text: 'Finally, a gifting brand that understands luxury without being ostentatious. Every detail is considered.',
+    text: 'Finally, a gifting brand that understands quality without being ostentatious. Every detail is considered.',
     rating: 5,
   },
   {
@@ -33,7 +33,7 @@ export const Testimonials = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-14"
         >
-          <span className="text-[11px] font-medium uppercase tracking-[4px] text-accent mb-3 block">Testimonials</span>
+          <span className="text-[11px] font-medium uppercase tracking-[4px] text-primary mb-3 block">Testimonials</span>
           <h2 className="font-display text-3xl sm:text-4xl tracking-tight">What Our Clients Say</h2>
         </motion.div>
 
@@ -45,15 +45,15 @@ export const Testimonials = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="bg-background border border-border p-8 relative"
+              className="bg-background border border-border rounded-xl p-8 relative"
             >
-              <Quote className="h-6 w-6 text-accent/30 mb-4" />
+              <Quote className="h-6 w-6 text-primary/30 mb-4" />
               <p className="text-sm text-muted-foreground leading-relaxed mb-6">
                 "{testimonial.text}"
               </p>
               <div className="flex items-center gap-1 mb-3">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="h-3 w-3 fill-accent text-accent" />
+                  <Star key={i} className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                 ))}
               </div>
               <p className="text-sm font-medium">{testimonial.name}</p>

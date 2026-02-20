@@ -12,13 +12,13 @@ export const FeaturedProducts = () => {
     return (
       <section className="py-20 lg:py-28 bg-card">
         <div className="container mx-auto px-4">
-          <div className="h-8 bg-secondary w-48 mb-14" />
+          <div className="h-8 bg-secondary rounded w-48 mb-14" />
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="animate-pulse">
-                <div className="aspect-[3/4] bg-secondary mb-3" />
-                <div className="h-3 bg-secondary w-1/3 mb-2" />
-                <div className="h-4 bg-secondary w-2/3" />
+                <div className="aspect-[3/4] bg-secondary rounded-xl mb-3" />
+                <div className="h-3 bg-secondary rounded w-1/3 mb-2" />
+                <div className="h-4 bg-secondary rounded w-2/3" />
               </div>
             ))}
           </div>
@@ -40,12 +40,12 @@ export const FeaturedProducts = () => {
           className="flex items-end justify-between mb-14"
         >
           <div>
-            <span className="text-[11px] font-medium uppercase tracking-[4px] text-accent mb-3 block">New Arrivals</span>
+            <span className="text-[11px] font-medium uppercase tracking-[4px] text-primary mb-3 block">New Arrivals</span>
             <h2 className="font-display text-3xl sm:text-4xl tracking-tight">Trending Now</h2>
           </div>
           <Link
             to="/products"
-            className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent hover:gap-2.5 transition-all uppercase tracking-wider"
+            className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary hover:gap-2.5 transition-all uppercase tracking-wider"
           >
             View All <ArrowRight className="h-4 w-4" />
           </Link>

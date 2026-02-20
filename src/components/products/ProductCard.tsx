@@ -40,7 +40,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
     >
       <Link to={`/product/${product.id}`} className="block">
         {/* Image Container */}
-        <div className="relative aspect-[3/4] overflow-hidden bg-secondary mb-4">
+        <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-xl mb-4">
           <img
             src={product.image}
             alt={product.name}
@@ -62,22 +62,22 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
             {product.badge === 'Sale' && discount && (
-              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-destructive text-destructive-foreground">
+              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-accent text-accent-foreground rounded-full">
                 -{discount}%
               </span>
             )}
             {product.badge === 'New' && (
-              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-accent text-accent-foreground">
+              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-primary text-primary-foreground rounded-full">
                 New
               </span>
             )}
             {product.badge === 'Best Seller' && (
-              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-foreground text-background">
+              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-foreground text-background rounded-full">
                 Best Seller
               </span>
             )}
             {product.badge === 'Featured' && (
-              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-foreground text-background">
+              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-foreground text-background rounded-full">
                 Featured
               </span>
             )}
@@ -91,13 +91,13 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                 e.stopPropagation();
                 toast('Added to wishlist');
               }}
-              className="hidden lg:flex p-2 bg-background shadow-soft hover:scale-110 transition-transform"
+              className="hidden lg:flex p-2 bg-background shadow-soft rounded-lg hover:scale-110 transition-transform"
               aria-label="Add to wishlist"
             >
               <Heart className="h-4 w-4" />
             </button>
             <button
-              className="hidden lg:flex p-2 bg-background shadow-soft hover:scale-110 transition-transform"
+              className="hidden lg:flex p-2 bg-background shadow-soft rounded-lg hover:scale-110 transition-transform"
               aria-label="Quick view"
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
             >
@@ -112,7 +112,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               e.stopPropagation();
               toast('Added to wishlist');
             }}
-            className="lg:hidden absolute top-3 right-3 p-2.5 bg-background/90 backdrop-blur-sm shadow-soft min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="lg:hidden absolute top-3 right-3 p-2.5 bg-background/90 backdrop-blur-sm shadow-soft rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Add to wishlist"
           >
             <Heart className="h-4 w-4" />
@@ -122,7 +122,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-3 group-hover:translate-y-0 hidden lg:block">
             <button
               onClick={handleAddToCart}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-foreground text-background text-sm font-medium uppercase tracking-wider hover:bg-foreground/90 transition-colors active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium uppercase tracking-wider hover:bg-primary/90 transition-colors active:scale-[0.98]"
             >
               <ShoppingBag className="h-4 w-4" />
               Add to Cart
@@ -132,7 +132,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           {/* Mobile Add to Cart */}
           <button
             onClick={handleAddToCart}
-            className="lg:hidden absolute bottom-3 right-3 p-2.5 bg-foreground text-background shadow-card-hover min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="lg:hidden absolute bottom-3 right-3 p-2.5 bg-primary text-primary-foreground shadow-card-hover rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Add to cart"
           >
             <ShoppingBag className="h-4 w-4" />
@@ -140,8 +140,8 @@ export const ProductCard = ({ product }: ProductCardProps) => {
 
           {/* Out of Stock */}
           {!product.inStock && (
-            <div className="absolute inset-0 bg-background/60 flex items-center justify-center backdrop-blur-[2px]">
-              <span className="px-4 py-2 bg-foreground text-background text-sm font-medium uppercase tracking-wider">
+            <div className="absolute inset-0 bg-background/60 flex items-center justify-center backdrop-blur-[2px] rounded-xl">
+              <span className="px-4 py-2 bg-foreground text-background text-sm font-medium uppercase tracking-wider rounded-lg">
                 Out of Stock
               </span>
             </div>
@@ -151,9 +151,9 @@ export const ProductCard = ({ product }: ProductCardProps) => {
         {/* Product Info */}
         <div className="space-y-1.5 px-0.5">
           {product.brand && (
-            <p className="text-[10px] text-accent uppercase tracking-[3px] font-medium">{product.brand}</p>
+            <p className="text-[10px] text-primary uppercase tracking-[3px] font-medium">{product.brand}</p>
           )}
-          <h3 className="text-sm font-medium leading-snug line-clamp-2 group-hover:text-accent transition-colors">
+          <h3 className="text-sm font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors">
             {product.name}
           </h3>
 
@@ -165,7 +165,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
                     key={i}
                     className={`h-3 w-3 ${
                       i < Math.floor(product.rating)
-                        ? 'fill-accent text-accent'
+                        ? 'fill-yellow-400 text-yellow-400'
                         : 'text-border'
                     }`}
                   />
@@ -192,7 +192,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
               {product.colors.slice(0, 4).map((color, i) => (
                 <span
                   key={i}
-                  className="w-4 h-4 border border-border"
+                  className="w-4 h-4 rounded-full border border-border"
                   style={{ backgroundColor: color }}
                 />
               ))}

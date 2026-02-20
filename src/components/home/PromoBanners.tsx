@@ -17,23 +17,22 @@ export const PromoBanners = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <div className="relative overflow-hidden bg-foreground p-8 lg:p-10 h-full min-h-[280px] flex flex-col justify-between">
-              <div className="absolute top-0 right-0 w-32 h-32 border border-accent/10" />
+            <div className="relative overflow-hidden bg-primary rounded-2xl p-8 lg:p-10 h-full min-h-[280px] flex flex-col justify-between">
               <div>
-                <span className="inline-block px-4 py-1.5 bg-accent text-accent-foreground text-[10px] font-semibold uppercase tracking-[3px] mb-6">
+                <span className="inline-block px-4 py-1.5 bg-primary-foreground/15 text-primary-foreground text-[10px] font-semibold uppercase tracking-[3px] rounded-full mb-6">
                   Limited Time
                 </span>
-                <h3 className="font-display text-3xl lg:text-4xl text-background mb-3">
+                <h3 className="font-display text-3xl lg:text-4xl text-primary-foreground mb-3">
                   Festive Sale
                 </h3>
-                <p className="text-background/45 mb-6 text-sm">
+                <p className="text-primary-foreground/60 mb-6 text-sm">
                   Up to 50% off on curated gift sets
                 </p>
                 <CountdownTimer targetDate={saleEndDate} />
               </div>
               <Link
                 to="/products"
-                className="inline-flex items-center gap-2 text-accent font-medium text-sm mt-6 hover:gap-3 transition-all uppercase tracking-wider"
+                className="inline-flex items-center gap-2 text-primary-foreground font-medium text-sm mt-6 hover:gap-3 transition-all uppercase tracking-wider"
               >
                 Shop Sale <ArrowRight className="h-4 w-4" />
               </Link>
@@ -47,10 +46,9 @@ export const PromoBanners = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <div className="relative overflow-hidden bg-card border border-border p-8 lg:p-10 h-full min-h-[280px] flex flex-col justify-between">
-              <div className="absolute top-0 right-0 w-32 h-32 border border-accent/5" />
+            <div className="relative overflow-hidden bg-card border border-border rounded-2xl p-8 lg:p-10 h-full min-h-[280px] flex flex-col justify-between">
               <div>
-                <span className="inline-block px-4 py-1.5 bg-foreground text-background text-[10px] font-semibold uppercase tracking-[3px] mb-6">
+                <span className="inline-block px-4 py-1.5 bg-foreground text-background text-[10px] font-semibold uppercase tracking-[3px] rounded-full mb-6">
                   This Weekend
                 </span>
                 <h3 className="font-display text-3xl lg:text-4xl text-foreground mb-3">
