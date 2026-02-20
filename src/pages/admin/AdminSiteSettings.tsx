@@ -1,84 +1,224 @@
 import React, { useState, useEffect } from 'react';
 import { useSiteMode } from '@/contexts/SiteModeContext';
-import { Globe, Wrench, Rocket, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { useQueryClient } from '@tanstack/react-query';
+import { Globe, Wrench, Rocket, Loader2, Save, Image, Share2, Phone, Mail, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 
 const modes = [
   { id: 'live' as const, label: 'Live', desc: 'Site is fully accessible to all visitors', icon: Globe, color: 'text-green-600 bg-green-50 border-green-200' },
-  { id: 'maintenance' as const, label: 'Maintenance', desc: 'Shows maintenance page to visitors. Admins can still access the panel.', icon: Wrench, color: 'text-yellow-600 bg-yellow-50 border-yellow-200' },
-  { id: 'coming_soon' as const, label: 'Coming Soon', desc: 'Shows a coming soon page with email signup. Admins can still access the panel.', icon: Rocket, color: 'text-primary bg-primary/10 border-primary/20' },
+  { id: 'maintenance' as const, label: 'Maintenance', desc: 'Shows maintenance page to visitors.', icon: Wrench, color: 'text-yellow-600 bg-yellow-50 border-yellow-200' },
+  { id: 'coming_soon' as const, label: 'Coming Soon', desc: 'Shows a coming soon page with email signup.', icon: Rocket, color: 'text-primary bg-primary/10 border-primary/20' },
 ] as const;
+
+const heroFields = [
+  { key: 'hero_subtitle', label: 'Subtitle Tag', placeholder: 'e.g. The Art of Gifting' },
+  { key: 'hero_title', label: 'Main Heading', placeholder: 'e.g. Gifts That Speak Louder' },
+  { key: 'hero_description', label: 'Description', placeholder: 'Hero description text', multiline: true },
+  { key: 'hero_cta_primary_text', label: 'Primary Button Text', placeholder: 'e.g. Explore Collection' },
+  { key: 'hero_cta_primary_link', label: 'Primary Button Link', placeholder: '/products' },
+  { key: 'hero_cta_secondary_text', label: 'Secondary Button Text', placeholder: 'e.g. Personalize a Gift' },
+  { key: 'hero_cta_secondary_link', label: 'Secondary Button Link', placeholder: '/products?category=...' },
+];
+
+const socialFields = [
+  { key: 'social_instagram', label: 'Instagram URL', placeholder: 'https://instagram.com/yourpage' },
+  { key: 'social_facebook', label: 'Facebook URL', placeholder: 'https://facebook.com/yourpage' },
+  { key: 'social_twitter', label: 'Twitter / X URL', placeholder: 'https://x.com/yourpage' },
+  { key: 'social_youtube', label: 'YouTube URL', placeholder: 'https://youtube.com/@yourchannel' },
+];
+
+const contactFields = [
+  { key: 'contact_email', label: 'Email', placeholder: 'hello@ekamgift.com', icon: Mail },
+  { key: 'contact_phone', label: 'Phone', placeholder: '+91 98765 43210', icon: Phone },
+  { key: 'contact_location', label: 'Location', placeholder: 'India', icon: MapPin },
+];
 
 const AdminSiteSettings: React.FC = () => {
   const { siteMode, setSiteMode } = useSiteMode();
+  const { data: settings = {}, isLoading } = useSiteSettings();
+  const queryClient = useQueryClient();
   const [selected, setSelected] = useState(siteMode);
-  const [saving, setSaving] = useState(false);
+  const [savingMode, setSavingMode] = useState(false);
+  const [formValues, setFormValues] = useState<Record<string, string>>({});
+  const [savingSettings, setSavingSettings] = useState(false);
 
-  // Sync local state when context value loads/changes
-  useEffect(() => {
-    setSelected(siteMode);
-  }, [siteMode]);
+  useEffect(() => { setSelected(siteMode); }, [siteMode]);
+  useEffect(() => { if (settings) setFormValues({ ...settings }); }, [settings]);
 
-  const handleSave = async () => {
+  const handleSaveMode = async () => {
     if (selected === siteMode) return;
-    setSaving(true);
+    setSavingMode(true);
     try {
       await setSiteMode(selected);
       toast.success(`Site mode changed to ${selected}`);
     } catch {
       toast.error('Failed to update site mode');
     }
-    setSaving(false);
+    setSavingMode(false);
   };
 
+  const handleSaveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      const updates = Object.entries(formValues)
+        .filter(([key]) => key !== 'site_mode')
+        .map(([key, value]) => ({ key, value: value || '' }));
+
+      for (const item of updates) {
+        const { error } = await supabase
+          .from('site_settings')
+          .upsert({ key: item.key, value: item.value }, { onConflict: 'key' });
+        if (error) throw error;
+      }
+      queryClient.invalidateQueries({ queryKey: ['site-settings'] });
+      toast.success('Settings saved successfully');
+    } catch {
+      toast.error('Failed to save settings');
+    }
+    setSavingSettings(false);
+  };
+
+  const updateField = (key: string, value: string) => {
+    setFormValues((prev) => ({ ...prev, [key]: value }));
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-3xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Site Settings</h1>
-        <p className="text-sm text-muted-foreground mt-1">Control your storefront visibility</p>
+        <p className="text-sm text-muted-foreground mt-1">Manage your storefront content and configuration</p>
       </div>
 
-      <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-        <h2 className="font-semibold">Site Mode</h2>
-        <div className="space-y-3">
-          {modes.map((mode) => (
-            <label
-              key={mode.id}
-              className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all ${
-                selected === mode.id ? `${mode.color} border-2` : 'border-border hover:border-muted-foreground/30'
-              }`}
-            >
-              <input
-                type="radio"
-                name="siteMode"
-                value={mode.id}
-                checked={selected === mode.id}
-                onChange={() => setSelected(mode.id)}
-                className="mt-1 accent-primary"
-              />
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <mode.icon className="h-4 w-4" />
-                  <span className="font-medium text-sm">{mode.label}</span>
-                  {siteMode === mode.id && (
-                    <span className="text-[10px] uppercase tracking-wider font-bold bg-foreground/10 px-2 py-0.5 rounded-full">Current</span>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">{mode.desc}</p>
+      <Tabs defaultValue="hero" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="hero" className="gap-1.5"><Image className="h-3.5 w-3.5" /> Hero</TabsTrigger>
+          <TabsTrigger value="social" className="gap-1.5"><Share2 className="h-3.5 w-3.5" /> Social</TabsTrigger>
+          <TabsTrigger value="contact" className="gap-1.5"><Phone className="h-3.5 w-3.5" /> Contact</TabsTrigger>
+          <TabsTrigger value="mode" className="gap-1.5"><Globe className="h-3.5 w-3.5" /> Mode</TabsTrigger>
+        </TabsList>
+
+        {/* Hero Section */}
+        <TabsContent value="hero">
+          <div className="bg-card border border-border rounded-xl p-6 space-y-5">
+            <h2 className="font-semibold flex items-center gap-2"><Image className="h-4 w-4 text-primary" /> Hero Section</h2>
+            <p className="text-xs text-muted-foreground">Edit the main banner content on your homepage</p>
+            {heroFields.map((field) => (
+              <div key={field.key} className="space-y-1.5">
+                <Label className="text-xs font-medium">{field.label}</Label>
+                {field.multiline ? (
+                  <Textarea
+                    value={formValues[field.key] || ''}
+                    onChange={(e) => updateField(field.key, e.target.value)}
+                    placeholder={field.placeholder}
+                    rows={3}
+                  />
+                ) : (
+                  <Input
+                    value={formValues[field.key] || ''}
+                    onChange={(e) => updateField(field.key, e.target.value)}
+                    placeholder={field.placeholder}
+                  />
+                )}
               </div>
-            </label>
-          ))}
-        </div>
+            ))}
+            <Button onClick={handleSaveSettings} disabled={savingSettings} className="w-full">
+              {savingSettings ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...</> : <><Save className="h-4 w-4 mr-2" /> Save Hero Settings</>}
+            </Button>
+          </div>
+        </TabsContent>
 
-        <Button
-          onClick={handleSave}
-          disabled={saving || selected === siteMode}
-          className="w-full"
-        >
-          {saving ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...</> : 'Save Changes'}
-        </Button>
-      </div>
+        {/* Social Media */}
+        <TabsContent value="social">
+          <div className="bg-card border border-border rounded-xl p-6 space-y-5">
+            <h2 className="font-semibold flex items-center gap-2"><Share2 className="h-4 w-4 text-primary" /> Social Media Links</h2>
+            <p className="text-xs text-muted-foreground">Add your social media profiles. Leave blank to hide.</p>
+            {socialFields.map((field) => (
+              <div key={field.key} className="space-y-1.5">
+                <Label className="text-xs font-medium">{field.label}</Label>
+                <Input
+                  value={formValues[field.key] || ''}
+                  onChange={(e) => updateField(field.key, e.target.value)}
+                  placeholder={field.placeholder}
+                />
+              </div>
+            ))}
+            <Button onClick={handleSaveSettings} disabled={savingSettings} className="w-full">
+              {savingSettings ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...</> : <><Save className="h-4 w-4 mr-2" /> Save Social Links</>}
+            </Button>
+          </div>
+        </TabsContent>
+
+        {/* Contact Info */}
+        <TabsContent value="contact">
+          <div className="bg-card border border-border rounded-xl p-6 space-y-5">
+            <h2 className="font-semibold flex items-center gap-2"><Phone className="h-4 w-4 text-primary" /> Contact Information</h2>
+            <p className="text-xs text-muted-foreground">Displayed in the footer and contact page</p>
+            {contactFields.map((field) => (
+              <div key={field.key} className="space-y-1.5">
+                <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <field.icon className="h-3.5 w-3.5 text-muted-foreground" />
+                  {field.label}
+                </Label>
+                <Input
+                  value={formValues[field.key] || ''}
+                  onChange={(e) => updateField(field.key, e.target.value)}
+                  placeholder={field.placeholder}
+                />
+              </div>
+            ))}
+            <Button onClick={handleSaveSettings} disabled={savingSettings} className="w-full">
+              {savingSettings ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...</> : <><Save className="h-4 w-4 mr-2" /> Save Contact Info</>}
+            </Button>
+          </div>
+        </TabsContent>
+
+        {/* Site Mode */}
+        <TabsContent value="mode">
+          <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+            <h2 className="font-semibold">Site Mode</h2>
+            <div className="space-y-3">
+              {modes.map((mode) => (
+                <label
+                  key={mode.id}
+                  className={`flex items-start gap-4 p-4 border rounded-xl cursor-pointer transition-all ${
+                    selected === mode.id ? `${mode.color} border-2` : 'border-border hover:border-muted-foreground/30'
+                  }`}
+                >
+                  <input type="radio" name="siteMode" value={mode.id} checked={selected === mode.id} onChange={() => setSelected(mode.id)} className="mt-1 accent-primary" />
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <mode.icon className="h-4 w-4" />
+                      <span className="font-medium text-sm">{mode.label}</span>
+                      {siteMode === mode.id && (
+                        <span className="text-[10px] uppercase tracking-wider font-bold bg-foreground/10 px-2 py-0.5 rounded-full">Current</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{mode.desc}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+            <Button onClick={handleSaveMode} disabled={savingMode || selected === siteMode} className="w-full">
+              {savingMode ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...</> : 'Save Changes'}
+            </Button>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
