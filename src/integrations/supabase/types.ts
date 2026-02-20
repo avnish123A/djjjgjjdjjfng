@@ -79,6 +79,7 @@ export type Database = {
       }
       customers: {
         Row: {
+          auth_user_id: string | null
           created_at: string
           email: string
           id: string
@@ -88,6 +89,7 @@ export type Database = {
           total_spent: number
         }
         Insert: {
+          auth_user_id?: string | null
           created_at?: string
           email: string
           id?: string
@@ -97,6 +99,7 @@ export type Database = {
           total_spent?: number
         }
         Update: {
+          auth_user_id?: string | null
           created_at?: string
           email?: string
           id?: string

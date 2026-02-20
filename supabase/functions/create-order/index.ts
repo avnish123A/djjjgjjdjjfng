@@ -72,6 +72,19 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
+    // Check for authenticated user (optional - supports guest checkout)
+    let authUserId: string | null = null
+    const authHeader = req.headers.get('Authorization')
+    if (authHeader?.startsWith('Bearer ')) {
+      const anonClient = createClient(supabaseUrl, Deno.env.get('SUPABASE_ANON_KEY')!, {
+        global: { headers: { Authorization: authHeader } }
+      })
+      const { data: claims } = await anonClient.auth.getUser()
+      if (claims?.user) {
+        authUserId = claims.user.id
+      }
+    }
+
     const rawBody = await req.json()
 
     // Validate input with Zod
@@ -152,23 +165,32 @@ Deno.serve(async (req) => {
 
     if (existingCustomer) {
       customerId = existingCustomer.id
+      const updateData: Record<string, any> = {
+        total_orders: existingCustomer.total_orders + 1,
+        total_spent: Number(existingCustomer.total_spent) + total,
+      }
+      // Link auth user if not already linked
+      if (authUserId) {
+        updateData.auth_user_id = authUserId
+      }
       await supabase
         .from('customers')
-        .update({
-          total_orders: existingCustomer.total_orders + 1,
-          total_spent: Number(existingCustomer.total_spent) + total,
-        })
+        .update(updateData)
         .eq('id', customerId)
     } else {
+      const insertData: Record<string, any> = {
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
+        total_orders: 1,
+        total_spent: total,
+      }
+      if (authUserId) {
+        insertData.auth_user_id = authUserId
+      }
       const { data: newCustomer, error: custError } = await supabase
         .from('customers')
-        .insert({
-          name: customer.name,
-          email: customer.email,
-          phone: customer.phone,
-          total_orders: 1,
-          total_spent: total,
-        })
+        .insert(insertData)
         .select('id')
         .single()
 
