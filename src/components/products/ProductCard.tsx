@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, ShoppingBag, Star, Eye } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
@@ -9,7 +10,7 @@ interface ProductCardProps {
   product: Product;
 }
 
-export const ProductCard = ({ product }: ProductCardProps) => {
+export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ product }, ref) => {
   const { addItem } = useCart();
 
   const handleAddToCart = (e: React.MouseEvent) => {
@@ -32,7 +33,7 @@ export const ProductCard = ({ product }: ProductCardProps) => {
   const hasSecondaryImage = product.images && product.images.length > 1;
 
   return (
-    <div className="group transition-transform duration-300 ease-out hover:-translate-y-0.5">
+    <div ref={ref} className="group transition-transform duration-300 ease-out hover:-translate-y-0.5">
       <Link to={`/product/${product.id}`} className="block">
         {/* Image Container */}
         <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-xl mb-4">
@@ -200,4 +201,6 @@ export const ProductCard = ({ product }: ProductCardProps) => {
       </Link>
     </div>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
