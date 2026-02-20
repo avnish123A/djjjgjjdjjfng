@@ -3,7 +3,7 @@ import { useSiteMode } from '@/contexts/SiteModeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useQueryClient } from '@tanstack/react-query';
-import { Globe, Wrench, Rocket, Loader2, Save, Image, Share2, Phone, Mail, MapPin, Megaphone, Upload, X, Clock } from 'lucide-react';
+import { Globe, Wrench, Rocket, Loader2, Save, Image, Share2, Phone, Mail, MapPin, Megaphone, Upload, X, Clock, MessageCircle } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,8 +44,6 @@ const contactFields = [
   { key: 'contact_email', label: 'Email', placeholder: 'hello@ekamgift.com', icon: Mail },
   { key: 'contact_phone', label: 'Phone', placeholder: '+91 98765 43210', icon: Phone },
   { key: 'contact_location', label: 'Address', placeholder: 'India', icon: MapPin },
-  { key: 'whatsapp_number', label: 'WhatsApp Number', placeholder: '+919876543210 (with country code)', icon: Phone },
-  { key: 'whatsapp_message', label: 'WhatsApp Default Message', placeholder: 'Hi! I have a question about your products.', icon: Phone },
   { key: 'contact_page_title', label: 'Page Heading', placeholder: 'Get in Touch', icon: Mail },
   { key: 'contact_page_description', label: 'Page Description', placeholder: 'Have a question? We\'d love to hear from you.', icon: Mail },
   { key: 'contact_business_hours', label: 'Business Hours', placeholder: 'Mon – Sat: 10 AM – 7 PM IST', icon: Phone },
@@ -246,6 +244,50 @@ const AdminSiteSettings: React.FC = () => {
                 />
               </div>
             ))}
+
+            {/* WhatsApp Section */}
+            <div className="border-t border-border pt-5 space-y-4">
+              <h3 className="font-semibold flex items-center gap-2"><MessageCircle className="h-4 w-4 text-[#25D366]" /> WhatsApp Chat Button</h3>
+              <p className="text-xs text-muted-foreground">A floating WhatsApp button lets customers chat with you instantly</p>
+              
+              <div className="flex items-center justify-between p-4 border border-border rounded-lg">
+                <div>
+                  <Label className="text-sm font-medium">Enable WhatsApp Button</Label>
+                  <p className="text-xs text-muted-foreground mt-0.5">Show or hide the floating WhatsApp chat icon on all pages</p>
+                </div>
+                <Switch
+                  checked={formValues['whatsapp_enabled'] === 'true'}
+                  onCheckedChange={(checked) => updateField('whatsapp_enabled', checked ? 'true' : 'false')}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                  WhatsApp Number
+                </Label>
+                <Input
+                  value={formValues['whatsapp_number'] || ''}
+                  onChange={(e) => updateField('whatsapp_number', e.target.value)}
+                  placeholder="+919876543210 (with country code)"
+                />
+                <p className="text-[10px] text-muted-foreground">Include country code without spaces, e.g. +919876543210</p>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium flex items-center gap-1.5">
+                  <MessageCircle className="h-3.5 w-3.5 text-muted-foreground" />
+                  Default Message
+                </Label>
+                <Input
+                  value={formValues['whatsapp_message'] || ''}
+                  onChange={(e) => updateField('whatsapp_message', e.target.value)}
+                  placeholder="Hi! I have a question about your products."
+                />
+                <p className="text-[10px] text-muted-foreground">Pre-filled message when customer clicks the button</p>
+              </div>
+            </div>
+
             <Button onClick={handleSaveSettings} disabled={savingSettings} className="w-full">
               {savingSettings ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Saving...</> : <><Save className="h-4 w-4 mr-2" /> Save Contact Info</>}
             </Button>
