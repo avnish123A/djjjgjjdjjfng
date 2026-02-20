@@ -269,9 +269,22 @@ const AdminSiteSettings: React.FC = () => {
                 <Input
                   value={formValues['whatsapp_number'] || ''}
                   onChange={(e) => updateField('whatsapp_number', e.target.value)}
-                  placeholder="+919876543210 (with country code)"
+                  placeholder="919876543210 (country code + number)"
                 />
-                <p className="text-[10px] text-muted-foreground">Include country code without spaces, e.g. +919876543210</p>
+                <p className="text-[10px] text-muted-foreground">Enter country code + number without +, spaces, or dashes. E.g. <strong>919876543210</strong></p>
+                {formValues['whatsapp_number'] && (
+                  <div className="mt-2 p-3 bg-muted/50 rounded-lg">
+                    <p className="text-[11px] text-muted-foreground mb-1">Generated WhatsApp link:</p>
+                    <a
+                      href={`https://wa.me/${formValues['whatsapp_number']?.replace(/\D/g, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-primary underline break-all"
+                    >
+                      https://wa.me/{formValues['whatsapp_number']?.replace(/\D/g, '')}
+                    </a>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-1.5">

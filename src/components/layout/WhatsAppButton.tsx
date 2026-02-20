@@ -1,7 +1,8 @@
+import React from 'react';
 import { MessageCircle } from 'lucide-react';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 
-export const WhatsAppButton = () => {
+export const WhatsAppButton: React.FC = () => {
   const { data: settings = {} } = useSiteSettings();
   
   const isEnabled = settings['whatsapp_enabled'] === 'true';
