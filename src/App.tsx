@@ -102,13 +102,20 @@ const AdminLoginGuard = ({ children }: { children: React.ReactNode }) => {
 
 // Maintenance guard — blocks public routes when site isn't live
 const MaintenanceGuard = ({ children }: { children: React.ReactNode }) => {
-  const { siteMode, isLoading } = useSiteMode();
-  const { isAdmin } = useAdminAuth();
+  const { siteMode, isLoading: isSiteLoading } = useSiteMode();
+  const { isAdmin, isLoading: isAuthLoading } = useAdminAuth();
+
+  // Wait for both contexts before deciding
+  if (isSiteLoading || isAuthLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="h-8 w-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   // Admins always bypass
   if (isAdmin) return <>{children}</>;
-  // While loading, show content (avoids flash)
-  if (isLoading) return <>{children}</>;
   // If not live, show maintenance
   if (siteMode !== 'live') return <Maintenance />;
   return <>{children}</>;

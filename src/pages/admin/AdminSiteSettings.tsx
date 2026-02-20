@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSiteMode } from '@/contexts/SiteModeContext';
 import { Globe, Wrench, Rocket, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,11 @@ const AdminSiteSettings: React.FC = () => {
   const { siteMode, setSiteMode } = useSiteMode();
   const [selected, setSelected] = useState(siteMode);
   const [saving, setSaving] = useState(false);
+
+  // Sync local state when context value loads/changes
+  useEffect(() => {
+    setSelected(siteMode);
+  }, [siteMode]);
 
   const handleSave = async () => {
     if (selected === siteMode) return;
