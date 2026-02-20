@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingBag, Star, Eye } from 'lucide-react';
+import { Heart, ShoppingBag, Star } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 import { formatPrice } from '@/lib/format';
@@ -33,10 +33,10 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
   const hasSecondaryImage = product.images && product.images.length > 1;
 
   return (
-    <div ref={ref} className="group transition-transform duration-300 ease-out hover:-translate-y-0.5">
+    <div ref={ref} className="group transition-all duration-300 ease-out hover:-translate-y-1">
       <Link to={`/product/${product.id}`} className="block">
         {/* Image Container */}
-        <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-xl mb-4">
+        <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-2xl mb-4 shadow-soft hover:shadow-card-hover transition-shadow duration-500">
           <img
             src={product.image}
             alt={product.name}
@@ -67,58 +67,45 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
                 New
               </span>
             )}
-            {product.badge === 'Best Seller' && (
+            {(product.badge === 'Best Seller' || product.badge === 'Featured') && (
               <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-foreground text-background rounded-full">
-                Best Seller
-              </span>
-            )}
-            {product.badge === 'Featured' && (
-              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-foreground text-background rounded-full">
-                Featured
+                {product.badge}
               </span>
             )}
           </div>
 
-          {/* Quick Actions (desktop hover) */}
-          <div className="absolute top-3 right-3 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                toast('Added to wishlist');
-              }}
-              className="hidden lg:flex p-2 bg-background shadow-soft rounded-lg hover:scale-110 transition-transform"
-              aria-label="Add to wishlist"
-            >
-              <Heart className="h-4 w-4" />
-            </button>
-            <button
-              className="hidden lg:flex p-2 bg-background shadow-soft rounded-lg hover:scale-110 transition-transform"
-              aria-label="Quick view"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            >
-              <Eye className="h-4 w-4" />
-            </button>
-          </div>
-
-          {/* Mobile Wishlist */}
+          {/* Wishlist */}
           <button
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               toast('Added to wishlist');
             }}
-            className="lg:hidden absolute top-3 right-3 p-2.5 bg-background/90 backdrop-blur-sm shadow-soft rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="absolute top-3 right-3 p-2.5 bg-card/90 backdrop-blur-sm rounded-xl shadow-soft hover:scale-110 transition-transform min-w-[44px] min-h-[44px] flex items-center justify-center opacity-0 group-hover:opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+            style={{ opacity: undefined }}
             aria-label="Add to wishlist"
           >
             <Heart className="h-4 w-4" />
           </button>
 
-          {/* Add to Cart (desktop hover) */}
-          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-3 group-hover:translate-y-0 hidden lg:block">
+          {/* Mobile wishlist always visible */}
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toast('Added to wishlist');
+            }}
+            className="lg:hidden absolute top-3 right-3 p-2.5 bg-card/90 backdrop-blur-sm rounded-xl shadow-soft min-w-[44px] min-h-[44px] flex items-center justify-center"
+            aria-label="Add to wishlist"
+          >
+            <Heart className="h-4 w-4" />
+          </button>
+
+          {/* Add to Cart */}
+          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 hidden lg:block">
             <button
               onClick={handleAddToCart}
-              className="w-full flex items-center justify-center gap-2 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium uppercase tracking-wider hover:bg-primary/90 transition-colors active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-primary-foreground rounded-xl text-sm font-medium uppercase tracking-wider hover:bg-primary/90 transition-colors active:scale-[0.98]"
             >
               <ShoppingBag className="h-4 w-4" />
               Add to Cart
@@ -128,7 +115,7 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
           {/* Mobile Add to Cart */}
           <button
             onClick={handleAddToCart}
-            className="lg:hidden absolute bottom-3 right-3 p-2.5 bg-primary text-primary-foreground shadow-card-hover rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="lg:hidden absolute bottom-3 right-3 p-2.5 bg-primary text-primary-foreground rounded-xl shadow-card-hover min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Add to cart"
           >
             <ShoppingBag className="h-4 w-4" />
@@ -136,8 +123,8 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
 
           {/* Out of Stock */}
           {!product.inStock && (
-            <div className="absolute inset-0 bg-background/60 flex items-center justify-center backdrop-blur-[2px] rounded-xl">
-              <span className="px-4 py-2 bg-foreground text-background text-sm font-medium uppercase tracking-wider rounded-lg">
+            <div className="absolute inset-0 bg-background/60 flex items-center justify-center backdrop-blur-[2px] rounded-2xl">
+              <span className="px-4 py-2 bg-foreground text-background text-sm font-medium uppercase tracking-wider rounded-xl">
                 Out of Stock
               </span>
             </div>
@@ -145,7 +132,7 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
         </div>
 
         {/* Product Info */}
-        <div className="space-y-1.5 px-0.5">
+        <div className="space-y-1.5 px-1">
           {product.brand && (
             <p className="text-[10px] text-primary uppercase tracking-[3px] font-medium">{product.brand}</p>
           )}
@@ -171,7 +158,7 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
             </div>
           )}
 
-          <div className="flex items-center gap-2 pt-0.5">
+          <div className="flex items-center gap-2 pt-1">
             <span className="font-semibold text-base">{formatPrice(product.price)}</span>
             {product.originalPrice && (
               <span className="text-sm text-muted-foreground line-through">{formatPrice(product.originalPrice)}</span>
@@ -182,21 +169,6 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
               </span>
             )}
           </div>
-
-          {product.colors && product.colors.length > 0 && (
-            <div className="flex items-center gap-1.5 pt-1">
-              {product.colors.slice(0, 4).map((color, i) => (
-                <span
-                  key={i}
-                  className="w-4 h-4 rounded-full border border-border"
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-              {product.colors.length > 4 && (
-                <span className="text-[10px] text-muted-foreground">+{product.colors.length - 4}</span>
-              )}
-            </div>
-          )}
         </div>
       </Link>
     </div>
