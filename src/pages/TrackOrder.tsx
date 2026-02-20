@@ -245,7 +245,6 @@ const TrackOrder = () => {
               alt="Track your gift"
               className="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 object-contain drop-shadow-2xl animate-float-gentle"
               loading="eager"
-              fetchPriority="high"
             />
           </div>
 
