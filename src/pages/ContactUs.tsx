@@ -5,12 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 const ContactUs = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
-    customer_name: '',
+    name: '',
     email: '',
     phone: '',
     subject: '',
@@ -31,21 +30,13 @@ const ContactUs = () => {
     }
 
     setIsSubmitting(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('submit-query', {
-        body: { ...form, source_form: 'contact' },
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      toast({ title: '✅ Message sent!', description: "We'll get back to you within 24 hours." });
-      setForm({ customer_name: '', email: '', phone: '', subject: '', message: '' });
-    } catch (err: any) {
-      toast({ title: 'Failed to send', description: err.message || 'Please try again.', variant: 'destructive' });
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Simple mailto approach — no backend storage
+    const mailtoLink = `mailto:support@ekamgift.com?subject=${encodeURIComponent(form.subject || 'Contact Form')}&body=${encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}\n\n${form.message}`)}`;
+    window.open(mailtoLink, '_blank');
+    
+    toast({ title: '✅ Opening email client!', description: 'Send your message via email.' });
+    setForm({ name: '', email: '', phone: '', subject: '', message: '' });
+    setIsSubmitting(false);
   };
 
   return (
@@ -113,7 +104,7 @@ const ContactUs = () => {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-foreground">Full Name</label>
-                  <Input name="customer_name" value={form.customer_name} onChange={handleChange} placeholder="Your name" maxLength={200} />
+                  <Input name="name" value={form.name} onChange={handleChange} placeholder="Your name" maxLength={200} />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-foreground">Email <span className="text-destructive">*</span></label>
@@ -135,12 +126,8 @@ const ContactUs = () => {
                 <Textarea name="message" value={form.message} onChange={handleChange} placeholder="Tell us what you need help with..." required rows={5} maxLength={5000} />
               </div>
               <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto gap-2">
-                {isSubmitting ? (
-                  <div className="h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <Send className="h-4 w-4" />
-                )}
-                {isSubmitting ? 'Sending…' : 'Send Message'}
+                <Send className="h-4 w-4" />
+                Send Message
               </Button>
             </form>
           </div>

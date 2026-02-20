@@ -18,6 +18,7 @@ import {
   MessageSquare,
   FileText,
   CreditCard,
+  ArrowRightLeft,
 } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { useInactivityLogout } from '@/hooks/useInactivityLogout';
@@ -47,6 +48,7 @@ const navItems: NavItem[] = [
   { label: 'Coupons', icon: Ticket, path: '/admin/coupons' },
   
   { label: 'Pages', icon: FileText, path: '/admin/pages' },
+  { label: 'Transactions', icon: ArrowRightLeft, path: '/admin/transactions' },
   { label: 'Payments', icon: CreditCard, path: '/admin/payments' },
   { label: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
   { label: 'Settings', icon: Settings, path: '/admin/settings' },
