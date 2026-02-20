@@ -14,21 +14,24 @@ import { Footer } from "@/components/layout/Footer";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { BackToTop } from "@/components/layout/BackToTop";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
+import PageLoader from "@/components/layout/PageLoader";
 import Index from "./pages/Index";
-import ProductListing from "./pages/ProductListing";
-import ProductDetail from "./pages/ProductDetail";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import OrderSuccess from "./pages/OrderSuccess";
-import TrackOrder from "./pages/TrackOrder";
-import NotFound from "./pages/NotFound";
 import Maintenance from "./pages/Maintenance";
+import NotFound from "./pages/NotFound";
 
-// Policy pages
-import PrivacyPolicy from "./pages/policies/PrivacyPolicy";
-import TermsConditions from "./pages/policies/TermsConditions";
-import ReturnPolicy from "./pages/policies/ReturnPolicy";
-import ShippingPolicy from "./pages/policies/ShippingPolicy";
+// Lazy-loaded storefront pages
+const ProductListing = lazy(() => import("./pages/ProductListing"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
+const TrackOrder = lazy(() => import("./pages/TrackOrder"));
+
+// Policy pages (lazy)
+const PrivacyPolicy = lazy(() => import("./pages/policies/PrivacyPolicy"));
+const TermsConditions = lazy(() => import("./pages/policies/TermsConditions"));
+const ReturnPolicy = lazy(() => import("./pages/policies/ReturnPolicy"));
+const ShippingPolicy = lazy(() => import("./pages/policies/ShippingPolicy"));
 
 // Lazy-loaded admin pages
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
@@ -54,6 +57,13 @@ const AdminLoadingFallback = () => (
       <div className="h-8 w-8 border-3 border-accent border-t-transparent rounded-full animate-spin" />
       <p className="text-sm text-white/40">Loading…</p>
     </div>
+  </div>
+);
+
+// Storefront loading fallback
+const StorefrontLoadingFallback = () => (
+  <div className="min-h-[60vh] flex items-center justify-center">
+    <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
   </div>
 );
 
@@ -133,10 +143,14 @@ const StorefrontLayout = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-// Storefront route with maintenance guard
+// Storefront route with maintenance guard + suspense
 const StorefrontRoute = ({ children }: { children: React.ReactNode }) => (
   <MaintenanceGuard>
-    <StorefrontLayout>{children}</StorefrontLayout>
+    <StorefrontLayout>
+      <Suspense fallback={<StorefrontLoadingFallback />}>
+        {children}
+      </Suspense>
+    </StorefrontLayout>
   </MaintenanceGuard>
 );
 
@@ -154,6 +168,7 @@ const App = () => {
           <SiteModeProvider>
             <BrowserRouter>
               <ScrollToTop />
+              <PageLoader />
               <Routes>
                 {/* Storefront routes — guarded by maintenance mode */}
                 <Route path="/" element={<StorefrontRoute><Index /></StorefrontRoute>} />
