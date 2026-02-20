@@ -6,6 +6,7 @@ import { BestSellers } from '@/components/home/BestSellers';
 import { TrustSection } from '@/components/home/TrustSection';
 import { NewsletterSignup } from '@/components/home/NewsletterSignup';
 import { Testimonials } from '@/components/home/Testimonials';
+import { FAQSection } from '@/components/home/FAQSection';
 
 const Index = () => {
   return (
@@ -16,6 +17,7 @@ const Index = () => {
       <PromoBanners />
       <BestSellers />
       <TrustSection />
+      <FAQSection />
       <Testimonials />
       <NewsletterSignup />
     </main>

@@ -27,6 +27,7 @@ const Checkout = lazy(() => import("./pages/Checkout"));
 const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
 const TrackOrder = lazy(() => import("./pages/TrackOrder"));
 const ContactUs = lazy(() => import("./pages/ContactUs"));
+const FAQ = lazy(() => import("./pages/FAQ"));
 
 // Policy pages (lazy) - kept as fallback, dynamic CMS pages take priority
 const PrivacyPolicy = lazy(() => import("./pages/policies/PrivacyPolicy"));
@@ -199,6 +200,7 @@ const App = () => {
                 <Route path="/order-success" element={<StorefrontRoute><OrderSuccess /></StorefrontRoute>} />
                 <Route path="/track-order" element={<StorefrontRoute><TrackOrder /></StorefrontRoute>} />
                 <Route path="/contact" element={<StorefrontRoute><ContactUs /></StorefrontRoute>} />
+                <Route path="/faq" element={<StorefrontRoute><FAQ /></StorefrontRoute>} />
 
                 {/* Policy pages — legacy routes kept for backwards compatibility */}
                 <Route path="/policies/privacy" element={<StorefrontRoute><PrivacyPolicy /></StorefrontRoute>} />
