@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Admins can read payment settings" ON public.payment_settings;
