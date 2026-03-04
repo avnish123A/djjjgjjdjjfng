@@ -9,12 +9,22 @@ interface GatewayConfig {
   gateway_name: string;
   is_enabled: boolean;
   environment: string;
-  key_id: string;
-  key_secret: string;
-  webhook_secret: string;
+  has_key_id: boolean;
+  has_key_secret: boolean;
+  has_webhook_secret: boolean;
   priority: number;
   cod_extra_charge: number;
   cod_min_order: number;
+}
+
+interface EditFields {
+  is_enabled?: boolean;
+  environment?: string;
+  key_id?: string;
+  key_secret?: string;
+  webhook_secret?: string;
+  cod_extra_charge?: number;
+  cod_min_order?: number;
 }
 
 const gatewayMeta: Record<string, { label: string; desc: string; icon: React.ElementType; color: string }> = {
@@ -28,28 +38,53 @@ const AdminPayments: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
-  const [editState, setEditState] = useState<Record<string, Partial<GatewayConfig>>>({});
+  const [editState, setEditState] = useState<Record<string, EditFields>>({});
 
   useEffect(() => {
     fetchGateways();
   }, []);
 
+  const callEdgeFunction = async (method: 'GET' | 'PUT', body?: any) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast.error('Please log in again');
+      return null;
+    }
+
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-payment-settings`;
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      ...(body ? { body: JSON.stringify(body) } : {}),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Request failed');
+    }
+
+    return res.json();
+  };
+
   const fetchGateways = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('payment_settings')
-      .select('*')
-      .order('priority', { ascending: true });
-    if (error) {
+    try {
+      const data = await callEdgeFunction('GET');
+      setGateways(data || []);
+    } catch {
       toast.error('Failed to load payment settings');
-    } else {
-      setGateways((data as any[]) || []);
     }
     setLoading(false);
   };
 
-  const getEditValue = (gw: GatewayConfig, field: keyof GatewayConfig) => {
-    return editState[gw.id]?.[field] ?? gw[field];
+  const getEditValue = (gw: GatewayConfig, field: string) => {
+    const edit = editState[gw.id];
+    if (edit && field in edit) return (edit as any)[field];
+    if (field in gw) return (gw as any)[field];
+    return '';
   };
 
   const setEditField = (id: string, field: string, value: any) => {
@@ -63,29 +98,25 @@ const AdminPayments: React.FC = () => {
     const isCod = gw.gateway_name === 'cod';
     const newVal = !gw.is_enabled;
 
-    // Validation: don't enable gateway without keys
     if (newVal && !isCod) {
-      const keyId = (getEditValue(gw, 'key_id') as string) || '';
-      const keySecret = (getEditValue(gw, 'key_secret') as string) || '';
-      if (!keyId.trim() || !keySecret.trim()) {
+      const hasKeyId = editState[gw.id]?.key_id ? true : gw.has_key_id;
+      const hasKeySecret = editState[gw.id]?.key_secret ? true : gw.has_key_secret;
+      if (!hasKeyId || !hasKeySecret) {
         toast.error(`Please add API keys before enabling ${gatewayMeta[gw.gateway_name]?.label}`);
         return;
       }
     }
 
-    const { error } = await supabase
-      .from('payment_settings')
-      .update({ is_enabled: newVal })
-      .eq('id', gw.id);
-    if (error) {
-      toast.error('Failed to update');
-    } else {
+    try {
+      await callEdgeFunction('PUT', { id: gw.id, changes: { is_enabled: newVal } });
       setGateways(prev => prev.map(g => g.id === gw.id ? { ...g, is_enabled: newVal } : g));
       toast.success(`${gatewayMeta[gw.gateway_name]?.label} ${newVal ? 'enabled' : 'disabled'}`);
+    } catch {
+      toast.error('Failed to update');
     }
   };
 
-  const validateGateway = (gw: GatewayConfig, changes: Partial<GatewayConfig>): string | null => {
+  const validateGateway = (gw: GatewayConfig, changes: EditFields): string | null => {
     const isCod = gw.gateway_name === 'cod';
 
     if (isCod) {
@@ -97,23 +128,25 @@ const AdminPayments: React.FC = () => {
       return null;
     }
 
-    // Gateway validation
     const env = (changes.environment ?? gw.environment) as string;
-    const keyId = ((changes.key_id ?? gw.key_id) as string).trim();
-    const keySecret = ((changes.key_secret ?? gw.key_secret) as string).trim();
+    const newKeyId = changes.key_id?.trim();
 
     // Check test/live key mismatch for Razorpay
-    if (gw.gateway_name === 'razorpay' && keyId) {
-      if (env === 'test' && !keyId.startsWith('rzp_test_')) {
+    if (gw.gateway_name === 'razorpay' && newKeyId) {
+      if (env === 'test' && !newKeyId.startsWith('rzp_test_')) {
         return 'Test mode requires keys starting with "rzp_test_". Are you using live keys in test mode?';
       }
-      if (env === 'live' && !keyId.startsWith('rzp_live_')) {
+      if (env === 'live' && !newKeyId.startsWith('rzp_live_')) {
         return 'Live mode requires keys starting with "rzp_live_". Are you using test keys in live mode?';
       }
     }
 
-    if (gw.is_enabled && (!keyId || !keySecret)) {
-      return 'API keys are required while gateway is enabled';
+    if (gw.is_enabled) {
+      const hasKeyId = newKeyId ? true : gw.has_key_id;
+      const hasKeySecret = changes.key_secret?.trim() ? true : gw.has_key_secret;
+      if (!hasKeyId || !hasKeySecret) {
+        return 'API keys are required while gateway is enabled';
+      }
     }
 
     return null;
@@ -130,17 +163,25 @@ const AdminPayments: React.FC = () => {
     }
 
     setSaving(gw.id);
-    const { error } = await supabase
-      .from('payment_settings')
-      .update(changes)
-      .eq('id', gw.id);
-
-    if (error) {
-      toast.error('Failed to save');
-    } else {
-      setGateways(prev => prev.map(g => g.id === gw.id ? { ...g, ...changes } as GatewayConfig : g));
+    try {
+      await callEdgeFunction('PUT', { id: gw.id, changes });
+      // Update local state - merge non-secret changes and update has_* flags
+      setGateways(prev => prev.map(g => {
+        if (g.id !== gw.id) return g;
+        return {
+          ...g,
+          environment: changes.environment ?? g.environment,
+          cod_extra_charge: changes.cod_extra_charge ?? g.cod_extra_charge,
+          cod_min_order: changes.cod_min_order ?? g.cod_min_order,
+          has_key_id: changes.key_id?.trim() ? true : g.has_key_id,
+          has_key_secret: changes.key_secret?.trim() ? true : g.has_key_secret,
+          has_webhook_secret: changes.webhook_secret?.trim() ? true : g.has_webhook_secret,
+        };
+      }));
       setEditState(prev => { const n = { ...prev }; delete n[gw.id]; return n; });
       toast.success(`${gatewayMeta[gw.gateway_name]?.label} settings saved`);
+    } catch {
+      toast.error('Failed to save');
     }
     setSaving(null);
   };
@@ -336,10 +377,10 @@ const AdminPayments: React.FC = () => {
                   </label>
                   <input
                     type="text"
-                    value={getEditValue(gw, 'key_id') as string}
+                    value={(editState[gw.id]?.key_id as string) ?? ''}
                     onChange={(e) => setEditField(gw.id, 'key_id', e.target.value)}
                     className="w-full px-3 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-mono"
-                    placeholder={gw.gateway_name === 'razorpay' ? (isLive ? 'rzp_live_...' : 'rzp_test_...') : 'your_app_id'}
+                    placeholder={gw.has_key_id ? '••••••••  (saved — enter new value to change)' : (gw.gateway_name === 'razorpay' ? (isLive ? 'rzp_live_...' : 'rzp_test_...') : 'your_app_id')}
                   />
                 </div>
 
@@ -351,10 +392,10 @@ const AdminPayments: React.FC = () => {
                   <div className="relative">
                     <input
                       type={showSecrets[`${gw.id}_secret`] ? 'text' : 'password'}
-                      value={getEditValue(gw, 'key_secret') as string}
+                      value={(editState[gw.id]?.key_secret as string) ?? ''}
                       onChange={(e) => setEditField(gw.id, 'key_secret', e.target.value)}
                       className="w-full px-3 py-2.5 pr-10 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-mono"
-                      placeholder="••••••••••"
+                      placeholder={gw.has_key_secret ? '••••••••  (saved — enter new value to change)' : '••••••••••'}
                     />
                     <button
                       type="button"
@@ -374,10 +415,10 @@ const AdminPayments: React.FC = () => {
                   <div className="relative">
                     <input
                       type={showSecrets[`${gw.id}_webhook`] ? 'text' : 'password'}
-                      value={getEditValue(gw, 'webhook_secret') as string}
+                      value={(editState[gw.id]?.webhook_secret as string) ?? ''}
                       onChange={(e) => setEditField(gw.id, 'webhook_secret', e.target.value)}
                       className="w-full px-3 py-2.5 pr-10 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-mono"
-                      placeholder="Optional — for webhook signature verification"
+                      placeholder={gw.has_webhook_secret ? '••••••••  (saved — enter new value to change)' : 'Optional — for webhook signature verification'}
                     />
                     <button
                       type="button"
@@ -399,7 +440,7 @@ const AdminPayments: React.FC = () => {
                 </div>
 
                 {/* Validation warning */}
-                {gw.is_enabled && !(getEditValue(gw, 'key_id') as string)?.trim() && (
+                {gw.is_enabled && !gw.has_key_id && !editState[gw.id]?.key_id?.trim() && (
                   <div className="flex items-start gap-2 bg-destructive/10 text-destructive border border-destructive/20 rounded-lg p-3 text-xs">
                     <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
                     <span>Gateway is enabled but missing API keys. Payments will fail until keys are configured.</span>
