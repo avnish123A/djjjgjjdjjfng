@@ -266,6 +266,7 @@ export type Database = {
           discount: number
           estimated_delivery_date: string | null
           id: string
+          idempotency_key: string | null
           order_date: string
           order_number: string
           order_status: string
@@ -289,6 +290,7 @@ export type Database = {
           discount?: number
           estimated_delivery_date?: string | null
           id?: string
+          idempotency_key?: string | null
           order_date?: string
           order_number: string
           order_status?: string
@@ -312,6 +314,7 @@ export type Database = {
           discount?: number
           estimated_delivery_date?: string | null
           id?: string
+          idempotency_key?: string | null
           order_date?: string
           order_number?: string
           order_status?: string
