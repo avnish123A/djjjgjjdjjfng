@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronRight, ShieldCheck, Truck, Lock, CreditCard, Banknote, Check, Calendar, Tag, X, ArrowLeft, MapPin, User, Package, Loader2 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
@@ -7,6 +7,7 @@ import { formatPrice } from '@/lib/format';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
+import { generateCartHash } from '@/lib/cartHash';
 
 const indianStates = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -32,7 +33,6 @@ const gatewayDisplay: Record<string, { label: string; desc: string; icon: React.
   cashfree: { label: 'Cashfree', desc: 'UPI, Cards, Net Banking, EMI', icon: CreditCard, badge: null },
 };
 
-// Helper to get COD charge label dynamically
 const getCodDisplay = (gw: ActiveGateway) => {
   if (gw.gateway_name !== 'cod') return gatewayDisplay[gw.gateway_name] || { label: gw.gateway_name, desc: '', icon: CreditCard, badge: null };
   const charge = Number(gw.cod_extra_charge) || 0;
@@ -60,19 +60,22 @@ const Checkout = () => {
   const [activeGateways, setActiveGateways] = useState<ActiveGateway[]>([]);
   const [gatewaysLoading, setGatewaysLoading] = useState(true);
 
+  // Anti-double-click: ref-based lock prevents concurrent submissions
+  const submissionLockRef = useRef(false);
+  // Idempotency key: unique per submission attempt
+  const idempotencyKeyRef = useRef<string>(crypto.randomUUID());
+
   const [form, setForm] = useState({
     name: '', email: '', phone: '',
     address: '', address2: '', city: '', state: '', pincode: '',
   });
 
-  // Fetch active gateways on mount
   useEffect(() => {
     const fetchGateways = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('get-active-gateways');
         if (!error && data?.gateways) {
           setActiveGateways(data.gateways);
-          // Set default to first non-cod gateway, or cod
           const first = data.gateways[0];
           if (first) setPaymentMethod(first.gateway_name);
         }
@@ -84,7 +87,6 @@ const Checkout = () => {
     fetchGateways();
   }, []);
 
-  // Calculate COD extra charge
   const codGateway = activeGateways.find(g => g.gateway_name === 'cod');
   const codExtraCharge = paymentMethod === 'cod' && codGateway ? (Number(codGateway.cod_extra_charge) || 0) : 0;
   const codMinOrder = codGateway ? (Number(codGateway.cod_min_order) || 0) : 0;
@@ -123,6 +125,25 @@ const Checkout = () => {
     return Object.keys(errs).length === 0;
   }, [form]);
 
+  /** Pre-submit validation pipeline */
+  const runCheckoutValidation = (): string | null => {
+    // 1. Cart not empty
+    if (items.length === 0) return 'Your cart is empty';
+
+    // 2. Payment method selected and available
+    if (!paymentMethod) return 'Please select a payment method';
+    const selectedGw = activeGateways.find(g => g.gateway_name === paymentMethod);
+    if (!selectedGw) return 'Selected payment method is not available';
+
+    // 3. COD minimum check
+    if (isCodBelowMin) return `Minimum order of ₹${codMinOrder} required for COD`;
+
+    // 4. No gateways available at all
+    if (activeGateways.length === 0) return 'No payment methods available. Please try again later.';
+
+    return null; // All checks passed
+  };
+
   const goNext = () => {
     if (currentStep === 'contact' && validateContact()) setCurrentStep('shipping');
     else if (currentStep === 'shipping' && validateShipping()) setCurrentStep('payment');
@@ -136,12 +157,35 @@ const Checkout = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (currentStep !== 'payment') { goNext(); return; }
-    if (items.length === 0) { toast.error('Your cart is empty'); return; }
-    if (isCodBelowMin) { toast.error(`Minimum order of ₹${codMinOrder} required for COD`); return; }
 
+    // Anti-double-click guard
+    if (submissionLockRef.current) return;
+
+    // Run validation pipeline
+    const validationError = runCheckoutValidation();
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+
+    // Lock submissions
+    submissionLockRef.current = true;
     setIsSubmitting(true);
+
     try {
-      // Step 1: Create order via edge function
+      // Generate cart hash for tamper detection
+      const cartHash = await generateCartHash(
+        items.map(item => ({
+          id: item.id,
+          price: item.price,
+          quantity: item.quantity,
+          variantKey: item.variantKey,
+        }))
+      );
+
+      // Use current idempotency key, then rotate for next attempt
+      const currentIdempotencyKey = idempotencyKeyRef.current;
+
       const { data, error: orderError } = await supabase.functions.invoke('create-order', {
         body: {
           orderNumber: 'pending',
@@ -151,6 +195,8 @@ const Checkout = () => {
           paymentMethod, subtotal: totalPrice, shipping, discount: discountAmount, total,
           codExtraCharge,
           couponCode: appliedCoupon?.code || null,
+          cartHash,
+          idempotencyKey: currentIdempotencyKey,
         },
       });
       if (orderError) throw orderError;
@@ -158,7 +204,9 @@ const Checkout = () => {
 
       const { orderId, orderNumber } = data;
 
-      // Step 2: If online payment, initiate payment flow
+      // Rotate idempotency key after successful order creation
+      idempotencyKeyRef.current = crypto.randomUUID();
+
       if (paymentMethod === 'razorpay' || paymentMethod === 'cashfree') {
         const { data: paymentData, error: payErr } = await supabase.functions.invoke('create-payment', {
           body: { orderId, gateway: paymentMethod },
@@ -169,7 +217,7 @@ const Checkout = () => {
 
         if (paymentMethod === 'razorpay') {
           await openRazorpay(paymentData, orderId, orderNumber);
-          return; // Don't clear cart until payment verified
+          return;
         } else if (paymentMethod === 'cashfree') {
           await openCashfree(paymentData, orderId, orderNumber);
           return;
@@ -185,12 +233,12 @@ const Checkout = () => {
       toast.error(error?.message || 'Failed to place order. Please try again.');
     } finally {
       setIsSubmitting(false);
+      submissionLockRef.current = false;
     }
   };
 
   const openRazorpay = (paymentData: any, orderId: string, orderNumber: string) => {
     return new Promise<void>((resolve, reject) => {
-      // Load Razorpay script if not loaded
       const loadScript = () => {
         if ((window as any).Razorpay) return Promise.resolve();
         return new Promise<void>((res, rej) => {
@@ -237,12 +285,14 @@ const Checkout = () => {
               toast.error('Payment verification failed. Please contact support.');
             }
             setIsSubmitting(false);
+            submissionLockRef.current = false;
             resolve();
           },
           modal: {
             ondismiss: () => {
               toast.info('Payment cancelled. Your order is saved — you can retry payment.');
               setIsSubmitting(false);
+              submissionLockRef.current = false;
               resolve();
             },
           },
@@ -254,6 +304,7 @@ const Checkout = () => {
           console.error('Razorpay payment failed:', response.error);
           toast.error(response.error?.description || 'Payment failed. Please try again.');
           setIsSubmitting(false);
+          submissionLockRef.current = false;
           resolve();
         });
         rzp.open();
@@ -263,7 +314,6 @@ const Checkout = () => {
 
   const openCashfree = async (paymentData: any, orderId: string, orderNumber: string) => {
     try {
-      // Load Cashfree SDK
       if (!(window as any).Cashfree) {
         const script = document.createElement('script');
         script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
@@ -283,7 +333,6 @@ const Checkout = () => {
         redirectTarget: '_modal',
       });
 
-      // Verify after modal closes
       if (result?.paymentDetails || result?.error === undefined) {
         const { data: verifyData } = await supabase.functions.invoke('verify-payment', {
           body: { gateway: 'cashfree', orderId },
@@ -303,6 +352,7 @@ const Checkout = () => {
       toast.error('Payment failed. Please try again.');
     } finally {
       setIsSubmitting(false);
+      submissionLockRef.current = false;
     }
   };
 
@@ -619,7 +669,7 @@ const Checkout = () => {
                       </Button>
                       <Button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || activeGateways.length === 0}
                         className="rounded-full bg-foreground text-background hover:bg-foreground/90 px-8 h-12 text-base font-semibold gap-2 min-w-[180px]"
                       >
                         {isSubmitting ? (
@@ -657,7 +707,7 @@ const Checkout = () => {
 
                 <div className="space-y-3 max-h-[250px] overflow-y-auto scrollbar-hide pr-1">
                   {items.map(item => (
-                    <div key={item.id} className="flex gap-3 group">
+                    <div key={item.variantKey || item.id} className="flex gap-3 group">
                       <div className="relative shrink-0">
                         <div className="w-14 h-14 rounded-xl overflow-hidden bg-secondary">
                           <img src={item.image} alt={item.name} className="w-full h-full object-cover" loading="lazy" />

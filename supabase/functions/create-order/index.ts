@@ -53,6 +53,8 @@ const orderSchema = z.object({
   total: z.number().min(0).max(9999999),
   codExtraCharge: z.number().min(0).max(9999).optional().default(0),
   couponCode: z.string().max(50).nullable().optional(),
+  cartHash: z.string().max(128).optional(),
+  idempotencyKey: z.string().uuid().optional(),
 })
 
 Deno.serve(async (req) => {
@@ -98,7 +100,51 @@ Deno.serve(async (req) => {
       )
     }
 
-    const { orderNumber, customer, shippingAddress, items, paymentMethod, subtotal, shipping, discount, total, codExtraCharge, couponCode } = parseResult.data
+    const { orderNumber, customer, shippingAddress, items, paymentMethod, subtotal, shipping, discount, total, codExtraCharge, couponCode, cartHash, idempotencyKey } = parseResult.data
+
+    // Idempotency check: if this key was already used, return the existing order
+    if (idempotencyKey) {
+      const { data: existingOrder } = await supabase
+        .from('orders')
+        .select('id, order_number')
+        .eq('idempotency_key', idempotencyKey)
+        .maybeSingle()
+
+      if (existingOrder) {
+        return new Response(
+          JSON.stringify({
+            success: true,
+            orderId: existingOrder.id,
+            orderNumber: existingOrder.order_number,
+            deduplicated: true,
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
+
+    // Cart hash verification: recompute from items and compare
+    if (cartHash) {
+      const itemsPayload = items
+        .map(i => `${i.productId || i.title}:${i.price}:${i.quantity}`)
+        .sort()
+        .join('|')
+      
+      // Use Web Crypto to compute SHA-256
+      const encoder = new TextEncoder()
+      const data = encoder.encode(itemsPayload)
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+      const serverHash = Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('')
+      
+      if (serverHash !== cartHash) {
+        return new Response(
+          JSON.stringify({ error: 'Cart contents have changed. Please refresh and try again.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    }
 
     // Server-side price verification against database
     for (const item of items) {
@@ -297,6 +343,7 @@ Deno.serve(async (req) => {
         discount,
         total,
         cod_extra_charge: validatedCodCharge,
+        idempotency_key: idempotencyKey || null,
       })
       .select('id')
       .single()
