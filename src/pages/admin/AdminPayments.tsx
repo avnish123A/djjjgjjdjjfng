@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { CreditCard, Eye, EyeOff, Loader2, ToggleLeft, ToggleRight, AlertTriangle, CheckCircle2, Webhook, Banknote, IndianRupee, ShieldAlert, Info } from 'lucide-react';
+import { CreditCard, Eye, EyeOff, Loader2, ToggleLeft, ToggleRight, AlertTriangle, CheckCircle2, Webhook, Banknote, IndianRupee, ShieldAlert, Info, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface GatewayConfig {
@@ -421,12 +421,25 @@ const AdminPayments: React.FC = () => {
                 </div>
 
                 {/* Webhook URL info */}
-                <div className="bg-secondary/70 rounded-lg p-3 text-xs space-y-1">
-                  <p className="font-medium">Webhook URL:</p>
-                  <code className="block text-[11px] break-all text-muted-foreground font-mono">
-                    {`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${gw.gateway_name}-webhook`}
-                  </code>
-                  <p className="text-muted-foreground">Add this URL in your {meta.label} dashboard webhook settings.</p>
+                <div className="bg-secondary/70 rounded-lg p-3 text-xs space-y-2">
+                  <p className="font-medium flex items-center gap-1.5"><Webhook className="h-3.5 w-3.5" /> Webhook URL</p>
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 text-[11px] break-all text-muted-foreground font-mono bg-background/50 rounded px-2 py-1.5">
+                      {`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${gw.gateway_name}-webhook`}
+                    </code>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${gw.gateway_name}-webhook`);
+                        toast.success('Webhook URL copied!');
+                      }}
+                      className="shrink-0 p-1.5 rounded-md hover:bg-background border border-border text-muted-foreground hover:text-foreground transition-colors"
+                      title="Copy webhook URL"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <p className="text-muted-foreground">Add this URL in your {meta.label} Dashboard → Settings → Webhooks.</p>
                 </div>
 
                 {/* Validation warning */}

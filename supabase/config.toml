@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.get-active-gateways]
 verify_jwt = false
+
+[functions.admin-payment-settings]
+verify_jwt = false
