@@ -17,13 +17,12 @@ async function verifyAdmin(req: Request) {
     { global: { headers: { Authorization: authHeader } } }
   )
 
-  const token = authHeader.replace('Bearer ', '')
-  const { data, error } = await supabase.auth.getClaims(token)
-  if (error || !data?.claims) {
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user) {
     return { error: 'Unauthorized', status: 401 }
   }
 
-  const userId = data.claims.sub
+  const userId = user.id
   const { data: isAdmin } = await supabase.rpc('has_role', { _user_id: userId, _role: 'admin' })
   if (!isAdmin) {
     return { error: 'Forbidden', status: 403 }

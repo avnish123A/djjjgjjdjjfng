@@ -109,10 +109,10 @@ const AdminPayments: React.FC = () => {
 
     try {
       await callEdgeFunction('PUT', { id: gw.id, changes: { is_enabled: newVal } });
-      setGateways(prev => prev.map(g => g.id === gw.id ? { ...g, is_enabled: newVal } : g));
       toast.success(`${gatewayMeta[gw.gateway_name]?.label} ${newVal ? 'enabled' : 'disabled'}`);
-    } catch {
-      toast.error('Failed to update');
+      await fetchGateways();
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to update');
     }
   };
 
@@ -165,23 +165,12 @@ const AdminPayments: React.FC = () => {
     setSaving(gw.id);
     try {
       await callEdgeFunction('PUT', { id: gw.id, changes });
-      // Update local state - merge non-secret changes and update has_* flags
-      setGateways(prev => prev.map(g => {
-        if (g.id !== gw.id) return g;
-        return {
-          ...g,
-          environment: changes.environment ?? g.environment,
-          cod_extra_charge: changes.cod_extra_charge ?? g.cod_extra_charge,
-          cod_min_order: changes.cod_min_order ?? g.cod_min_order,
-          has_key_id: changes.key_id?.trim() ? true : g.has_key_id,
-          has_key_secret: changes.key_secret?.trim() ? true : g.has_key_secret,
-          has_webhook_secret: changes.webhook_secret?.trim() ? true : g.has_webhook_secret,
-        };
-      }));
+      // Re-fetch from server to ensure immediate accurate reflection
       setEditState(prev => { const n = { ...prev }; delete n[gw.id]; return n; });
       toast.success(`${gatewayMeta[gw.gateway_name]?.label} settings saved`);
-    } catch {
-      toast.error('Failed to save');
+      await fetchGateways();
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to save');
     }
     setSaving(null);
   };
