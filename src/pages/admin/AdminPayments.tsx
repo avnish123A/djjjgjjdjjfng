@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { CreditCard, Eye, EyeOff, Loader2, ToggleLeft, ToggleRight, AlertTriangle, CheckCircle2, Webhook, Banknote, IndianRupee, ShieldAlert, Info, Copy, Check } from 'lucide-react';
+import { CreditCard, Eye, EyeOff, Loader2, ToggleLeft, ToggleRight, AlertTriangle, CheckCircle2, Webhook, Banknote, IndianRupee, ShieldAlert, Info, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+/* ── Types ── */
 interface GatewayConfig {
   id: string;
   gateway_name: string;
@@ -27,10 +28,17 @@ interface EditFields {
   cod_min_order?: number;
 }
 
+/* ── Gateway metadata ── */
 const gatewayMeta: Record<string, { label: string; desc: string; icon: React.ElementType; color: string }> = {
   razorpay: { label: 'Razorpay', desc: 'Accept UPI, Cards, Net Banking, Wallets', icon: CreditCard, color: 'text-blue-600' },
   cashfree: { label: 'Cashfree', desc: 'Accept UPI, Cards, Net Banking, EMI', icon: CreditCard, color: 'text-purple-600' },
   cod: { label: 'Cash on Delivery', desc: 'Collect payment on delivery', icon: Banknote, color: 'text-green-600' },
+};
+
+/* ── Webhook URL builder (reads from single config) ── */
+const getWebhookUrl = (gatewayName: string) => {
+  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+  return `https://${projectId}.supabase.co/functions/v1/${gatewayName}-webhook`;
 };
 
 const AdminPayments: React.FC = () => {
@@ -40,18 +48,17 @@ const AdminPayments: React.FC = () => {
   const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
   const [editState, setEditState] = useState<Record<string, EditFields>>({});
 
-  useEffect(() => {
-    fetchGateways();
-  }, []);
-
-  const callEdgeFunction = async (method: 'GET' | 'PUT', body?: any) => {
+  /* ── Edge function caller ── */
+  const callEdgeFunction = useCallback(async (method: 'GET' | 'PUT', body?: any) => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      toast.error('Please log in again');
-      return null;
+      toast.error('Session expired — please log in again');
+      throw new Error('No session');
     }
 
-    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-payment-settings`;
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+    const url = `https://${projectId}.supabase.co/functions/v1/admin-payment-settings`;
+
     const res = await fetch(url, {
       method,
       headers: {
@@ -62,25 +69,35 @@ const AdminPayments: React.FC = () => {
       ...(body ? { body: JSON.stringify(body) } : {}),
     });
 
+    const data = await res.json().catch(() => ({}));
+
     if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Request failed');
+      throw new Error(data.error || `Request failed (${res.status})`);
     }
 
-    return res.json();
-  };
+    return data;
+  }, []);
 
-  const fetchGateways = async () => {
+  /* ── Fetch gateways ── */
+  const fetchGateways = useCallback(async () => {
     setLoading(true);
     try {
       const data = await callEdgeFunction('GET');
-      setGateways(data || []);
-    } catch {
-      toast.error('Failed to load payment settings');
+      if (Array.isArray(data)) {
+        setGateways(data);
+      } else {
+        toast.error('Unexpected response format');
+      }
+    } catch (err: any) {
+      console.error('fetchGateways error:', err);
+      toast.error(err?.message || 'Failed to load payment settings');
     }
     setLoading(false);
-  };
+  }, [callEdgeFunction]);
 
+  useEffect(() => { fetchGateways(); }, [fetchGateways]);
+
+  /* ── Edit helpers ── */
   const getEditValue = (gw: GatewayConfig, field: string) => {
     const edit = editState[gw.id];
     if (edit && field in edit) return (edit as any)[field];
@@ -95,7 +112,29 @@ const AdminPayments: React.FC = () => {
     }));
   };
 
+  const hasChanges = (id: string) => {
+    const changes = editState[id];
+    return changes && Object.keys(changes).length > 0;
+  };
+
+  /* ── Save helper (shared by save button + toggle + env switch) ── */
+  const saveChanges = async (gw: GatewayConfig, changes: EditFields, successMsg: string) => {
+    setSaving(gw.id);
+    try {
+      await callEdgeFunction('PUT', { id: gw.id, changes });
+      // Clear edit state for this gateway
+      setEditState(prev => { const n = { ...prev }; delete n[gw.id]; return n; });
+      toast.success(successMsg);
+      await fetchGateways();
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to save');
+    }
+    setSaving(null);
+  };
+
+  /* ── Toggle enabled ── */
   const handleToggleEnabled = async (gw: GatewayConfig) => {
+    if (saving) return; // prevent double-click
     const isCod = gw.gateway_name === 'cod';
     const newVal = !gw.is_enabled;
 
@@ -108,15 +147,18 @@ const AdminPayments: React.FC = () => {
       }
     }
 
-    try {
-      await callEdgeFunction('PUT', { id: gw.id, changes: { is_enabled: newVal } });
-      toast.success(`${gatewayMeta[gw.gateway_name]?.label} ${newVal ? 'enabled' : 'disabled'}`);
-      await fetchGateways();
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to update');
-    }
+    await saveChanges(gw, { is_enabled: newVal }, `${gatewayMeta[gw.gateway_name]?.label} ${newVal ? 'enabled' : 'disabled'}`);
   };
 
+  /* ── Environment switch ── */
+  const handleEnvironmentChange = async (gw: GatewayConfig, env: string) => {
+    if (saving) return;
+    if (gw.environment === env && !editState[gw.id]?.environment) return; // already set
+    // Save immediately to backend
+    await saveChanges(gw, { environment: env }, `${gatewayMeta[gw.gateway_name]?.label} switched to ${env} mode`);
+  };
+
+  /* ── Validate before save ── */
   const validateGateway = (gw: GatewayConfig, changes: EditFields): string | null => {
     const isCod = gw.gateway_name === 'cod';
 
@@ -132,13 +174,12 @@ const AdminPayments: React.FC = () => {
     const env = (changes.environment ?? gw.environment) as string;
     const newKeyId = changes.key_id?.trim();
 
-    // Check test/live key mismatch for Razorpay
     if (gw.gateway_name === 'razorpay' && newKeyId) {
       if (env === 'test' && !newKeyId.startsWith('rzp_test_')) {
-        return 'Test mode requires keys starting with "rzp_test_". Are you using live keys in test mode?';
+        return 'Test mode requires keys starting with "rzp_test_"';
       }
       if (env === 'live' && !newKeyId.startsWith('rzp_live_')) {
-        return 'Live mode requires keys starting with "rzp_live_". Are you using test keys in live mode?';
+        return 'Live mode requires keys starting with "rzp_live_"';
       }
     }
 
@@ -153,9 +194,13 @@ const AdminPayments: React.FC = () => {
     return null;
   };
 
+  /* ── Save button handler ── */
   const handleSave = async (gw: GatewayConfig) => {
     const changes = editState[gw.id];
-    if (!changes || Object.keys(changes).length === 0) return;
+    if (!changes || Object.keys(changes).length === 0) {
+      toast.info('No changes to save');
+      return;
+    }
 
     const validationError = validateGateway(gw, changes);
     if (validationError) {
@@ -163,24 +208,10 @@ const AdminPayments: React.FC = () => {
       return;
     }
 
-    setSaving(gw.id);
-    try {
-      await callEdgeFunction('PUT', { id: gw.id, changes });
-      // Re-fetch from server to ensure immediate accurate reflection
-      setEditState(prev => { const n = { ...prev }; delete n[gw.id]; return n; });
-      toast.success(`${gatewayMeta[gw.gateway_name]?.label} settings saved`);
-      await fetchGateways();
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to save');
-    }
-    setSaving(null);
+    await saveChanges(gw, changes, `${gatewayMeta[gw.gateway_name]?.label} settings saved successfully`);
   };
 
-  const hasChanges = (id: string) => {
-    const changes = editState[id];
-    return changes && Object.keys(changes).length > 0;
-  };
-
+  /* ── Loading state ── */
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -205,12 +236,19 @@ const AdminPayments: React.FC = () => {
         </div>
       </div>
 
+      {gateways.length === 0 && (
+        <div className="text-center py-12 text-muted-foreground text-sm">
+          No payment gateways configured. Please contact support.
+        </div>
+      )}
+
       {gateways.map((gw) => {
         const meta = gatewayMeta[gw.gateway_name] || { label: gw.gateway_name, desc: '', icon: CreditCard, color: '' };
         const IconComp = meta.icon;
         const isCod = gw.gateway_name === 'cod';
-        const env = (getEditValue(gw, 'environment') as string) || 'test';
+        const env = (getEditValue(gw, 'environment') as string) || gw.environment || 'test';
         const isLive = env === 'live';
+        const isSaving = saving === gw.id;
 
         return (
           <div key={gw.id} className={`bg-card border rounded-xl overflow-hidden transition-all ${
@@ -243,7 +281,8 @@ const AdminPayments: React.FC = () => {
               <button
                 type="button"
                 onClick={() => handleToggleEnabled(gw)}
-                className="flex items-center gap-2"
+                disabled={isSaving}
+                className="flex items-center gap-2 disabled:opacity-50"
               >
                 {gw.is_enabled ? (
                   <ToggleRight className="h-8 w-8 text-primary" />
@@ -251,7 +290,7 @@ const AdminPayments: React.FC = () => {
                   <ToggleLeft className="h-8 w-8 text-muted-foreground" />
                 )}
                 <span className={`text-xs font-medium ${gw.is_enabled ? 'text-primary' : 'text-muted-foreground'}`}>
-                  {gw.is_enabled ? 'Enabled' : 'Disabled'}
+                  {isSaving ? 'Saving...' : gw.is_enabled ? 'Enabled' : 'Disabled'}
                 </span>
               </button>
             </div>
@@ -300,7 +339,7 @@ const AdminPayments: React.FC = () => {
                   <div className="flex items-start gap-2 bg-secondary/70 rounded-lg p-3 text-xs">
                     <Info className="h-3.5 w-3.5 shrink-0 mt-0.5 text-muted-foreground" />
                     <span className="text-muted-foreground">
-                      Customers will see "Cash on Delivery (+₹{Number(getEditValue(gw, 'cod_extra_charge'))}&nbsp;fee)" at checkout. This charge is added to their order total.
+                      Customers will see "Cash on Delivery (+₹{Number(getEditValue(gw, 'cod_extra_charge'))}&nbsp;fee)" at checkout.
                     </span>
                   </div>
                 )}
@@ -308,11 +347,11 @@ const AdminPayments: React.FC = () => {
                 <div className="flex justify-end pt-1">
                   <Button
                     onClick={() => handleSave(gw)}
-                    disabled={!hasChanges(gw.id) || saving === gw.id}
+                    disabled={!hasChanges(gw.id) || isSaving}
                     size="sm"
                     className="gap-1.5"
                   >
-                    {saving === gw.id ? (
+                    {isSaving ? (
                       <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving...</>
                     ) : (
                       <><CheckCircle2 className="h-3.5 w-3.5" /> Save Changes</>
@@ -334,8 +373,9 @@ const AdminPayments: React.FC = () => {
                   <div className="flex items-center gap-0">
                     <button
                       type="button"
-                      onClick={() => setEditField(gw.id, 'environment', 'test')}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-l-lg border transition-colors ${
+                      disabled={isSaving}
+                      onClick={() => handleEnvironmentChange(gw, 'test')}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-l-lg border transition-colors disabled:opacity-50 ${
                         !isLive ? 'bg-yellow-100 border-yellow-300 text-yellow-800 dark:bg-yellow-900/40 dark:border-yellow-700 dark:text-yellow-400' : 'border-border text-muted-foreground hover:bg-secondary'
                       }`}
                     >
@@ -343,8 +383,9 @@ const AdminPayments: React.FC = () => {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setEditField(gw.id, 'environment', 'live')}
-                      className={`px-3 py-1.5 text-xs font-medium rounded-r-lg border-y border-r transition-colors ${
+                      disabled={isSaving}
+                      onClick={() => handleEnvironmentChange(gw, 'live')}
+                      className={`px-3 py-1.5 text-xs font-medium rounded-r-lg border-y border-r transition-colors disabled:opacity-50 ${
                         isLive ? 'bg-green-100 border-green-300 text-green-800 dark:bg-green-900/40 dark:border-green-700 dark:text-green-400' : 'border-border text-muted-foreground hover:bg-secondary'
                       }`}
                     >
@@ -356,7 +397,7 @@ const AdminPayments: React.FC = () => {
                 {isLive && (
                   <div className="flex items-start gap-2 bg-yellow-50 dark:bg-yellow-950/30 text-yellow-800 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 text-xs">
                     <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-                    <span><strong>Warning:</strong> Live mode uses production keys. Real payments will be processed. Ensure keys are correct before enabling.</span>
+                    <span><strong>Warning:</strong> Live mode processes real payments. Ensure keys are correct before enabling.</span>
                   </div>
                 )}
 
@@ -372,6 +413,11 @@ const AdminPayments: React.FC = () => {
                     className="w-full px-3 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 font-mono"
                     placeholder={gw.has_key_id ? '••••••••  (saved — enter new value to change)' : (gw.gateway_name === 'razorpay' ? (isLive ? 'rzp_live_...' : 'rzp_test_...') : 'your_app_id')}
                   />
+                  {gw.has_key_id && (
+                    <p className="text-[11px] text-green-600 mt-1 flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" /> Key ID is configured
+                    </p>
+                  )}
                 </div>
 
                 {/* Key Secret */}
@@ -395,6 +441,11 @@ const AdminPayments: React.FC = () => {
                       {showSecrets[`${gw.id}_secret`] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
+                  {gw.has_key_secret && (
+                    <p className="text-[11px] text-green-600 mt-1 flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" /> Secret key is configured
+                    </p>
+                  )}
                 </div>
 
                 {/* Webhook Secret */}
@@ -420,17 +471,17 @@ const AdminPayments: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Webhook URL info */}
+                {/* Webhook URL (read-only) */}
                 <div className="bg-secondary/70 rounded-lg p-3 text-xs space-y-2">
                   <p className="font-medium flex items-center gap-1.5"><Webhook className="h-3.5 w-3.5" /> Webhook URL</p>
                   <div className="flex items-center gap-2">
                     <code className="flex-1 text-[11px] break-all text-muted-foreground font-mono bg-background/50 rounded px-2 py-1.5">
-                      {`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${gw.gateway_name}-webhook`}
+                      {getWebhookUrl(gw.gateway_name)}
                     </code>
                     <button
                       type="button"
                       onClick={() => {
-                        navigator.clipboard.writeText(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${gw.gateway_name}-webhook`);
+                        navigator.clipboard.writeText(getWebhookUrl(gw.gateway_name));
                         toast.success('Webhook URL copied!');
                       }}
                       className="shrink-0 p-1.5 rounded-md hover:bg-background border border-border text-muted-foreground hover:text-foreground transition-colors"
@@ -454,11 +505,11 @@ const AdminPayments: React.FC = () => {
                 <div className="flex justify-end pt-1">
                   <Button
                     onClick={() => handleSave(gw)}
-                    disabled={!hasChanges(gw.id) || saving === gw.id}
+                    disabled={!hasChanges(gw.id) || isSaving}
                     size="sm"
                     className="gap-1.5"
                   >
-                    {saving === gw.id ? (
+                    {isSaving ? (
                       <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Saving...</>
                     ) : (
                       <><CheckCircle2 className="h-3.5 w-3.5" /> Save Changes</>

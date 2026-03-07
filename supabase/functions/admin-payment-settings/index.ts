@@ -11,32 +11,37 @@ async function verifyAdmin(req: Request) {
     return { error: 'Unauthorized', status: 401 }
   }
 
+  const token = authHeader.replace('Bearer ', '')
+
+  // Create client with user's token for auth verification
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_ANON_KEY')!,
     { global: { headers: { Authorization: authHeader } } }
   )
 
-  // Use getClaims for JWT verification
-  const token = authHeader.replace('Bearer ', '')
-  const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token)
-  if (claimsError || !claimsData?.claims) {
-    console.error('getClaims error:', claimsError?.message)
+  // Verify user via getUser (server-side validation)
+  const { data: userData, error: userError } = await supabase.auth.getUser(token)
+  if (userError || !userData?.user) {
+    console.error('Auth error:', userError?.message)
     return { error: 'Unauthorized', status: 401 }
   }
 
-  const userId = claimsData.claims.sub as string
-  if (!userId) {
-    return { error: 'Unauthorized', status: 401 }
-  }
+  const userId = userData.user.id
 
-  // Check admin role
-  const { data: isAdmin, error: roleError } = await supabase.rpc('has_role', { _user_id: userId, _role: 'admin' })
-  if (roleError) {
-    console.error('has_role error:', roleError.message)
-    return { error: 'Forbidden', status: 403 }
-  }
-  if (!isAdmin) {
+  // Check admin role using service client to bypass RLS
+  const serviceClient = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  )
+
+  const { data: roles } = await serviceClient
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', userId)
+    .eq('role', 'admin')
+
+  if (!roles || roles.length === 0) {
     return { error: 'Forbidden', status: 403 }
   }
 
@@ -76,7 +81,7 @@ Deno.serve(async (req) => {
         })
       }
 
-      // Mask secrets - replace actual values with boolean indicators
+      // Mask secrets
       const masked = (data || []).map((gw: any) => ({
         id: gw.id,
         gateway_name: gw.gateway_name,
@@ -111,7 +116,6 @@ Deno.serve(async (req) => {
       const sanitized: Record<string, any> = {}
       for (const field of allowedFields) {
         if (field in changes) {
-          // Don't overwrite secrets with empty strings
           if (['key_id', 'key_secret', 'webhook_secret'].includes(field)) {
             if (changes[field] !== undefined && changes[field] !== '') {
               sanitized[field] = changes[field]
