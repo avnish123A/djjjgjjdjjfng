@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { CreditCard, Eye, EyeOff, Loader2, ToggleLeft, ToggleRight, AlertTriangle, CheckCircle2, Webhook, Banknote, IndianRupee, ShieldAlert, Info, Copy } from 'lucide-react';
+import { CreditCard, Eye, EyeOff, Loader2, AlertTriangle, CheckCircle2, Webhook, Banknote, IndianRupee, ShieldAlert, Info, Copy, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 
 /* ── Types ── */
 interface GatewayConfig {
@@ -35,7 +36,7 @@ const gatewayMeta: Record<string, { label: string; desc: string; icon: React.Ele
   cod: { label: 'Cash on Delivery', desc: 'Collect payment on delivery', icon: Banknote, color: 'text-green-600' },
 };
 
-/* ── Webhook URL builder (reads from single config) ── */
+/* ── Webhook URL builder ── */
 const getWebhookUrl = (gatewayName: string) => {
   const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
   return `https://${projectId}.supabase.co/functions/v1/${gatewayName}-webhook`;
@@ -47,40 +48,57 @@ const AdminPayments: React.FC = () => {
   const [saving, setSaving] = useState<string | null>(null);
   const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({});
   const [editState, setEditState] = useState<Record<string, EditFields>>({});
+  const [cardErrors, setCardErrors] = useState<Record<string, string>>({});
 
-  /* ── Edge function caller ── */
+  /* ── Edge function caller with timeout ── */
   const callEdgeFunction = useCallback(async (method: 'GET' | 'PUT', body?: any) => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      toast.error('Session expired — please log in again');
-      throw new Error('No session');
+      throw new Error('Session expired — please log in again');
     }
 
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
     const url = `https://${projectId}.supabase.co/functions/v1/admin-payment-settings`;
 
-    const res = await fetch(url, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-        'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-      },
-      ...(body ? { body: JSON.stringify(body) } : {}),
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
-    const data = await res.json().catch(() => ({}));
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        signal: controller.signal,
+        ...(body ? { body: JSON.stringify(body) } : {}),
+      });
 
-    if (!res.ok) {
-      throw new Error(data.error || `Request failed (${res.status})`);
+      clearTimeout(timeout);
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        if (res.status === 401) throw new Error('Authentication failed — please log in again');
+        if (res.status === 403) throw new Error('Access denied — admin role required');
+        throw new Error(data.error || `Server error (${res.status})`);
+      }
+
+      return data;
+    } catch (err: any) {
+      clearTimeout(timeout);
+      if (err.name === 'AbortError') {
+        throw new Error('Request timed out — please check your connection and try again');
+      }
+      throw err;
     }
-
-    return data;
   }, []);
 
   /* ── Fetch gateways ── */
   const fetchGateways = useCallback(async () => {
     setLoading(true);
+    setCardErrors({});
     try {
       const data = await callEdgeFunction('GET');
       if (Array.isArray(data)) {
@@ -106,6 +124,7 @@ const AdminPayments: React.FC = () => {
   };
 
   const setEditField = (id: string, field: string, value: any) => {
+    setCardErrors(prev => { const n = { ...prev }; delete n[id]; return n; });
     setEditState(prev => ({
       ...prev,
       [id]: { ...prev[id], [field]: value },
@@ -117,24 +136,30 @@ const AdminPayments: React.FC = () => {
     return changes && Object.keys(changes).length > 0;
   };
 
-  /* ── Save helper (shared by save button + toggle + env switch) ── */
+  const clearCardError = (id: string) => {
+    setCardErrors(prev => { const n = { ...prev }; delete n[id]; return n; });
+  };
+
+  /* ── Save helper with optimistic revert ── */
   const saveChanges = async (gw: GatewayConfig, changes: EditFields, successMsg: string) => {
     setSaving(gw.id);
+    clearCardError(gw.id);
     try {
       await callEdgeFunction('PUT', { id: gw.id, changes });
-      // Clear edit state for this gateway
       setEditState(prev => { const n = { ...prev }; delete n[gw.id]; return n; });
       toast.success(successMsg);
       await fetchGateways();
     } catch (err: any) {
-      toast.error(err?.message || 'Failed to save');
+      const msg = err?.message || 'Failed to save';
+      setCardErrors(prev => ({ ...prev, [gw.id]: msg }));
+      toast.error(msg);
     }
     setSaving(null);
   };
 
-  /* ── Toggle enabled ── */
+  /* ── Toggle enabled (optimistic) ── */
   const handleToggleEnabled = async (gw: GatewayConfig) => {
-    if (saving) return; // prevent double-click
+    if (saving) return;
     const isCod = gw.gateway_name === 'cod';
     const newVal = !gw.is_enabled;
 
@@ -142,20 +167,57 @@ const AdminPayments: React.FC = () => {
       const hasKeyId = editState[gw.id]?.key_id ? true : gw.has_key_id;
       const hasKeySecret = editState[gw.id]?.key_secret ? true : gw.has_key_secret;
       if (!hasKeyId || !hasKeySecret) {
-        toast.error(`Please add API keys before enabling ${gatewayMeta[gw.gateway_name]?.label}`);
+        const msg = `Please add API keys before enabling ${gatewayMeta[gw.gateway_name]?.label}`;
+        setCardErrors(prev => ({ ...prev, [gw.id]: msg }));
+        toast.error(msg);
         return;
       }
     }
 
-    await saveChanges(gw, { is_enabled: newVal }, `${gatewayMeta[gw.gateway_name]?.label} ${newVal ? 'enabled' : 'disabled'}`);
+    // Optimistic update
+    setGateways(prev => prev.map(g => g.id === gw.id ? { ...g, is_enabled: newVal } : g));
+
+    setSaving(gw.id);
+    clearCardError(gw.id);
+    try {
+      await callEdgeFunction('PUT', { id: gw.id, changes: { is_enabled: newVal } });
+      setEditState(prev => { const n = { ...prev }; delete n[gw.id]; return n; });
+      toast.success(`${gatewayMeta[gw.gateway_name]?.label} ${newVal ? 'enabled' : 'disabled'}`);
+      await fetchGateways();
+    } catch (err: any) {
+      // Revert optimistic update
+      setGateways(prev => prev.map(g => g.id === gw.id ? { ...g, is_enabled: !newVal } : g));
+      const msg = err?.message || 'Failed to save';
+      setCardErrors(prev => ({ ...prev, [gw.id]: msg }));
+      toast.error(msg);
+    }
+    setSaving(null);
   };
 
-  /* ── Environment switch ── */
+  /* ── Environment switch (optimistic) ── */
   const handleEnvironmentChange = async (gw: GatewayConfig, env: string) => {
     if (saving) return;
-    if (gw.environment === env && !editState[gw.id]?.environment) return; // already set
-    // Save immediately to backend
-    await saveChanges(gw, { environment: env }, `${gatewayMeta[gw.gateway_name]?.label} switched to ${env} mode`);
+    if (gw.environment === env) return;
+
+    const prevEnv = gw.environment;
+    // Optimistic
+    setGateways(prev => prev.map(g => g.id === gw.id ? { ...g, environment: env } : g));
+
+    setSaving(gw.id);
+    clearCardError(gw.id);
+    try {
+      await callEdgeFunction('PUT', { id: gw.id, changes: { environment: env } });
+      setEditState(prev => { const n = { ...prev }; delete n[gw.id]; return n; });
+      toast.success(`${gatewayMeta[gw.gateway_name]?.label} switched to ${env} mode`);
+      await fetchGateways();
+    } catch (err: any) {
+      // Revert
+      setGateways(prev => prev.map(g => g.id === gw.id ? { ...g, environment: prevEnv } : g));
+      const msg = err?.message || 'Failed to save';
+      setCardErrors(prev => ({ ...prev, [gw.id]: msg }));
+      toast.error(msg);
+    }
+    setSaving(null);
   };
 
   /* ── Validate before save ── */
@@ -204,6 +266,7 @@ const AdminPayments: React.FC = () => {
 
     const validationError = validateGateway(gw, changes);
     if (validationError) {
+      setCardErrors(prev => ({ ...prev, [gw.id]: validationError }));
       toast.error(validationError);
       return;
     }
@@ -246,9 +309,10 @@ const AdminPayments: React.FC = () => {
         const meta = gatewayMeta[gw.gateway_name] || { label: gw.gateway_name, desc: '', icon: CreditCard, color: '' };
         const IconComp = meta.icon;
         const isCod = gw.gateway_name === 'cod';
-        const env = (getEditValue(gw, 'environment') as string) || gw.environment || 'test';
+        const env = gw.environment || 'test';
         const isLive = env === 'live';
         const isSaving = saving === gw.id;
+        const cardError = cardErrors[gw.id];
 
         return (
           <div key={gw.id} className={`bg-card border rounded-xl overflow-hidden transition-all ${
@@ -278,22 +342,29 @@ const AdminPayments: React.FC = () => {
                   <p className="text-xs text-muted-foreground">{meta.desc}</p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => handleToggleEnabled(gw)}
-                disabled={isSaving}
-                className="flex items-center gap-2 disabled:opacity-50"
-              >
-                {gw.is_enabled ? (
-                  <ToggleRight className="h-8 w-8 text-primary" />
-                ) : (
-                  <ToggleLeft className="h-8 w-8 text-muted-foreground" />
-                )}
-                <span className={`text-xs font-medium ${gw.is_enabled ? 'text-primary' : 'text-muted-foreground'}`}>
-                  {isSaving ? 'Saving...' : gw.is_enabled ? 'Enabled' : 'Disabled'}
+              <div className="flex items-center gap-2">
+                {isSaving && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                <Switch
+                  checked={gw.is_enabled}
+                  onCheckedChange={() => handleToggleEnabled(gw)}
+                  disabled={isSaving}
+                />
+                <span className={`text-xs font-medium min-w-[52px] ${gw.is_enabled ? 'text-primary' : 'text-muted-foreground'}`}>
+                  {gw.is_enabled ? 'Enabled' : 'Disabled'}
                 </span>
-              </button>
+              </div>
             </div>
+
+            {/* Inline error banner */}
+            {cardError && (
+              <div className="flex items-start gap-2 bg-destructive/10 text-destructive border-b border-destructive/20 px-6 py-3 text-xs">
+                <XCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                <span className="flex-1">{cardError}</span>
+                <button type="button" onClick={() => clearCardError(gw.id)} className="text-destructive/60 hover:text-destructive">
+                  <XCircle className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
 
             {/* COD Configuration */}
             {isCod && (
