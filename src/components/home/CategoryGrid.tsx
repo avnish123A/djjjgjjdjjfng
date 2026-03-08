@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useCategories } from '@/hooks/useCategories';
 import { Smartphone, Laptop, Tablet, Headphones, Mouse, Watch } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const categoryIcons: Record<string, React.ElementType> = {
   smartphones: Smartphone,
@@ -9,6 +10,15 @@ const categoryIcons: Record<string, React.ElementType> = {
   'mobile-accessories': Headphones,
   'laptop-accessories': Mouse,
   'smart-gadgets': Watch,
+};
+
+const categoryGradients: Record<string, string> = {
+  smartphones: 'from-blue-500/10 to-cyan-500/10',
+  laptops: 'from-violet-500/10 to-blue-500/10',
+  tablets: 'from-emerald-500/10 to-teal-500/10',
+  'mobile-accessories': 'from-orange-500/10 to-amber-500/10',
+  'laptop-accessories': 'from-pink-500/10 to-rose-500/10',
+  'smart-gadgets': 'from-cyan-500/10 to-blue-500/10',
 };
 
 const fallbackCategories = [
@@ -25,12 +35,12 @@ export const CategoryGrid = () => {
 
   if (isLoading) {
     return (
-      <section className="py-6 bg-background">
+      <section className="py-8 lg:py-12">
         <div className="container mx-auto px-4">
-          <div className="flex gap-6 overflow-x-auto scrollbar-hide justify-center">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-4">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="flex flex-col items-center gap-2 animate-pulse">
-                <div className="w-16 h-16 bg-secondary rounded-full" />
+              <div key={i} className="flex flex-col items-center gap-3 animate-pulse">
+                <div className="w-20 h-20 bg-secondary rounded-2xl" />
                 <div className="h-3 w-16 bg-secondary rounded" />
               </div>
             ))}
@@ -43,28 +53,47 @@ export const CategoryGrid = () => {
   const displayCategories = categories.length > 0 ? categories : fallbackCategories;
 
   return (
-    <section className="py-6 lg:py-8 bg-background border-b border-border">
+    <section className="py-8 lg:py-12">
       <div className="container mx-auto px-4">
-        <div className="flex gap-6 sm:gap-8 lg:gap-12 overflow-x-auto scrollbar-hide justify-start lg:justify-center pb-2">
-          {displayCategories.map((cat) => {
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-8"
+        >
+          <h2 className="font-display text-2xl sm:text-3xl tracking-tight">Shop by Category</h2>
+          <p className="text-sm text-muted-foreground mt-2">Find exactly what you need</p>
+        </motion.div>
+
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-4 lg:gap-6">
+          {displayCategories.map((cat, i) => {
             const IconComp = categoryIcons[cat.slug] || Smartphone;
+            const gradient = categoryGradients[cat.slug] || 'from-blue-500/10 to-cyan-500/10';
             return (
-              <Link
+              <motion.div
                 key={cat.id}
-                to={`/products?category=${cat.slug}`}
-                className="flex flex-col items-center gap-2 min-w-[72px] group"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
               >
-                <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-secondary border-2 border-transparent group-hover:border-primary flex items-center justify-center transition-all duration-300 group-hover:shadow-md">
-                  {cat.image && cat.image !== '/placeholder.svg' ? (
-                    <img src={cat.image} alt={cat.name} className="w-10 h-10 lg:w-12 lg:h-12 object-contain rounded-full" />
-                  ) : (
-                    <IconComp className="w-7 h-7 lg:w-8 lg:h-8 text-muted-foreground group-hover:text-primary transition-colors" />
-                  )}
-                </div>
-                <span className="text-[11px] lg:text-xs font-medium text-foreground/80 group-hover:text-primary text-center transition-colors whitespace-nowrap">
-                  {cat.name}
-                </span>
-              </Link>
+                <Link
+                  to={`/products?category=${cat.slug}`}
+                  className="flex flex-col items-center gap-3 group"
+                >
+                  <div className={`w-20 h-20 lg:w-24 lg:h-24 rounded-2xl bg-gradient-to-br ${gradient} border border-border/50 flex items-center justify-center category-3d group-hover:glow-blue`}>
+                    {cat.image && cat.image !== '/placeholder.svg' ? (
+                      <img src={cat.image} alt={cat.name} className="w-12 h-12 lg:w-14 lg:h-14 object-contain" />
+                    ) : (
+                      <IconComp className="w-8 h-8 lg:w-10 lg:h-10 text-primary group-hover:scale-110 transition-transform duration-300" />
+                    )}
+                  </div>
+                  <span className="text-xs lg:text-sm font-medium text-foreground/80 group-hover:text-primary text-center transition-colors">
+                    {cat.name}
+                  </span>
+                </Link>
+              </motion.div>
             );
           })}
         </div>
