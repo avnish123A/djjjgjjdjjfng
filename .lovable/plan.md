@@ -1,42 +1,87 @@
 
 
-## Security Fix: Payment Gateway Secrets Exposure
+## Plan: Expand EkamWear Product Catalog & Categories (Aachho-Inspired)
 
-### The Issue
-There is one error-level security finding: **Payment gateway secrets (API keys, webhook secrets) are directly readable by admin users via client-side queries** to the `payment_settings` table. This means `key_secret`, `webhook_secret`, and `key_id` values are visible in browser memory, dev tools, and network traffic.
+### What We Have Now
+- 3 categories in DB: Women Ethnic Wear, Men Ethnic Wear, Accessories
+- 17 products with Unsplash placeholder images
+- All using "EkamWear" brand
 
-### Approach: Edge Function Proxy
+### What We'll Do
 
-Create an edge function `admin-payment-settings` that:
-1. **GET**: Returns payment settings with secrets masked (only boolean flags like `has_key_secret: true`)
-2. **PUT**: Accepts updates (including new secret values) and writes them server-side
+**Important**: We cannot copy Aachho's product images, names, or descriptions — that's copyrighted content. Instead, we'll create an **original catalog inspired by the same category structure** using royalty-free Unsplash images and original product descriptions.
 
-Then update `AdminPayments.tsx` to use the edge function instead of direct Supabase queries.
+---
 
-### Changes
+### 1. Expand Categories in Database
 
-**1. New edge function: `supabase/functions/admin-payment-settings/index.ts`**
-- Verifies the caller is an authenticated admin (via `has_role` RPC)
-- GET: Fetches payment settings, strips `key_id`, `key_secret`, `webhook_secret`, returns `has_key_id`, `has_key_secret`, `has_webhook_secret` booleans instead
-- PUT: Accepts gateway ID + changes, updates the `payment_settings` table using service role
+Delete existing 3 categories and create a richer category structure matching the Aachho-style navigation:
 
-**2. Update `supabase/config.toml`**
-- Add `[functions.admin-payment-settings]` with `verify_jwt = false` (auth handled inside the function)
+| Category | Subcategory-style products |
+|----------|--------------------------|
+| Suit Sets | Chanderi, Georgette, Cotton suits |
+| Kurta Sets | Printed, Embroidered, Block-print |
+| Co-ord Sets | Crop top + pants, ethnic fusion |
+| Anarkali | Floor-length, short, velvet |
+| Lehenga Sets | Bridal, festive, lightweight |
+| Sarees | Silk, Chiffon, Bandhani |
+| Dresses | Maxi, Midi, A-line ethnic |
+| Men Kurtas | Lucknowi, Pathani, Cotton |
+| Sherwanis | Wedding, festive |
+| Jewellery | Earrings, Necklaces, Bangles |
+| Bags | Potli, Clutch, Tote |
+| Dupattas & Scarves | Silk, Cotton, Embroidered |
 
-**3. Update `src/pages/admin/AdminPayments.tsx`**
-- Change `fetchGateways` to call the edge function GET endpoint instead of direct Supabase query
-- Change `handleSave` and `handleToggleEnabled` to call the edge function PUT endpoint
-- Update the `GatewayConfig` interface: secret fields become optional (only present when admin types new values), add `has_key_id`, `has_key_secret`, `has_webhook_secret` booleans
-- Input fields for secrets show placeholder "••••••••" when `has_key_secret` is true but no edit value; only send secret fields in updates when the admin actually changes them
-- Validation logic updated to check `has_key_id`/`has_key_secret` booleans instead of actual secret values
+---
 
-**4. Remove the admin SELECT RLS policy on `payment_settings`**
-- Drop the "Admins can read payment settings" SELECT policy since admins should only access settings through the edge function
-- Keep INSERT, UPDATE, DELETE policies for direct admin operations that don't expose secrets
+### 2. Delete All Existing Products & Insert New Catalog (~50+ products)
 
-### Technical Details
-- The edge function uses `SUPABASE_SERVICE_ROLE_KEY` to bypass RLS
-- Auth verification done by extracting the JWT from the Authorization header and calling `has_role`
-- Secrets are never returned to the client; only status indicators
-- When saving, if a secret field is empty/unchanged, it's omitted from the update to avoid overwriting existing secrets with empty strings
+Each product will have:
+- Original creative name and description
+- Realistic INR pricing (₹999 - ₹12,999)
+- High-quality Unsplash fashion images
+- Proper sizes (XS-3XL), colors, badges
+- Category assignment
+- Product type: `apparel` for clothing, `standard` for accessories
+
+---
+
+### 3. Update Hero Slide in Database
+
+Replace the old "Gifts That Speak Louder" hero slide with ethnic fashion content:
+- Title: "Timeless Ethnic Elegance"
+- Subtitle: "New Collection 2026"
+- Description about handcrafted ethnic fashion
+- CTAs pointing to /products
+
+---
+
+### 4. Update Site Settings
+
+Update these `site_settings` keys:
+- `hero_title`, `hero_subtitle`, `hero_description` → ethnic fashion copy
+- `announcement_text` → fashion-relevant offer
+- `contact_email` → hello@ekamwear.store
+
+---
+
+### 5. Update Static Fallback Data
+
+- `src/data/products.ts` — update with ethnic fashion fallback products
+- `src/data/categories.ts` — update with new category slugs
+
+---
+
+### 6. No UI Changes
+
+The existing components (CategoryGrid, ProductListing, ProductCard, BestSellers, FeaturedProducts) already read from DB dynamically — they'll automatically reflect the new data.
+
+---
+
+### Execution Order
+1. Delete old categories & products from DB (cascade cleans up attributes)
+2. Insert new categories (12 categories)
+3. Insert new products (~50 products with Unsplash images)
+4. Update hero_slides and site_settings
+5. Update static fallback files
 
