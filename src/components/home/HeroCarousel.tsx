@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useHeroSlides } from '@/hooks/useHeroSlides';
-import heroFallback from '@/assets/hero-premium-gift.jpg';
+import heroFallback from '@/assets/hero-ethnic-fashion.jpg';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const HeroCarousel = () => {
@@ -19,7 +19,6 @@ export const HeroCarousel = () => {
     if (count > 1) setCurrent(i => (i - 1 + count) % count);
   }, [count]);
 
-  // Auto-rotate every 6 seconds
   useEffect(() => {
     if (count <= 1) return;
     const timer = setInterval(next, 6000);
@@ -30,16 +29,22 @@ export const HeroCarousel = () => {
   if (count === 0) {
     return (
       <section className="relative h-[85vh] min-h-[600px] max-h-[900px] overflow-hidden">
-        <img src={heroFallback} alt="Premium gifts" className="absolute inset-0 w-full h-full object-cover" loading="eager" />
+        <img src={heroFallback} alt="Premium ethnic fashion" className="absolute inset-0 w-full h-full object-cover" loading="eager" />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/60 via-foreground/30 to-transparent" />
         <div className="relative h-full flex items-center">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl">
+              <span className="inline-block text-[11px] sm:text-xs font-medium uppercase tracking-[6px] text-white/50 mb-6">
+                New Collection 2026
+              </span>
               <h1 className="font-display text-4xl sm:text-5xl lg:text-7xl text-white mb-6 leading-[1.05]">
-                Gifts That Speak <span className="text-primary">Louder</span>
+                Timeless Ethnic <span className="text-accent">Elegance</span>
               </h1>
+              <p className="text-base sm:text-lg text-white/60 mb-12 max-w-lg leading-relaxed">
+                Handcrafted kurtas, anarkalis & sherwanis that celebrate the beauty of Indian craftsmanship.
+              </p>
               <Link to="/products" className="inline-flex items-center gap-3 bg-primary text-primary-foreground px-10 py-4 rounded-xl text-sm font-semibold uppercase tracking-[2px] hover:bg-primary/90 transition-all">
-                Explore Collection <ArrowRight className="h-4 w-4" />
+                Shop Collection <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>
@@ -90,7 +95,7 @@ export const HeroCarousel = () => {
               )}
               <h1 className="font-display text-4xl sm:text-5xl lg:text-7xl text-white mb-6 leading-[1.05] tracking-tight">
                 {titleStart}{' '}
-                <span className="text-primary">{lastWord}</span>
+                <span className="text-accent">{lastWord}</span>
               </h1>
               {slide.description && (
                 <p className="text-base sm:text-lg text-white/60 mb-12 max-w-lg leading-relaxed">
@@ -121,7 +126,6 @@ export const HeroCarousel = () => {
         </div>
       </div>
 
-      {/* Navigation arrows */}
       {count > 1 && (
         <>
           <button onClick={prev} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 backdrop-blur-sm text-white p-2.5 rounded-full hover:bg-white/20 transition-colors" aria-label="Previous slide">
@@ -133,14 +137,13 @@ export const HeroCarousel = () => {
         </>
       )}
 
-      {/* Dot indicators */}
       {count > 1 && (
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-2 z-10">
           {slides.map((s, i) => (
             <button
               key={s.id}
               onClick={() => setCurrent(i)}
-              className={`h-2 rounded-full transition-all duration-300 ${i === current ? 'w-8 bg-primary' : 'w-2 bg-white/40 hover:bg-white/60'}`}
+              className={`h-2 rounded-full transition-all duration-300 ${i === current ? 'w-8 bg-accent' : 'w-2 bg-white/40 hover:bg-white/60'}`}
               aria-label={`Go to slide ${i + 1}`}
             />
           ))}

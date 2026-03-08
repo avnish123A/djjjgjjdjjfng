@@ -22,7 +22,7 @@ export const Header = () => {
   const { data: settings = {} } = useSiteSettings();
 
   const announcementEnabled = settings['announcement_enabled'] !== 'false';
-  const announcementText = settings['announcement_text'] || 'Free shipping on orders above ₹999 · Use code WELCOME10 for 10% off';
+  const announcementText = settings['announcement_text'] || 'Free shipping on orders above ₹1499 · Use code ETHNIC10 for 10% off';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -102,7 +102,7 @@ export const Header = () => {
 
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2">
-              <img src="/logo-ekamgift.png" alt="EkamGift" className="h-14 lg:h-16 w-auto object-contain" />
+              <img src="/logo-ekamwear.png" alt="EkamWear" className="h-10 lg:h-12 w-auto object-contain" />
             </Link>
 
             {/* Desktop Navigation */}
@@ -193,7 +193,7 @@ export const Header = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search products..."
+                  placeholder="Search kurtas, sherwanis..."
                   className="w-full pl-10 pr-4 py-2.5 bg-secondary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
               </form>

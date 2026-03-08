@@ -6,7 +6,7 @@ const footerLinks = {
   shop: [
     { label: 'New Arrivals', href: '/products' },
     { label: 'Best Sellers', href: '/products' },
-    { label: 'Gift Sets', href: '/products' },
+    { label: 'Kurta Sets', href: '/products' },
     { label: 'All Products', href: '/products' },
   ],
   support: [
@@ -42,7 +42,7 @@ const socialIcons = [
 export const Footer = () => {
   const { data: s = {} } = useSiteSettings();
 
-  const email = s.contact_email || 'hello@ekamgift.com';
+  const email = s.contact_email || 'hello@ekamwear.com';
   const phone = s.contact_phone || '+91 98765 43210';
   const location = s.contact_location || 'India';
 
@@ -50,16 +50,15 @@ export const Footer = () => {
 
   return (
     <footer className="bg-foreground text-background">
-      {/* Main Footer */}
       <div className="container mx-auto px-4 py-14 lg:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
           {/* Brand */}
           <div className="lg:col-span-2">
             <div className="mb-4">
-              <img src="/logo-ekamgift.png" alt="EkamGift" className="h-14 w-auto object-contain brightness-0 invert" />
+              <img src="/logo-ekamwear.png" alt="EkamWear" className="h-12 w-auto object-contain brightness-0 invert" />
             </div>
             <p className="text-background/40 text-sm leading-relaxed mb-6 max-w-xs">
-              Curated gifts and premium lifestyle products for every occasion. Thoughtfully selected, beautifully delivered.
+              Premium Indian ethnic fashion for every occasion. Handcrafted with love, delivered with care across India.
             </p>
             <div className="space-y-2.5 text-sm text-background/40">
               <div className="flex items-center gap-2.5">
@@ -136,7 +135,7 @@ export const Footer = () => {
         <div className="container mx-auto px-4 py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-background/25">
-              &copy; {new Date().getFullYear()} EkamGift. All rights reserved.
+              &copy; {new Date().getFullYear()} EkamWear. All rights reserved.
             </p>
             <div className="flex items-center gap-3">
               <span className="text-[10px] text-background/20 uppercase tracking-wider mr-1">We Accept</span>

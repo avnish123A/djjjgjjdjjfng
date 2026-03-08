@@ -33,8 +33,8 @@ export const FeaturedProducts = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-end justify-between mb-14">
           <div>
-            <span className="text-[11px] font-medium uppercase tracking-[5px] text-primary mb-3 block">New Arrivals</span>
-            <h2 className="font-display text-3xl sm:text-4xl tracking-tight">Trending Now</h2>
+            <span className="text-[11px] font-medium uppercase tracking-[5px] text-primary mb-3 block">Just Dropped</span>
+            <h2 className="font-display text-3xl sm:text-4xl tracking-tight">New Arrivals</h2>
           </div>
           <Link
             to="/products"
