@@ -6,38 +6,44 @@
 
 @layer base {
   :root {
-    /* EkamTech — Vijay Sales inspired clean electronics store */
-    --background: 0 0% 100%;             /* Pure white */
-    --foreground: 220 20% 10%;            /* Near black */
+    /* EkamTech — Premium Electronics Store */
+    --background: 210 40% 98%;              /* #F8FAFC */
+    --foreground: 222 47% 11%;              /* #0F172A */
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
-    --primary: 220 70% 50%;               /* #2563EB vibrant blue */
+    --popover-foreground: 222 47% 11%;
+    --primary: 217 91% 60%;                 /* #2563EB vibrant blue */
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;             /* #F1F5F9 light gray */
-    --secondary-foreground: 220 20% 10%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-    --accent: 220 70% 50%;                /* Same blue accent */
+    --secondary: 210 40% 96%;              /* Light cool gray */
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 192 91% 36%;                 /* #0891B2 cyan */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 220 70% 50%;
-    --radius: 0.5rem;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 60%;
+    --radius: 0.75rem;
 
     /* Functional Colors */
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
-    --warning-foreground: 220 20% 10%;
+    --warning-foreground: 222 47% 11%;
     --info: 199 89% 48%;
     --info-foreground: 0 0% 100%;
 
+    /* Extended palette */
+    --glow: 217 91% 60%;
+    --glow-cyan: 192 91% 36%;
+    --gradient-start: 217 91% 60%;
+    --gradient-end: 192 91% 36%;
+
     /* Badge Colors */
-    --badge-new: 220 70% 50%;
+    --badge-new: 217 91% 60%;
     --badge-sale: 0 84% 60%;
     --badge-featured: 38 92% 50%;
     --rating: 43 96% 56%;
@@ -45,12 +51,12 @@
     /* Sidebar (admin) */
     --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 214 32% 91%;
-    --sidebar-primary: 220 70% 50%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 222 40% 18%;
     --sidebar-accent-foreground: 214 32% 91%;
     --sidebar-border: 222 40% 18%;
-    --sidebar-ring: 220 70% 50%;
+    --sidebar-ring: 217 91% 60%;
   }
 
   .dark {
@@ -66,7 +72,7 @@
     --secondary-foreground: 210 40% 96%;
     --muted: 222 40% 14%;
     --muted-foreground: 215 16% 55%;
-    --accent: 199 89% 48%;
+    --accent: 192 91% 36%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 96%;
@@ -126,6 +132,37 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Glass morphism */
+  .glass {
+    background: hsl(var(--card) / 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid hsl(var(--border) / 0.5);
+  }
+  .glass-dark {
+    background: hsl(var(--foreground) / 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* Glow effects */
+  .glow-blue {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3), 0 0 60px hsl(var(--primary) / 0.1);
+  }
+  .glow-cyan {
+    box-shadow: 0 0 20px hsl(var(--accent) / 0.3), 0 0 60px hsl(var(--accent) / 0.1);
+  }
+
+  /* Shimmer */
   .shimmer {
     background: linear-gradient(
       90deg,
@@ -137,51 +174,108 @@
     animation: shimmer 1.5s infinite linear;
   }
 
-  .perspective-container {
-    perspective: 1000px;
+  /* 3D card transforms */
+  .card-3d {
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease;
+    transform-style: preserve-3d;
+    will-change: transform;
   }
+  .card-3d:hover {
+    transform: translateY(-8px) rotateX(2deg);
+    box-shadow: 0 20px 40px hsl(var(--foreground) / 0.08), 0 8px 16px hsl(var(--primary) / 0.06);
+  }
+
+  .product-3d {
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease;
+    transform-style: preserve-3d;
+  }
+  .product-3d:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 16px 32px hsl(var(--foreground) / 0.08), 0 4px 12px hsl(var(--primary) / 0.08);
+  }
+
   .category-3d {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
   .category-3d:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px hsl(var(--foreground) / 0.08);
-  }
-  .product-3d {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .product-3d:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px hsl(var(--foreground) / 0.08);
-  }
-  .shadow-3d {
-    transition: box-shadow 0.3s ease;
-  }
-  .shadow-3d:hover {
-    box-shadow: 0 8px 24px hsl(var(--foreground) / 0.06);
+    transform: translateY(-6px) scale(1.05);
+    box-shadow: 0 12px 24px hsl(var(--primary) / 0.15);
   }
 
+  /* Floating animation */
   @keyframes float-gentle {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
+    50% { transform: translateY(-10px); }
   }
   .animate-float-gentle {
     animation: float-gentle 4s ease-in-out infinite;
   }
 
+  @keyframes float-slow {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    33% { transform: translateY(-8px) rotate(1deg); }
+    66% { transform: translateY(-4px) rotate(-1deg); }
+  }
+  .animate-float-slow {
+    animation: float-slow 6s ease-in-out infinite;
+  }
+
+  /* Pulse glow */
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 8px hsl(var(--primary) / 0.2); }
+    50% { box-shadow: 0 0 24px hsl(var(--primary) / 0.4), 0 0 48px hsl(var(--primary) / 0.1); }
+  }
+  .animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  /* Slide up stagger */
   @keyframes slide-up {
-    from { opacity: 0; transform: translateY(16px); }
+    from { opacity: 0; transform: translateY(24px); }
     to { opacity: 1; transform: translateY(0); }
   }
   .animate-slide-up {
-    animation: slide-up 0.4s ease-out forwards;
+    animation: slide-up 0.5s ease-out forwards;
+  }
+
+  /* Gradient border */
+  .gradient-border {
+    position: relative;
+  }
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  /* Mesh gradient backgrounds */
+  .mesh-gradient {
+    background:
+      radial-gradient(at 20% 30%, hsl(var(--primary) / 0.08) 0px, transparent 50%),
+      radial-gradient(at 80% 70%, hsl(var(--accent) / 0.06) 0px, transparent 50%),
+      radial-gradient(at 50% 50%, hsl(var(--secondary)) 0px, transparent 100%);
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .animate-float-gentle,
+    .animate-float-slow,
     .animate-slide-up,
-    .category-3d:hover,
-    .product-3d:hover {
+    .animate-pulse-glow,
+    .card-3d:hover,
+    .product-3d:hover,
+    .category-3d:hover {
       animation: none;
       transform: none;
     }

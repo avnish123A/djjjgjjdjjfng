@@ -35,69 +35,66 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
     : null;
 
   return (
-    <div ref={ref} className="group bg-card border border-border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 product-3d">
+    <div ref={ref} className="group relative bg-card border border-border/60 rounded-2xl overflow-hidden product-3d">
       <Link to={`/product/${product.id}`} className="block">
         {/* Image */}
-        <div className="relative bg-secondary/30 p-4">
-          {/* Badges top-left */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+        <div className="relative bg-gradient-to-b from-secondary/50 to-secondary/20 p-5">
+          {/* Badges */}
+          <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
             {product.badge === 'Sale' && (
-              <span className="px-2 py-0.5 text-[10px] font-bold bg-destructive text-destructive-foreground rounded">
+              <span className="px-2.5 py-1 text-[10px] font-bold bg-destructive text-destructive-foreground rounded-lg shadow-sm">
                 Sale
               </span>
             )}
             {product.badge === 'New' && (
-              <span className="px-2 py-0.5 text-[10px] font-bold bg-primary text-primary-foreground rounded">
+              <span className="px-2.5 py-1 text-[10px] font-bold bg-primary text-primary-foreground rounded-lg shadow-sm">
                 New
               </span>
             )}
             {product.badge === 'Best Seller' && (
-              <span className="px-2 py-0.5 text-[10px] font-bold bg-foreground text-background rounded">
+              <span className="px-2.5 py-1 text-[10px] font-bold bg-foreground text-background rounded-lg shadow-sm">
                 Best Seller
               </span>
             )}
           </div>
 
-          {/* Wishlist top-right */}
+          {/* Wishlist */}
           <button
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               toast('Added to wishlist');
             }}
-            className="absolute top-2 right-2 p-2 bg-card/90 rounded-full shadow-sm hover:shadow-md hover:text-destructive transition-all z-10 min-w-[36px] min-h-[36px] flex items-center justify-center"
+            className="absolute top-3 right-3 p-2.5 bg-card/90 backdrop-blur-sm rounded-xl shadow-sm hover:shadow-md hover:text-destructive transition-all z-10 min-w-[40px] min-h-[40px] flex items-center justify-center"
             aria-label="Add to wishlist"
           >
             <Heart className="h-4 w-4" />
           </button>
 
-          {/* Product image — centered, contained */}
+          {/* Product image */}
           <div className="aspect-square flex items-center justify-center">
             <img
               src={product.image}
               alt={product.name}
-              className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-500"
+              className="max-w-full max-h-full object-contain group-hover:scale-110 transition-transform duration-500 ease-out"
               loading="lazy"
             />
           </div>
         </div>
 
-        {/* Product info */}
-        <div className="p-3 lg:p-4 space-y-2">
-          {/* Brand */}
+        {/* Info */}
+        <div className="p-4 space-y-2.5">
           {product.brand && (
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{product.brand}</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">{product.brand}</p>
           )}
 
-          {/* Title */}
           <h3 className="text-sm font-medium leading-snug line-clamp-2 min-h-[2.5rem] group-hover:text-primary transition-colors">
             {product.name}
           </h3>
 
-          {/* Rating */}
           {product.rating > 0 && (
             <div className="flex items-center gap-1.5">
-              <div className="flex items-center gap-0.5 bg-success text-success-foreground px-1.5 py-0.5 rounded text-[10px] font-bold">
+              <div className="flex items-center gap-0.5 bg-success text-success-foreground px-2 py-0.5 rounded-md text-[10px] font-bold">
                 {product.rating}
                 <Star className="h-2.5 w-2.5 fill-current" />
               </div>
@@ -105,12 +102,11 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
             </div>
           )}
 
-          {/* Price */}
           <div className="space-y-0.5">
             <div className="flex items-baseline gap-2">
               <span className="text-lg font-bold">{formatPrice(product.price)}</span>
               {discount && (
-                <span className="text-xs font-semibold text-success">{discount}% Off</span>
+                <span className="text-xs font-bold text-success">{discount}% off</span>
               )}
             </div>
             {product.originalPrice && (
@@ -120,28 +116,27 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
             )}
           </div>
 
-          {/* Delivery info */}
-          <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1 text-[11px] text-accent font-medium">
             <Truck className="h-3 w-3 shrink-0" />
             <span>Free Delivery</span>
           </div>
         </div>
 
-        {/* Cart button at bottom */}
-        <div className="px-3 lg:px-4 pb-3 lg:pb-4">
+        {/* Cart button */}
+        <div className="px-4 pb-4">
           <button
             onClick={handleAddToCart}
-            className="w-full flex items-center justify-center gap-2 py-2.5 bg-primary text-primary-foreground rounded-lg text-xs font-semibold uppercase tracking-wide hover:bg-primary/90 transition-colors active:scale-[0.98]"
+            className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-primary-foreground rounded-xl text-xs font-semibold uppercase tracking-wide hover:shadow-glow transition-all duration-300 active:scale-[0.98]"
           >
             <ShoppingBag className="h-3.5 w-3.5" />
             Add to Cart
           </button>
         </div>
 
-        {/* Out of Stock overlay */}
+        {/* Out of Stock */}
         {!product.inStock && (
-          <div className="absolute inset-0 bg-background/70 flex items-center justify-center backdrop-blur-[2px] rounded-xl">
-            <span className="px-4 py-2 bg-foreground text-background text-sm font-medium rounded-lg">
+          <div className="absolute inset-0 bg-background/70 backdrop-blur-sm flex items-center justify-center rounded-2xl">
+            <span className="px-5 py-2.5 bg-foreground text-background text-sm font-semibold rounded-xl">
               Out of Stock
             </span>
           </div>

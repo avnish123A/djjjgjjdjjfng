@@ -1,4 +1,5 @@
 import { Star, Quote } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const testimonials = [
   {
@@ -7,6 +8,7 @@ const testimonials = [
     text: 'Ordered the MacBook Air M4 and it arrived in just 2 days. Genuine product, sealed packaging, and the price was better than other stores. Highly recommended!',
     rating: 5,
     initials: 'RM',
+    color: 'from-blue-500 to-cyan-500',
   },
   {
     name: 'Sneha P.',
@@ -14,6 +16,7 @@ const testimonials = [
     text: 'Bought the Samsung Galaxy S25 Ultra. The delivery was fast, product is 100% authentic, and customer support helped me with setup. Great experience!',
     rating: 5,
     initials: 'SP',
+    color: 'from-violet-500 to-blue-500',
   },
   {
     name: 'Vikram S.',
@@ -21,34 +24,49 @@ const testimonials = [
     text: 'Great experience buying my ASUS ROG gaming laptop. Competitive pricing, genuine warranty card included, and solid packaging. Will shop here again.',
     rating: 5,
     initials: 'VS',
+    color: 'from-emerald-500 to-teal-500',
   },
 ];
 
 export const Testimonials = () => {
   return (
-    <section className="py-10 lg:py-12 bg-secondary/30">
+    <section className="py-12 lg:py-16">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h2 className="font-display text-xl sm:text-2xl tracking-tight">What Our Customers Say</h2>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-10"
+        >
+          <h2 className="font-display text-2xl sm:text-3xl tracking-tight">What Our Customers Say</h2>
           <p className="text-muted-foreground mt-2 text-sm">
             Trusted by thousands of tech enthusiasts across India
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-          {testimonials.map((t) => (
-            <div
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {testimonials.map((t, i) => (
+            <motion.div
               key={t.name}
-              className="bg-card border border-border rounded-xl p-5 hover:shadow-sm transition-shadow"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
+              className="bg-card border border-border/60 rounded-2xl p-6 card-3d relative overflow-hidden"
             >
+              {/* Subtle gradient accent */}
+              <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${t.color}`} />
+              
+              <Quote className="h-8 w-8 text-primary/10 mb-3" />
               <div className="flex items-center gap-1 mb-3">
-                {[...Array(t.rating)].map((_, i) => (
-                  <Star key={i} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                {[...Array(t.rating)].map((_, j) => (
+                  <Star key={j} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                 ))}
               </div>
-              <p className="text-sm text-foreground/80 leading-relaxed mb-4">"{t.text}"</p>
+              <p className="text-sm text-foreground/80 leading-relaxed mb-5">"{t.text}"</p>
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-semibold">
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${t.color} flex items-center justify-center text-white text-xs font-bold`}>
                   {t.initials}
                 </div>
                 <div>
@@ -56,7 +74,7 @@ export const Testimonials = () => {
                   <p className="text-[11px] text-muted-foreground">{t.location}</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

@@ -1,8 +1,6 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
-import { CountdownTimer } from './CountdownTimer';
-
-const saleEndDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+import { ArrowRight, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const banners = [
   {
@@ -10,39 +8,49 @@ const banners = [
     subtitle: 'Best display phones at budget prices',
     image: 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=600&q=80',
     link: '/products?category=smartphones',
-    bg: 'from-blue-50 to-cyan-50',
+    gradient: 'from-blue-600/90 to-cyan-600/90',
   },
   {
     title: 'Laptop Deals of the Week',
     subtitle: 'Up to 25% off on select laptops',
     image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=600&q=80',
     link: '/products?category=laptops',
-    bg: 'from-violet-50 to-blue-50',
+    gradient: 'from-violet-600/90 to-blue-600/90',
   },
 ];
 
 export const PromoBanners = () => {
   return (
-    <section className="py-6 lg:py-8">
+    <section className="py-8 lg:py-10">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {banners.map((banner) => (
-            <Link
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {banners.map((banner, i) => (
+            <motion.div
               key={banner.title}
-              to={banner.link}
-              className={`relative rounded-xl overflow-hidden bg-gradient-to-br ${banner.bg} p-6 lg:p-8 flex items-center gap-4 group hover:shadow-md transition-shadow`}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.1 }}
             >
-              <div className="flex-1">
-                <h3 className="font-display text-base lg:text-lg mb-1">{banner.title}</h3>
-                <p className="text-xs text-muted-foreground mb-3">{banner.subtitle}</p>
-                <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary group-hover:gap-2 transition-all">
-                  Shop Now <ArrowRight className="h-3.5 w-3.5" />
-                </span>
-              </div>
-              <div className="w-24 h-24 lg:w-32 lg:h-32 shrink-0">
-                <img src={banner.image} alt={banner.title} className="w-full h-full object-cover rounded-lg" loading="lazy" />
-              </div>
-            </Link>
+              <Link
+                to={banner.link}
+                className="group relative rounded-2xl overflow-hidden block min-h-[180px] card-3d"
+              >
+                <img src={banner.image} alt={banner.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                <div className={`absolute inset-0 bg-gradient-to-r ${banner.gradient}`} />
+                <div className="relative p-6 lg:p-8 flex flex-col justify-center h-full min-h-[180px]">
+                  <div className="inline-flex items-center gap-1 text-[10px] font-bold text-white/70 uppercase tracking-widest mb-2">
+                    <Zap className="h-3 w-3 fill-white/70" />
+                    Limited Offer
+                  </div>
+                  <h3 className="font-display text-xl lg:text-2xl text-white mb-1">{banner.title}</h3>
+                  <p className="text-sm text-white/60 mb-4">{banner.subtitle}</p>
+                  <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-white group-hover:gap-2.5 transition-all">
+                    Shop Now <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </div>
+              </Link>
+            </motion.div>
           ))}
         </div>
       </div>
