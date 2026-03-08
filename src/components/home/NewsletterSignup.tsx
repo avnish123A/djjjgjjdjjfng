@@ -26,7 +26,7 @@ export const NewsletterSignup = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      toast.success('Welcome to the EkamGift community!');
+      toast.success('Welcome to the EkamWear family!');
       setEmail('');
     } catch {
       toast.error('Something went wrong. Please try again.');
@@ -40,9 +40,9 @@ export const NewsletterSignup = () => {
       <div className="container mx-auto px-4">
         <div className="max-w-2xl mx-auto text-center">
           <span className="text-[11px] font-medium uppercase tracking-[5px] text-primary mb-4 block">Newsletter</span>
-          <h2 className="font-display text-3xl sm:text-4xl mb-4 tracking-tight">Stay in the Know</h2>
+          <h2 className="font-display text-3xl sm:text-4xl mb-4 tracking-tight">Stay in Style</h2>
           <p className="text-muted-foreground mb-10 text-sm leading-relaxed max-w-md mx-auto">
-            Be the first to discover new collections, exclusive offers, and curated gift guides.
+            Be the first to know about new collections, exclusive drops, and seasonal fashion guides.
           </p>
           <form onSubmit={handleSubmit} className="flex gap-0 max-w-md mx-auto">
             <input

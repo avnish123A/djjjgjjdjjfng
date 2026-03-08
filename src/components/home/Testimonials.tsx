@@ -4,21 +4,21 @@ const testimonials = [
   {
     name: 'Priya S.',
     location: 'Mumbai',
-    text: 'The packaging was exquisite. My mother was moved to tears when she opened her birthday gift from EkamGift.',
+    text: 'The Anarkali I ordered was absolutely stunning. The fabric quality and embroidery work exceeded my expectations. Perfect for my cousin\'s wedding!',
     rating: 5,
     initials: 'PS',
   },
   {
     name: 'Arjun K.',
     location: 'Bangalore',
-    text: 'Finally, a gifting brand that understands quality without being ostentatious. Every detail is considered.',
+    text: 'Finally found a brand that makes premium ethnic wear for men that fits perfectly. The Nehru jacket I bought gets compliments every time.',
     rating: 5,
     initials: 'AK',
   },
   {
     name: 'Meera R.',
     location: 'Delhi',
-    text: 'I\'ve ordered three times now. The quality is consistent, delivery is prompt, and the curation is impeccable.',
+    text: 'I\'ve ordered kurta sets three times now. The quality is consistent, the colors are vibrant, and delivery is always on time. My go-to ethnic brand.',
     rating: 5,
     initials: 'MR',
   },
@@ -29,10 +29,10 @@ export const Testimonials = () => {
     <section className="py-24 lg:py-32 bg-secondary/50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <span className="text-[11px] font-medium uppercase tracking-[5px] text-primary mb-4 block">Social Proof</span>
-          <h2 className="font-display text-3xl sm:text-4xl tracking-tight">What Our Clients Say</h2>
+          <span className="text-[11px] font-medium uppercase tracking-[5px] text-primary mb-4 block">Reviews</span>
+          <h2 className="font-display text-3xl sm:text-4xl tracking-tight">What Our Customers Say</h2>
           <p className="text-muted-foreground mt-4 max-w-md mx-auto text-sm">
-            Trusted by thousands of happy gifters across India
+            Loved by thousands of fashion enthusiasts across India
           </p>
         </div>
 
