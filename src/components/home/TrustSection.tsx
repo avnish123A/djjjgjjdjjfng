@@ -1,27 +1,27 @@
 import { Truck, ShieldCheck, RotateCcw, CreditCard, Headphones, Award } from 'lucide-react';
 
 const trustItems = [
-  { icon: Truck, title: 'Free Shipping', description: 'On orders above ₹4999 across India' },
-  { icon: ShieldCheck, title: '100% Genuine', description: 'Authorized products with warranty' },
-  { icon: RotateCcw, title: '7-Day Returns', description: 'Easy hassle-free return policy' },
-  { icon: CreditCard, title: 'Secure Payments', description: 'SSL encrypted, PCI-DSS compliant' },
-  { icon: Award, title: 'Brand Warranty', description: 'Official manufacturer warranty' },
-  { icon: Headphones, title: '24/7 Support', description: 'Expert tech support anytime' },
+  { icon: Truck, title: 'Free Delivery', description: 'On orders above ₹4999' },
+  { icon: ShieldCheck, title: '100% Genuine', description: 'Authorized products' },
+  { icon: RotateCcw, title: '7-Day Returns', description: 'Easy return policy' },
+  { icon: CreditCard, title: 'Secure Payments', description: 'SSL encrypted' },
+  { icon: Award, title: 'Brand Warranty', description: 'Official warranty' },
+  { icon: Headphones, title: '24/7 Support', description: 'Expert help anytime' },
 ];
 
 export const TrustSection = () => {
   return (
-    <section className="py-16 border-t border-border">
+    <section className="py-8 border-t border-b border-border bg-secondary/30">
       <div className="container mx-auto px-4">
-        <div className="perspective-container grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           {trustItems.map((item) => (
-            <div key={item.title} className="flex items-start gap-4 group">
-              <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center">
-                <item.icon className="h-5 w-5 text-accent" />
+            <div key={item.title} className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <item.icon className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold text-sm mb-0.5">{item.title}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">{item.description}</p>
+                <h3 className="font-semibold text-xs">{item.title}</h3>
+                <p className="text-[10px] text-muted-foreground">{item.description}</p>
               </div>
             </div>
           ))}

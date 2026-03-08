@@ -1,15 +1,21 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useProducts } from '@/hooks/useProducts';
+import { useCategories } from '@/hooks/useCategories';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const BestSellers = () => {
   const { data: products = [] } = useProducts();
+  const { data: categories = [] } = useCategories();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState<string>('all');
 
-  const bestSellers = products.filter(p => p.badge === 'Best Seller').slice(0, 12);
-  const displayProducts = bestSellers.length > 0 ? bestSellers : products.slice(0, 12);
+  const filteredProducts = activeTab === 'all'
+    ? products.filter(p => p.badge === 'Best Seller').slice(0, 12)
+    : products.filter(p => p.categoryId === activeTab).slice(0, 12);
+
+  const displayProducts = filteredProducts.length > 0 ? filteredProducts : products.slice(0, 12);
 
   if (displayProducts.length === 0) return null;
 
@@ -19,57 +25,64 @@ export const BestSellers = () => {
     scrollRef.current.scrollBy({ left: dir === 'left' ? -amount : amount, behavior: 'smooth' });
   };
 
+  const tabs = [
+    { id: 'all', name: 'All' },
+    ...categories.slice(0, 6).map(c => ({ id: c.id, name: c.name })),
+  ];
+
   return (
-    <section className="py-20 lg:py-28">
+    <section className="py-8 lg:py-10 bg-secondary/30">
       <div className="container mx-auto px-4">
-        <div className="flex items-end justify-between mb-12">
-          <div>
-            <span className="text-[11px] font-medium uppercase tracking-[5px] text-accent mb-3 block">Top Rated</span>
-            <h2 className="font-display text-3xl sm:text-4xl tracking-tight">Best Sellers</h2>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2">
-              <button
-                onClick={() => scroll('left')}
-                className="p-2.5 rounded-xl border border-border hover:border-accent hover:text-accent transition-colors"
-                aria-label="Scroll left"
-              >
+        {/* Header with tabs */}
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-xl sm:text-2xl tracking-tight">Bestseller Deals</h2>
+            <div className="flex items-center gap-2">
+              <button onClick={() => scroll('left')} className="hidden sm:flex p-2 rounded-full border border-border hover:bg-secondary transition-colors" aria-label="Scroll left">
                 <ChevronLeft className="h-4 w-4" />
               </button>
-              <button
-                onClick={() => scroll('right')}
-                className="p-2.5 rounded-xl border border-border hover:border-accent hover:text-accent transition-colors"
-                aria-label="Scroll right"
-              >
+              <button onClick={() => scroll('right')} className="hidden sm:flex p-2 rounded-full border border-border hover:bg-secondary transition-colors" aria-label="Scroll right">
                 <ChevronRight className="h-4 w-4" />
               </button>
             </div>
-            <Link
-              to="/products"
-              className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent hover:gap-2.5 transition-all uppercase tracking-wider"
-            >
-              View All <ArrowRight className="h-4 w-4" />
-            </Link>
+          </div>
+
+          {/* Category tabs */}
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+            {tabs.map((tab, i) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+                  activeTab === tab.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-card border border-border text-foreground/70 hover:bg-secondary'
+                }`}
+              >
+                {String(i).padStart(2, '0')}. {tab.name}
+              </button>
+            ))}
           </div>
         </div>
 
+        {/* Product carousel */}
         <div
           ref={scrollRef}
-          className="flex gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 snap-x snap-mandatory"
+          className="flex gap-3 lg:gap-4 overflow-x-auto scrollbar-hide pb-4 snap-x snap-mandatory"
         >
           {displayProducts.map((product) => (
-            <div key={product.id} className="flex-shrink-0 w-[260px] sm:w-[280px] lg:w-[300px] snap-start">
+            <div key={product.id} className="flex-shrink-0 w-[200px] sm:w-[220px] lg:w-[240px] snap-start">
               <ProductCard product={product} />
             </div>
           ))}
         </div>
 
-        <div className="sm:hidden text-center mt-8">
+        <div className="text-center mt-4">
           <Link
             to="/products"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground uppercase tracking-wider"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:gap-2.5 transition-all"
           >
-            View All <ArrowRight className="h-4 w-4" />
+            View All Products <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </div>

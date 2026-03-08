@@ -1,14 +1,23 @@
 import { Link } from 'react-router-dom';
 import { useCategories } from '@/hooks/useCategories';
-import { ArrowRight } from 'lucide-react';
+import { Smartphone, Laptop, Tablet, Headphones, Mouse, Watch } from 'lucide-react';
+
+const categoryIcons: Record<string, React.ElementType> = {
+  smartphones: Smartphone,
+  laptops: Laptop,
+  tablets: Tablet,
+  'mobile-accessories': Headphones,
+  'laptop-accessories': Mouse,
+  'smart-gadgets': Watch,
+};
 
 const fallbackCategories = [
-  { id: 'f1', name: 'Smartphones', slug: 'smartphones', image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&q=80' },
-  { id: 'f2', name: 'Laptops', slug: 'laptops', image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&q=80' },
-  { id: 'f3', name: 'Tablets', slug: 'tablets', image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800&q=80' },
-  { id: 'f4', name: 'Smart Gadgets', slug: 'smart-gadgets', image: 'https://images.unsplash.com/photo-1546868871-af0de0ae72be?w=800&q=80' },
-  { id: 'f5', name: 'Mobile Accessories', slug: 'mobile-accessories', image: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=800&q=80' },
-  { id: 'f6', name: 'Laptop Accessories', slug: 'laptop-accessories', image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=800&q=80' },
+  { id: 'f1', name: 'Smartphones', slug: 'smartphones', image: '' },
+  { id: 'f2', name: 'Laptops', slug: 'laptops', image: '' },
+  { id: 'f3', name: 'Tablets', slug: 'tablets', image: '' },
+  { id: 'f4', name: 'Accessories', slug: 'mobile-accessories', image: '' },
+  { id: 'f5', name: 'Gadgets', slug: 'smart-gadgets', image: '' },
+  { id: 'f6', name: 'Laptop Acc.', slug: 'laptop-accessories', image: '' },
 ];
 
 export const CategoryGrid = () => {
@@ -16,11 +25,14 @@ export const CategoryGrid = () => {
 
   if (isLoading) {
     return (
-      <section className="py-20 lg:py-28">
+      <section className="py-6 bg-background">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="flex gap-6 overflow-x-auto scrollbar-hide justify-center">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="animate-pulse aspect-square bg-secondary rounded-2xl" />
+              <div key={i} className="flex flex-col items-center gap-2 animate-pulse">
+                <div className="w-16 h-16 bg-secondary rounded-full" />
+                <div className="h-3 w-16 bg-secondary rounded" />
+              </div>
             ))}
           </div>
         </div>
@@ -31,46 +43,30 @@ export const CategoryGrid = () => {
   const displayCategories = categories.length > 0 ? categories : fallbackCategories;
 
   return (
-    <section className="py-20 lg:py-28">
+    <section className="py-6 lg:py-8 bg-background border-b border-border">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-14">
-          <span className="text-[11px] font-medium uppercase tracking-[5px] text-accent mb-4 block">
-            Browse
-          </span>
-          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl tracking-tight">
-            Shop by Category
-          </h2>
-          <p className="text-muted-foreground mt-4 max-w-md mx-auto text-sm leading-relaxed">
-            Find the perfect tech from our curated categories
-          </p>
-        </div>
-
-        <div className="perspective-container grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          {displayCategories.map((cat, index) => (
-            <Link
-              key={cat.id}
-              to={`/products?category=${cat.slug}`}
-              className="group relative block aspect-square overflow-hidden rounded-2xl animate-fade-in-up category-3d"
-              style={{ animationDelay: `${index * 0.06}s` }}
-            >
-              <img
-                src={cat.image}
-                alt={cat.name}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-foreground/70 via-foreground/20 to-transparent transition-opacity duration-500 group-hover:from-foreground/80" />
-              
-              <div className="absolute bottom-0 left-0 right-0 p-4" style={{ transform: 'translateZ(30px)' }}>
-                <h3 className="text-sm lg:text-base font-display text-white mb-0.5">
+        <div className="flex gap-6 sm:gap-8 lg:gap-12 overflow-x-auto scrollbar-hide justify-start lg:justify-center pb-2">
+          {displayCategories.map((cat) => {
+            const IconComp = categoryIcons[cat.slug] || Smartphone;
+            return (
+              <Link
+                key={cat.id}
+                to={`/products?category=${cat.slug}`}
+                className="flex flex-col items-center gap-2 min-w-[72px] group"
+              >
+                <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-secondary border-2 border-transparent group-hover:border-primary flex items-center justify-center transition-all duration-300 group-hover:shadow-md">
+                  {cat.image && cat.image !== '/placeholder.svg' ? (
+                    <img src={cat.image} alt={cat.name} className="w-10 h-10 lg:w-12 lg:h-12 object-contain rounded-full" />
+                  ) : (
+                    <IconComp className="w-7 h-7 lg:w-8 lg:h-8 text-muted-foreground group-hover:text-primary transition-colors" />
+                  )}
+                </div>
+                <span className="text-[11px] lg:text-xs font-medium text-foreground/80 group-hover:text-primary text-center transition-colors whitespace-nowrap">
                   {cat.name}
-                </h3>
-                <span className="inline-flex items-center gap-1 text-[10px] text-white/60 font-medium uppercase tracking-wider group-hover:text-white/80 transition-colors">
-                  Shop <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-1" />
                 </span>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </section>

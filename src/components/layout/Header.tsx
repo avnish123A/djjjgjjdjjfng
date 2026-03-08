@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Package, ShoppingBag, X, Cpu } from 'lucide-react';
+import { Search, Package, ShoppingBag, X, Heart, User, MapPin, Cpu } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useCategories } from '@/hooks/useCategories';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
@@ -63,15 +63,15 @@ export const Header = () => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="bg-accent text-accent-foreground text-center text-[12px] py-2.5 px-4 relative"
+            className="bg-primary text-primary-foreground text-center text-[11px] sm:text-[12px] py-2 px-4 relative"
           >
-            <p className="font-medium tracking-[1.5px] uppercase">
+            <p className="font-medium tracking-wide">
               {announcementText}
             </p>
             <button
               onClick={() => setShowAnnouncement(false)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-accent-foreground/50 hover:text-accent-foreground transition-colors"
-              aria-label="Dismiss announcement"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-foreground/50 hover:text-primary-foreground transition-colors"
+              aria-label="Dismiss"
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -81,13 +81,14 @@ export const Header = () => {
 
       {/* Main Header */}
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 bg-background/98 backdrop-blur-md ${
-          scrolled ? 'shadow-nav' : 'border-b border-border'
+        className={`sticky top-0 z-50 transition-all duration-300 bg-background border-b border-border ${
+          scrolled ? 'shadow-sm' : ''
         } ${headerVisible ? 'translate-y-0' : '-translate-y-full'}`}
       >
+        {/* Top row */}
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-14 lg:h-16">
-            {/* Left: Hamburger (mobile) */}
+          <div className="flex items-center gap-4 h-16 lg:h-[68px]">
+            {/* Hamburger mobile */}
             <button
               className="lg:hidden p-2 -ml-2 hover:bg-secondary rounded-lg transition-colors"
               onClick={() => setMobileMenuOpen(true)}
@@ -101,80 +102,100 @@ export const Header = () => {
             </button>
 
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
-              <Cpu className="h-6 w-6 text-accent" />
-              <span className="font-display text-xl font-bold tracking-tight">EkamTech</span>
+            <Link to="/" className="flex items-center gap-2 shrink-0">
+              <div className="bg-primary rounded-lg p-1.5">
+                <Cpu className="h-5 w-5 text-primary-foreground" />
+              </div>
+              <span className="font-display text-xl font-bold tracking-tight hidden sm:block">EkamTech</span>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-8 ml-10">
-              {categories.slice(0, 5).map((cat) => (
-                <Link
-                  key={cat.id}
-                  to={`/products?category=${cat.slug}`}
-                  className="text-[13px] font-medium text-muted-foreground hover:text-accent transition-colors relative group py-5 uppercase tracking-wider"
-                >
-                  {cat.name}
-                  <span className="absolute bottom-4 left-0 w-0 h-0.5 bg-accent rounded-full transition-all duration-300 group-hover:w-full" />
-                </Link>
-              ))}
-              <Link
-                to="/products"
-                className="text-[13px] font-medium text-muted-foreground hover:text-accent transition-colors uppercase tracking-wider"
-              >
-                All
-              </Link>
-            </nav>
-
-            {/* Desktop Search */}
-            <div className="hidden lg:flex flex-1 max-w-sm mx-8">
+            {/* Search bar — wide, centered */}
+            <div className="hidden lg:flex flex-1 max-w-2xl mx-auto">
               <form onSubmit={handleSearch} className="relative w-full">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search phones, laptops, tablets..."
-                  className="w-full pl-10 pr-4 py-2 bg-secondary border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all placeholder:text-muted-foreground"
+                  placeholder="Search for phones, laptops, tablets, accessories..."
+                  className="w-full pl-5 pr-12 py-3 bg-secondary border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all placeholder:text-muted-foreground"
                 />
+                <button type="submit" className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-primary text-primary-foreground p-2 rounded-md hover:bg-primary/90 transition-colors">
+                  <Search className="h-4 w-4" />
+                </button>
               </form>
             </div>
 
-            {/* Icon Toolbar */}
-            <div className="flex items-center gap-0.5">
+            {/* Right icons */}
+            <div className="flex items-center gap-1 shrink-0 ml-auto lg:ml-0">
               <button
                 className="lg:hidden p-2.5 hover:bg-secondary rounded-lg transition-colors"
                 onClick={() => setSearchOpen(!searchOpen)}
                 aria-label="Search"
               >
-                <Search className="h-[18px] w-[18px]" />
+                <Search className="h-5 w-5" />
               </button>
+
               <Link
                 to="/track-order"
-                className="hidden lg:flex p-2.5 hover:bg-secondary rounded-lg transition-colors"
+                className="hidden lg:flex flex-col items-center p-2 hover:bg-secondary rounded-lg transition-colors min-w-[56px]"
                 aria-label="Track Order"
               >
-                <Package className="h-[18px] w-[18px]" />
+                <Package className="h-5 w-5" />
+                <span className="text-[10px] text-muted-foreground mt-0.5">Track</span>
               </Link>
+
+              <Link
+                to="/contact"
+                className="hidden lg:flex flex-col items-center p-2 hover:bg-secondary rounded-lg transition-colors min-w-[56px]"
+                aria-label="Help"
+              >
+                <User className="h-5 w-5" />
+                <span className="text-[10px] text-muted-foreground mt-0.5">Help</span>
+              </Link>
+
               <Link
                 to="/cart"
-                className="p-2.5 hover:bg-secondary rounded-lg transition-colors relative"
+                className="flex flex-col items-center p-2 hover:bg-secondary rounded-lg transition-colors relative min-w-[44px] lg:min-w-[56px]"
                 aria-label="Cart"
               >
-                <ShoppingBag className="h-[18px] w-[18px]" />
+                <ShoppingBag className="h-5 w-5" />
+                <span className="hidden lg:block text-[10px] text-muted-foreground mt-0.5">Cart</span>
                 {totalItems > 0 && (
                   <motion.span
                     key={totalItems}
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                    className="absolute top-0.5 right-0.5 bg-accent text-accent-foreground text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full"
+                    className="absolute top-0.5 right-0 bg-destructive text-destructive-foreground text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full"
                   >
                     {totalItems}
                   </motion.span>
                 )}
               </Link>
             </div>
+          </div>
+        </div>
+
+        {/* Category nav bar */}
+        <div className="hidden lg:block border-t border-border bg-background">
+          <div className="container mx-auto px-4">
+            <nav className="flex items-center gap-0 overflow-x-auto scrollbar-hide">
+              {categories.map((cat) => (
+                <Link
+                  key={cat.id}
+                  to={`/products?category=${cat.slug}`}
+                  className="text-[13px] font-medium text-foreground/80 hover:text-primary hover:bg-secondary px-4 py-2.5 whitespace-nowrap transition-colors"
+                >
+                  {cat.name}
+                </Link>
+              ))}
+              <Link
+                to="/products"
+                className="text-[13px] font-medium text-primary hover:bg-secondary px-4 py-2.5 whitespace-nowrap transition-colors"
+              >
+                All Products
+              </Link>
+            </nav>
           </div>
         </div>
 
@@ -185,18 +206,20 @@ export const Header = () => {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="lg:hidden px-4 pb-3"
+              className="lg:hidden px-4 pb-3 border-t border-border"
             >
-              <form onSubmit={handleSearch} className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <form onSubmit={handleSearch} className="relative mt-2">
                 <input
                   ref={searchInputRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search phones, laptops, tablets..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-secondary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  className="w-full pl-4 pr-12 py-3 bg-secondary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
+                <button type="submit" className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-primary text-primary-foreground p-2 rounded-md">
+                  <Search className="h-4 w-4" />
+                </button>
               </form>
             </motion.div>
           )}
