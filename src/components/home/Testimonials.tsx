@@ -2,37 +2,37 @@ import { Star, Quote } from 'lucide-react';
 
 const testimonials = [
   {
-    name: 'Priya S.',
+    name: 'Rahul M.',
     location: 'Mumbai',
-    text: 'The Anarkali I ordered was absolutely stunning. The fabric quality and embroidery work exceeded my expectations. Perfect for my cousin\'s wedding!',
+    text: 'Ordered the MacBook Air M4 and it arrived in just 2 days. Genuine product, sealed packaging, and the price was better than other online stores. EkamTech is now my go-to for electronics!',
     rating: 5,
-    initials: 'PS',
+    initials: 'RM',
   },
   {
-    name: 'Arjun K.',
+    name: 'Sneha P.',
     location: 'Bangalore',
-    text: 'Finally found a brand that makes premium ethnic wear for men that fits perfectly. The Nehru jacket I bought gets compliments every time.',
+    text: 'Bought the Samsung Galaxy S25 Ultra. The delivery was fast, the product is 100% authentic, and the customer support team helped me with the setup. Highly recommend!',
     rating: 5,
-    initials: 'AK',
+    initials: 'SP',
   },
   {
-    name: 'Meera R.',
+    name: 'Vikram S.',
     location: 'Delhi',
-    text: 'I\'ve ordered kurta sets three times now. The quality is consistent, the colors are vibrant, and delivery is always on time. My go-to ethnic brand.',
+    text: 'Great experience buying my ASUS ROG gaming laptop. Competitive pricing, genuine warranty card included, and the packaging was solid. Will definitely shop here again.',
     rating: 5,
-    initials: 'MR',
+    initials: 'VS',
   },
 ];
 
 export const Testimonials = () => {
   return (
-    <section className="py-24 lg:py-32 bg-secondary/50">
+    <section className="py-20 lg:py-28 bg-secondary/50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <span className="text-[11px] font-medium uppercase tracking-[5px] text-primary mb-4 block">Reviews</span>
+          <span className="text-[11px] font-medium uppercase tracking-[5px] text-accent mb-4 block">Reviews</span>
           <h2 className="font-display text-3xl sm:text-4xl tracking-tight">What Our Customers Say</h2>
           <p className="text-muted-foreground mt-4 max-w-md mx-auto text-sm">
-            Loved by thousands of fashion enthusiasts across India
+            Trusted by thousands of tech enthusiasts across India
           </p>
         </div>
 
@@ -43,7 +43,7 @@ export const Testimonials = () => {
               className="bg-card border border-border/60 rounded-2xl p-8 relative hover:shadow-card-hover transition-shadow duration-500 animate-fade-in-up"
               style={{ animationDelay: `${i * 0.1}s` }}
             >
-              <Quote className="h-8 w-8 text-primary/15 mb-5" />
+              <Quote className="h-8 w-8 text-accent/15 mb-5" />
               <p className="text-sm text-foreground/80 leading-relaxed mb-8">
                 "{testimonial.text}"
               </p>
@@ -53,7 +53,7 @@ export const Testimonials = () => {
                 ))}
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-semibold">
+                <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center text-accent text-xs font-semibold">
                   {testimonial.initials}
                 </div>
                 <div>

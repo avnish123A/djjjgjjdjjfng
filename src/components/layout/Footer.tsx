@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom';
-import { Mail, MapPin, Phone, Instagram, Facebook, Twitter, Youtube } from 'lucide-react';
+import { Mail, MapPin, Phone, Instagram, Facebook, Twitter, Youtube, Cpu } from 'lucide-react';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 const footerLinks = {
   shop: [
-    { label: 'New Arrivals', href: '/products' },
-    { label: 'Best Sellers', href: '/products' },
-    { label: 'Kurta Sets', href: '/products' },
+    { label: 'Smartphones', href: '/products?category=smartphones' },
+    { label: 'Laptops', href: '/products?category=laptops' },
+    { label: 'Tablets', href: '/products?category=tablets' },
     { label: 'All Products', href: '/products' },
   ],
   support: [
@@ -42,7 +42,7 @@ const socialIcons = [
 export const Footer = () => {
   const { data: s = {} } = useSiteSettings();
 
-  const email = s.contact_email || 'hello@ekamwear.com';
+  const email = s.contact_email || 'hello@ekamtech.com';
   const phone = s.contact_phone || '+91 98765 43210';
   const location = s.contact_location || 'India';
 
@@ -54,11 +54,12 @@ export const Footer = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <div className="mb-4">
-              <img src="/logo-ekamwear.png" alt="EkamWear" className="h-12 w-auto object-contain brightness-0 invert" />
+            <div className="mb-4 flex items-center gap-2">
+              <Cpu className="h-6 w-6 text-accent" />
+              <span className="font-display text-xl font-bold tracking-tight">EkamTech</span>
             </div>
             <p className="text-background/40 text-sm leading-relaxed mb-6 max-w-xs">
-              Premium Indian ethnic fashion for every occasion. Handcrafted with love, delivered with care across India.
+              Your destination for premium electronics. Genuine smartphones, laptops, and tablets from top brands, delivered with care across India.
             </p>
             <div className="space-y-2.5 text-sm text-background/40">
               <div className="flex items-center gap-2.5">
@@ -82,7 +83,7 @@ export const Footer = () => {
                     href={s[si.key]}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 border border-background/10 rounded-lg hover:border-primary hover:text-primary transition-all duration-200"
+                    className="p-2 border border-background/10 rounded-lg hover:border-accent hover:text-accent transition-all duration-200"
                     aria-label={si.label}
                   >
                     <si.icon className="h-4 w-4" />
@@ -97,7 +98,7 @@ export const Footer = () => {
             <h4 className="font-medium mb-5 text-[11px] uppercase tracking-[3px] text-background/50">Shop</h4>
             <nav className="space-y-3">
               {footerLinks.shop.map((link) => (
-                <Link key={link.label} to={link.href} className="block text-sm text-background/35 hover:text-primary transition-colors">
+                <Link key={link.label} to={link.href} className="block text-sm text-background/35 hover:text-accent transition-colors">
                   {link.label}
                 </Link>
               ))}
@@ -109,7 +110,7 @@ export const Footer = () => {
             <h4 className="font-medium mb-5 text-[11px] uppercase tracking-[3px] text-background/50">Support</h4>
             <nav className="space-y-3">
               {footerLinks.support.map((link) => (
-                <Link key={link.label} to={link.href} className="block text-sm text-background/35 hover:text-primary transition-colors">
+                <Link key={link.label} to={link.href} className="block text-sm text-background/35 hover:text-accent transition-colors">
                   {link.label}
                 </Link>
               ))}
@@ -121,7 +122,7 @@ export const Footer = () => {
             <h4 className="font-medium mb-5 text-[11px] uppercase tracking-[3px] text-background/50">Company</h4>
             <nav className="space-y-3">
               {footerLinks.company.map((link) => (
-                <Link key={link.label} to={link.href} className="block text-sm text-background/35 hover:text-primary transition-colors">
+                <Link key={link.label} to={link.href} className="block text-sm text-background/35 hover:text-accent transition-colors">
                   {link.label}
                 </Link>
               ))}
@@ -135,7 +136,7 @@ export const Footer = () => {
         <div className="container mx-auto px-4 py-5">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-background/25">
-              &copy; {new Date().getFullYear()} EkamWear. All rights reserved.
+              &copy; {new Date().getFullYear()} EkamTech. All rights reserved.
             </p>
             <div className="flex items-center gap-3">
               <span className="text-[10px] text-background/20 uppercase tracking-wider mr-1">We Accept</span>
