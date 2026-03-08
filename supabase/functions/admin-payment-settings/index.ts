@@ -54,6 +54,7 @@ Deno.serve(async (req) => {
   }
 
   try {
+    console.log('Request received:', req.method)
     const auth = await verifyAdmin(req)
     if ('error' in auth) {
       return new Response(JSON.stringify({ error: auth.error }), {
@@ -133,6 +134,8 @@ Deno.serve(async (req) => {
       }
 
       console.log('Updating payment settings for id:', id, 'fields:', Object.keys(sanitized))
+
+      sanitized.updated_at = new Date().toISOString()
 
       const { error } = await serviceClient
         .from('payment_settings')
