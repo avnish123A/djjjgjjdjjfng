@@ -6,51 +6,51 @@
 
 @layer base {
   :root {
-    /* EkamTech — Modern Electronics Store */
-    --background: 210 40% 98%;         /* #F8FAFC */
-    --foreground: 222 47% 11%;         /* #0F172A */
+    /* EkamTech — Vijay Sales inspired clean electronics store */
+    --background: 0 0% 100%;             /* Pure white */
+    --foreground: 220 20% 10%;            /* Near black */
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 220 20% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 222 47% 11%;            /* #0F172A deep navy */
-    --primary-foreground: 210 40% 98%;
-    --secondary: 214 32% 91%;          /* light blue-gray */
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 20% 93%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 217 91% 60%;             /* #2563EB blue */
+    --popover-foreground: 220 20% 10%;
+    --primary: 220 70% 50%;               /* #2563EB vibrant blue */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;             /* #F1F5F9 light gray */
+    --secondary-foreground: 220 20% 10%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 70% 50%;                /* Same blue accent */
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 72% 51%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 217 91% 60%;
-    --radius: 0.625rem;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 220 70% 50%;
+    --radius: 0.5rem;
 
     /* Functional Colors */
-    --success: 160 84% 39%;
+    --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
-    --warning-foreground: 222 47% 11%;
-    --info: 199 89% 48%;               /* #06B6D4 cyan */
+    --warning-foreground: 220 20% 10%;
+    --info: 199 89% 48%;
     --info-foreground: 0 0% 100%;
 
     /* Badge Colors */
-    --badge-new: 217 91% 60%;
-    --badge-sale: 0 72% 51%;
-    --badge-featured: 199 89% 48%;
-    --rating: 43 90% 55%;
+    --badge-new: 220 70% 50%;
+    --badge-sale: 0 84% 60%;
+    --badge-featured: 38 92% 50%;
+    --rating: 43 96% 56%;
 
     /* Sidebar (admin) */
     --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 214 32% 91%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary: 220 70% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 222 40% 18%;
     --sidebar-accent-foreground: 214 32% 91%;
     --sidebar-border: 222 40% 18%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-ring: 220 70% 50%;
   }
 
   .dark {
@@ -136,127 +136,50 @@
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite linear;
   }
-  .blur-up {
-    filter: blur(10px);
-    transition: filter 0.4s ease-out;
-  }
-  .blur-up.loaded {
-    filter: blur(0);
-  }
-  .glass {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
-  .glass-strong {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-  }
-  .glass-card {
-    background: hsl(var(--card) / 0.8);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid hsl(var(--border) / 0.6);
-    box-shadow: 0 8px 32px hsl(var(--foreground) / 0.04), 0 1px 2px hsl(var(--foreground) / 0.02);
-  }
-
-  @keyframes float-gentle {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
-  }
-  .animate-float-gentle {
-    animation: float-gentle 4s ease-in-out infinite;
-    will-change: transform;
-  }
-
-  @keyframes stepper-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 hsl(var(--accent) / 0.4); }
-    50% { box-shadow: 0 0 0 8px hsl(var(--accent) / 0); }
-  }
-  .animate-stepper-pulse {
-    animation: stepper-pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes slide-up {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .animate-slide-up {
-    animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  @keyframes scale-in {
-    from { opacity: 0; transform: scale(0.92); }
-    to { opacity: 1; transform: scale(1); }
-  }
-  .animate-scale-in {
-    animation: scale-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
 
   .perspective-container {
     perspective: 1000px;
   }
-
-  .card-3d {
-    transform-style: preserve-3d;
-    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-  }
-  .card-3d:hover {
-    transform: rotateY(-5deg) rotateX(3deg) translateZ(20px);
-  }
-
-  .shadow-3d {
-    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.5s ease;
-  }
-  .shadow-3d:hover {
-    transform: translateY(-8px) translateZ(12px);
-    box-shadow:
-      0 20px 40px hsl(var(--foreground) / 0.08),
-      0 8px 16px hsl(var(--foreground) / 0.04);
-  }
-
   .category-3d {
-    transform-style: preserve-3d;
-    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.6s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
   .category-3d:hover {
-    transform: scale(1.03) rotateX(3deg) rotateY(-4deg) translateZ(10px);
-    box-shadow: 12px 16px 40px hsl(var(--foreground) / 0.12);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px hsl(var(--foreground) / 0.08);
   }
-  .category-3d:hover img {
-    transform: scale(1.08) translateZ(20px);
-  }
-
   .product-3d {
-    transform-style: preserve-3d;
-    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
   .product-3d:hover {
-    transform: translateY(-8px) scale(1.02);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px hsl(var(--foreground) / 0.08);
+  }
+  .shadow-3d {
+    transition: box-shadow 0.3s ease;
+  }
+  .shadow-3d:hover {
+    box-shadow: 0 8px 24px hsl(var(--foreground) / 0.06);
   }
 
-  @keyframes float-3d {
-    0%, 100% { transform: translateY(0) rotateX(0) rotateY(0); }
-    25% { transform: translateY(-8px) rotateX(2deg) rotateY(-2deg); }
-    50% { transform: translateY(-14px) rotateX(0deg) rotateY(3deg); }
-    75% { transform: translateY(-6px) rotateX(-2deg) rotateY(-1deg); }
+  @keyframes float-gentle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
   }
-  .animate-float-3d {
-    animation: float-3d 6s ease-in-out infinite;
-    will-change: transform;
+  .animate-float-gentle {
+    animation: float-gentle 4s ease-in-out infinite;
+  }
+
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-slide-up {
+    animation: slide-up 0.4s ease-out forwards;
   }
 
   @media (prefers-reduced-motion: reduce) {
     .animate-float-gentle,
-    .animate-stepper-pulse,
     .animate-slide-up,
-    .animate-scale-in,
-    .animate-float-3d,
-    .card-3d:hover,
-    .shadow-3d:hover,
     .category-3d:hover,
     .product-3d:hover {
       animation: none;

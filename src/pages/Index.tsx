@@ -7,11 +7,13 @@ import { TrustSection } from '@/components/home/TrustSection';
 import { NewsletterSignup } from '@/components/home/NewsletterSignup';
 import { Testimonials } from '@/components/home/Testimonials';
 import { FAQSection } from '@/components/home/FAQSection';
+import { BankOffersStrip } from '@/components/home/BankOffersStrip';
 
 const Index = () => {
   return (
     <main>
       <HeroCarousel />
+      <BankOffersStrip />
       <CategoryGrid />
       <FeaturedProducts />
       <PromoBanners />

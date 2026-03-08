@@ -22,135 +22,131 @@ export const HeroCarousel = () => {
 
   useEffect(() => {
     if (count <= 1) return;
-    const timer = setInterval(next, 6000);
+    const timer = setInterval(next, 5000);
     return () => clearInterval(timer);
   }, [next, count]);
 
   if (count === 0) {
     return (
-      <section className="relative h-[85vh] min-h-[600px] max-h-[900px] overflow-hidden">
-        <img src={heroFallbackUrl} alt="Premium tech gadgets" className="absolute inset-0 w-full h-full object-cover" loading="eager" />
-        <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/40 to-transparent" />
-        <div className="relative h-full flex items-center">
-          <div className="container mx-auto px-4">
-            <div className="max-w-2xl">
-              <span className="inline-block text-[11px] sm:text-xs font-medium uppercase tracking-[6px] text-white/50 mb-6">
-                New Arrivals 2026
-              </span>
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-7xl text-white mb-6 leading-[1.05]">
-                Next-Gen Tech <span className="text-accent">Awaits</span>
-              </h1>
-              <p className="text-base sm:text-lg text-white/60 mb-12 max-w-lg leading-relaxed">
-                Discover the latest smartphones, laptops, and tablets from top brands at unbeatable prices.
-              </p>
-              <Link to="/products" className="inline-flex items-center gap-3 bg-accent text-accent-foreground px-10 py-4 rounded-xl text-sm font-semibold uppercase tracking-[2px] hover:bg-accent/90 transition-all">
-                Shop Now <ArrowRight className="h-4 w-4" />
-              </Link>
+      <section className="relative w-full overflow-hidden">
+        <div className="aspect-[16/6] sm:aspect-[16/5] lg:aspect-[16/5] relative">
+          <img src={heroFallbackUrl} alt="Premium tech gadgets" className="absolute inset-0 w-full h-full object-cover" loading="eager" />
+          <div className="absolute inset-0 bg-gradient-to-r from-foreground/60 via-foreground/30 to-transparent" />
+          <div className="relative h-full flex items-center">
+            <div className="container mx-auto px-4">
+              <div className="max-w-lg">
+                <span className="inline-block text-[10px] sm:text-xs font-medium uppercase tracking-[4px] text-white/50 mb-3">
+                  New Arrivals 2026
+                </span>
+                <h1 className="font-display text-2xl sm:text-4xl lg:text-5xl text-white mb-3 leading-tight">
+                  Next-Gen Tech <span className="text-primary">Awaits</span>
+                </h1>
+                <p className="text-sm text-white/60 mb-6 max-w-md">
+                  Discover the latest smartphones, laptops, and tablets at unbeatable prices.
+                </p>
+                <Link to="/products" className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-all">
+                  Shop Now <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
       </section>
     );
   }
 
   const slide = slides[current];
-  const titleWords = (slide.title || '').split(' ');
-  const lastWord = titleWords.pop();
-  const titleStart = titleWords.join(' ');
 
   return (
-    <section className="relative h-[85vh] min-h-[600px] max-h-[900px] overflow-hidden">
-      <AnimatePresence mode="wait">
-        <motion.img
-          key={slide.id}
-          src={slide.image_url || heroFallbackUrl}
-          alt={slide.title || 'Hero banner'}
-          className="absolute inset-0 w-full h-full object-cover"
-          initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
-          loading="eager"
-        />
-      </AnimatePresence>
+    <section className="relative w-full overflow-hidden">
+      <div className="aspect-[16/6] sm:aspect-[16/5] lg:aspect-[16/5] relative">
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={slide.id}
+            src={slide.image_url || heroFallbackUrl}
+            alt={slide.title || 'Hero banner'}
+            className="absolute inset-0 w-full h-full object-cover"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            loading="eager"
+          />
+        </AnimatePresence>
 
-      <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground/60 via-foreground/30 to-transparent" />
 
-      <div className="relative h-full flex items-center">
-        <div className="container mx-auto px-4">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={slide.id + '-content'}
-              className="max-w-2xl"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
-              {slide.subtitle && (
-                <span className="inline-block text-[11px] sm:text-xs font-medium uppercase tracking-[6px] text-white/50 mb-6">
-                  {slide.subtitle}
-                </span>
-              )}
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-7xl text-white mb-6 leading-[1.05] tracking-tight">
-                {titleStart}{' '}
-                <span className="text-accent">{lastWord}</span>
-              </h1>
-              {slide.description && (
-                <p className="text-base sm:text-lg text-white/60 mb-12 max-w-lg leading-relaxed">
-                  {slide.description}
-                </p>
-              )}
-              <div className="flex flex-col sm:flex-row gap-4">
-                {slide.cta_primary_text && (
-                  <Link
-                    to={slide.cta_primary_link || '/products'}
-                    className="inline-flex items-center justify-center gap-3 bg-accent text-accent-foreground px-10 py-4 rounded-xl text-sm font-semibold uppercase tracking-[2px] hover:bg-accent/90 transition-all active:scale-[0.98]"
-                  >
-                    {slide.cta_primary_text}
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
+        <div className="relative h-full flex items-center">
+          <div className="container mx-auto px-4">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={slide.id + '-content'}
+                className="max-w-lg"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.4, delay: 0.1 }}
+              >
+                {slide.subtitle && (
+                  <span className="inline-block text-[10px] sm:text-xs font-medium uppercase tracking-[4px] text-white/50 mb-3">
+                    {slide.subtitle}
+                  </span>
                 )}
-                {slide.cta_secondary_text && (
-                  <Link
-                    to={slide.cta_secondary_link || '/products'}
-                    className="inline-flex items-center justify-center gap-3 bg-white/10 text-white backdrop-blur-sm px-10 py-4 rounded-xl text-sm font-semibold uppercase tracking-[2px] hover:bg-white/20 transition-all border border-white/10"
-                  >
-                    {slide.cta_secondary_text}
-                  </Link>
+                <h1 className="font-display text-2xl sm:text-4xl lg:text-5xl text-white mb-3 leading-tight">
+                  {slide.title}
+                </h1>
+                {slide.description && (
+                  <p className="text-sm text-white/60 mb-6 max-w-md">
+                    {slide.description}
+                  </p>
                 )}
-              </div>
-            </motion.div>
-          </AnimatePresence>
+                <div className="flex gap-3">
+                  {slide.cta_primary_text && (
+                    <Link
+                      to={slide.cta_primary_link || '/products'}
+                      className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg text-sm font-semibold hover:bg-primary/90 transition-all"
+                    >
+                      {slide.cta_primary_text} <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  )}
+                  {slide.cta_secondary_text && (
+                    <Link
+                      to={slide.cta_secondary_link || '/products'}
+                      className="inline-flex items-center gap-2 bg-white/15 text-white backdrop-blur-sm px-6 py-3 rounded-lg text-sm font-semibold hover:bg-white/25 transition-all border border-white/20"
+                    >
+                      {slide.cta_secondary_text}
+                    </Link>
+                  )}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
+
+        {count > 1 && (
+          <>
+            <button onClick={prev} className="absolute left-3 top-1/2 -translate-y-1/2 bg-card/80 backdrop-blur-sm p-2 rounded-full shadow-md hover:bg-card transition-colors" aria-label="Previous">
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button onClick={next} className="absolute right-3 top-1/2 -translate-y-1/2 bg-card/80 backdrop-blur-sm p-2 rounded-full shadow-md hover:bg-card transition-colors" aria-label="Next">
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </>
+        )}
+
+        {count > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+            {slides.map((s, i) => (
+              <button
+                key={s.id}
+                onClick={() => setCurrent(i)}
+                className={`h-2 rounded-full transition-all duration-300 ${i === current ? 'w-6 bg-primary' : 'w-2 bg-white/50 hover:bg-white/70'}`}
+                aria-label={`Slide ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
-
-      {count > 1 && (
-        <>
-          <button onClick={prev} className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 backdrop-blur-sm text-white p-2.5 rounded-full hover:bg-white/20 transition-colors" aria-label="Previous slide">
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button onClick={next} className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 backdrop-blur-sm text-white p-2.5 rounded-full hover:bg-white/20 transition-colors" aria-label="Next slide">
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </>
-      )}
-
-      {count > 1 && (
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-          {slides.map((s, i) => (
-            <button
-              key={s.id}
-              onClick={() => setCurrent(i)}
-              className={`h-2 rounded-full transition-all duration-300 ${i === current ? 'w-8 bg-accent' : 'w-2 bg-white/40 hover:bg-white/60'}`}
-              aria-label={`Go to slide ${i + 1}`}
-            />
-          ))}
-        </div>
-      )}
-
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
     </section>
   );
 };
