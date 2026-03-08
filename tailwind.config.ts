@@ -23,9 +23,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Poppins", "Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "system-ui", "sans-serif"],
-        display: ["Playfair Display", "Georgia", "Times New Roman", "serif"],
-        body: ["Poppins", "Inter", "system-ui", "sans-serif"],
+        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "system-ui", "sans-serif"],
+        display: ["Space Grotesk", "Inter", "system-ui", "sans-serif"],
+        body: ["Inter", "system-ui", "sans-serif"],
       },
       fontSize: {
         "display": ["3.5rem", { lineHeight: "1.08", fontWeight: "700", letterSpacing: "-0.02em" }],

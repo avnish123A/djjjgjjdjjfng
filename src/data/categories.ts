@@ -6,18 +6,12 @@ export interface Category {
   productCount: number;
 }
 
-// These are fallback/static categories — the app primarily uses DB categories via useCategories hook
+// Static fallback categories — the app primarily uses DB categories via useCategories hook
 export const categories: Category[] = [
-  { id: '1', name: 'Suit Sets', slug: 'suit-sets', image: '/placeholder.svg', productCount: 4 },
-  { id: '2', name: 'Kurta Sets', slug: 'kurta-sets', image: '/placeholder.svg', productCount: 5 },
-  { id: '3', name: 'Co-ord Sets', slug: 'co-ord-sets', image: '/placeholder.svg', productCount: 4 },
-  { id: '4', name: 'Anarkali', slug: 'anarkali', image: '/placeholder.svg', productCount: 4 },
-  { id: '5', name: 'Lehenga Sets', slug: 'lehenga-sets', image: '/placeholder.svg', productCount: 3 },
-  { id: '6', name: 'Sarees', slug: 'sarees', image: '/placeholder.svg', productCount: 4 },
-  { id: '7', name: 'Dresses', slug: 'dresses', image: '/placeholder.svg', productCount: 4 },
-  { id: '8', name: 'Men Kurtas', slug: 'men-kurtas', image: '/placeholder.svg', productCount: 4 },
-  { id: '9', name: 'Sherwanis', slug: 'sherwanis', image: '/placeholder.svg', productCount: 3 },
-  { id: '10', name: 'Jewellery', slug: 'jewellery', image: '/placeholder.svg', productCount: 4 },
-  { id: '11', name: 'Bags', slug: 'bags', image: '/placeholder.svg', productCount: 3 },
-  { id: '12', name: 'Dupattas & Scarves', slug: 'dupattas-scarves', image: '/placeholder.svg', productCount: 4 },
+  { id: '1', name: 'Smartphones', slug: 'smartphones', image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&q=80', productCount: 8 },
+  { id: '2', name: 'Laptops', slug: 'laptops', image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&q=80', productCount: 8 },
+  { id: '3', name: 'Tablets', slug: 'tablets', image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800&q=80', productCount: 5 },
+  { id: '4', name: 'Mobile Accessories', slug: 'mobile-accessories', image: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=800&q=80', productCount: 7 },
+  { id: '5', name: 'Laptop Accessories', slug: 'laptop-accessories', image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=800&q=80', productCount: 6 },
+  { id: '6', name: 'Smart Gadgets', slug: 'smart-gadgets', image: 'https://images.unsplash.com/photo-1546868871-af0de0ae72be?w=800&q=80', productCount: 8 },
 ];

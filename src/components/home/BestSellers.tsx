@@ -20,25 +20,25 @@ export const BestSellers = () => {
   };
 
   return (
-    <section className="py-24 lg:py-32">
+    <section className="py-20 lg:py-28">
       <div className="container mx-auto px-4">
         <div className="flex items-end justify-between mb-12">
           <div>
-            <span className="text-[11px] font-medium uppercase tracking-[5px] text-primary mb-3 block">Most Loved</span>
+            <span className="text-[11px] font-medium uppercase tracking-[5px] text-accent mb-3 block">Top Rated</span>
             <h2 className="font-display text-3xl sm:text-4xl tracking-tight">Best Sellers</h2>
           </div>
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-2">
               <button
                 onClick={() => scroll('left')}
-                className="p-2.5 rounded-xl border border-border hover:border-primary hover:text-primary transition-colors"
+                className="p-2.5 rounded-xl border border-border hover:border-accent hover:text-accent transition-colors"
                 aria-label="Scroll left"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
               <button
                 onClick={() => scroll('right')}
-                className="p-2.5 rounded-xl border border-border hover:border-primary hover:text-primary transition-colors"
+                className="p-2.5 rounded-xl border border-border hover:border-accent hover:text-accent transition-colors"
                 aria-label="Scroll right"
               >
                 <ChevronRight className="h-4 w-4" />
@@ -46,7 +46,7 @@ export const BestSellers = () => {
             </div>
             <Link
               to="/products"
-              className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary hover:gap-2.5 transition-all uppercase tracking-wider"
+              className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent hover:gap-2.5 transition-all uppercase tracking-wider"
             >
               View All <ArrowRight className="h-4 w-4" />
             </Link>

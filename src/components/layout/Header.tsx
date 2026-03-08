@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Search, Package, ShoppingBag, X } from 'lucide-react';
+import { Search, Package, ShoppingBag, X, Cpu } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useCategories } from '@/hooks/useCategories';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
@@ -22,7 +22,7 @@ export const Header = () => {
   const { data: settings = {} } = useSiteSettings();
 
   const announcementEnabled = settings['announcement_enabled'] !== 'false';
-  const announcementText = settings['announcement_text'] || 'Free shipping on orders above ₹1499 · Use code ETHNIC10 for 10% off';
+  const announcementText = settings['announcement_text'] || 'Free shipping on orders above ₹4999 · Use code TECH10 for 10% off';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,14 +63,14 @@ export const Header = () => {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="bg-primary text-primary-foreground text-center text-[12px] py-2.5 px-4 relative"
+            className="bg-accent text-accent-foreground text-center text-[12px] py-2.5 px-4 relative"
           >
             <p className="font-medium tracking-[1.5px] uppercase">
               {announcementText}
             </p>
             <button
               onClick={() => setShowAnnouncement(false)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-foreground/50 hover:text-primary-foreground transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-accent-foreground/50 hover:text-accent-foreground transition-colors"
               aria-label="Dismiss announcement"
             >
               <X className="h-3.5 w-3.5" />
@@ -102,7 +102,8 @@ export const Header = () => {
 
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2">
-              <img src="/logo-ekamwear.png" alt="EkamWear" className="h-10 lg:h-12 w-auto object-contain" />
+              <Cpu className="h-6 w-6 text-accent" />
+              <span className="font-display text-xl font-bold tracking-tight">EkamTech</span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -111,15 +112,15 @@ export const Header = () => {
                 <Link
                   key={cat.id}
                   to={`/products?category=${cat.slug}`}
-                  className="text-[13px] font-medium text-muted-foreground hover:text-primary transition-colors relative group py-5 uppercase tracking-wider"
+                  className="text-[13px] font-medium text-muted-foreground hover:text-accent transition-colors relative group py-5 uppercase tracking-wider"
                 >
                   {cat.name}
-                  <span className="absolute bottom-4 left-0 w-0 h-0.5 bg-primary rounded-full transition-all duration-300 group-hover:w-full" />
+                  <span className="absolute bottom-4 left-0 w-0 h-0.5 bg-accent rounded-full transition-all duration-300 group-hover:w-full" />
                 </Link>
               ))}
               <Link
                 to="/products"
-                className="text-[13px] font-medium text-muted-foreground hover:text-primary transition-colors uppercase tracking-wider"
+                className="text-[13px] font-medium text-muted-foreground hover:text-accent transition-colors uppercase tracking-wider"
               >
                 All
               </Link>
@@ -133,8 +134,8 @@ export const Header = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search..."
-                  className="w-full pl-10 pr-4 py-2 bg-secondary border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all placeholder:text-muted-foreground"
+                  placeholder="Search phones, laptops, tablets..."
+                  className="w-full pl-10 pr-4 py-2 bg-secondary border-0 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all placeholder:text-muted-foreground"
                 />
               </form>
             </div>
@@ -167,7 +168,7 @@ export const Header = () => {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                    className="absolute top-0.5 right-0.5 bg-primary text-primary-foreground text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full"
+                    className="absolute top-0.5 right-0.5 bg-accent text-accent-foreground text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full"
                   >
                     {totalItems}
                   </motion.span>
@@ -193,8 +194,8 @@ export const Header = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search kurtas, sherwanis..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-secondary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  placeholder="Search phones, laptops, tablets..."
+                  className="w-full pl-10 pr-4 py-2.5 bg-secondary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
                 />
               </form>
             </motion.div>

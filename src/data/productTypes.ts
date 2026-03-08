@@ -11,26 +11,20 @@ export const PRODUCT_TYPES: ProductTypeConfig[] = [
     suggestedAttributes: [],
   },
   {
+    id: 'electronics',
+    label: 'Electronics',
+    suggestedAttributes: [
+      { name: 'storage', label: 'Storage', type: 'select', values: ['64GB', '128GB', '256GB', '512GB', '1TB'] },
+      { name: 'color', label: 'Color', type: 'select', values: ['Black', 'White', 'Silver', 'Blue', 'Gold'] },
+      { name: 'ram', label: 'RAM', type: 'select', values: ['4GB', '8GB', '16GB', '32GB', '64GB'] },
+    ],
+  },
+  {
     id: 'apparel',
     label: 'Apparel',
     suggestedAttributes: [
       { name: 'size', label: 'Size', type: 'radio', values: ['XS', 'S', 'M', 'L', 'XL', 'XXL'] },
       { name: 'color', label: 'Color', type: 'select', values: ['Black', 'White', 'Red', 'Blue', 'Green'] },
-    ],
-  },
-  {
-    id: 'footwear',
-    label: 'Footwear',
-    suggestedAttributes: [
-      { name: 'shoe_size', label: 'Shoe Size', type: 'select', values: ['6', '7', '8', '9', '10', '11', '12'] },
-      { name: 'color', label: 'Color', type: 'select', values: ['Black', 'White', 'Brown'] },
-    ],
-  },
-  {
-    id: 'weight_based',
-    label: 'Weight Based',
-    suggestedAttributes: [
-      { name: 'weight', label: 'Weight', type: 'select', values: ['250g', '500g', '1kg', '2kg', '5kg'] },
     ],
   },
   {

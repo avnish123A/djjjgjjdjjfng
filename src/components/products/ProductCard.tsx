@@ -39,8 +39,8 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
   return (
     <div ref={ref} className="group product-3d perspective-container">
       <Link to={`/product/${product.id}`} className="block">
-        {/* Image Container */}
-        <div className="relative aspect-[3/4] overflow-hidden bg-secondary rounded-2xl mb-4 shadow-soft hover:shadow-card-hover transition-shadow duration-500">
+        {/* Image Container — square aspect for tech products */}
+        <div className="relative aspect-square overflow-hidden bg-secondary rounded-2xl mb-4 shadow-soft hover:shadow-card-hover transition-shadow duration-500">
           <img
             src={product.image}
             alt={product.name}
@@ -62,12 +62,12 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
           {/* Badges */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5">
             {product.badge === 'Sale' && discount && (
-              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-accent text-accent-foreground rounded-full">
+              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-destructive text-destructive-foreground rounded-full">
                 -{discount}%
               </span>
             )}
             {product.badge === 'New' && (
-              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-primary text-primary-foreground rounded-full">
+              <span className="px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider bg-accent text-accent-foreground rounded-full">
                 New
               </span>
             )}
@@ -114,7 +114,7 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
           <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 hidden lg:block">
             <button
               onClick={handleAddToCart}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-primary text-primary-foreground rounded-xl text-sm font-medium uppercase tracking-wider hover:bg-primary/90 transition-colors active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2 py-3 bg-accent text-accent-foreground rounded-xl text-sm font-medium uppercase tracking-wider hover:bg-accent/90 transition-colors active:scale-[0.98]"
             >
               <ShoppingBag className="h-4 w-4" />
               Add to Cart
@@ -124,7 +124,7 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
           {/* Mobile Add to Cart */}
           <button
             onClick={handleAddToCart}
-            className="lg:hidden absolute bottom-3 right-3 p-2.5 bg-primary text-primary-foreground rounded-xl shadow-card-hover min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="lg:hidden absolute bottom-3 right-3 p-2.5 bg-accent text-accent-foreground rounded-xl shadow-card-hover min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Add to cart"
           >
             <ShoppingBag className="h-4 w-4" />
@@ -143,9 +143,9 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
         {/* Product Info */}
         <div className="space-y-1.5 px-1">
           {product.brand && (
-            <p className="text-[10px] text-primary uppercase tracking-[3px] font-medium">{product.brand}</p>
+            <p className="text-[10px] text-accent uppercase tracking-[3px] font-medium">{product.brand}</p>
           )}
-          <h3 className="text-sm font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+          <h3 className="text-sm font-medium leading-snug line-clamp-2 group-hover:text-accent transition-colors">
             {product.name}
           </h3>
 

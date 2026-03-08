@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useHeroSlides } from '@/hooks/useHeroSlides';
-import heroFallback from '@/assets/hero-ethnic-fashion.jpg';
 import { motion, AnimatePresence } from 'framer-motion';
+
+const heroFallbackUrl = 'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=1920&q=80';
 
 export const HeroCarousel = () => {
   const { data: slides = [] } = useHeroSlides(true);
@@ -25,26 +26,25 @@ export const HeroCarousel = () => {
     return () => clearInterval(timer);
   }, [next, count]);
 
-  // Fallback if no slides exist
   if (count === 0) {
     return (
       <section className="relative h-[85vh] min-h-[600px] max-h-[900px] overflow-hidden">
-        <img src={heroFallback} alt="Premium ethnic fashion" className="absolute inset-0 w-full h-full object-cover" loading="eager" />
-        <div className="absolute inset-0 bg-gradient-to-r from-foreground/60 via-foreground/30 to-transparent" />
+        <img src={heroFallbackUrl} alt="Premium tech gadgets" className="absolute inset-0 w-full h-full object-cover" loading="eager" />
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/40 to-transparent" />
         <div className="relative h-full flex items-center">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl">
               <span className="inline-block text-[11px] sm:text-xs font-medium uppercase tracking-[6px] text-white/50 mb-6">
-                New Collection 2026
+                New Arrivals 2026
               </span>
               <h1 className="font-display text-4xl sm:text-5xl lg:text-7xl text-white mb-6 leading-[1.05]">
-                Timeless Ethnic <span className="text-accent">Elegance</span>
+                Next-Gen Tech <span className="text-accent">Awaits</span>
               </h1>
               <p className="text-base sm:text-lg text-white/60 mb-12 max-w-lg leading-relaxed">
-                Handcrafted kurtas, anarkalis & sherwanis that celebrate the beauty of Indian craftsmanship.
+                Discover the latest smartphones, laptops, and tablets from top brands at unbeatable prices.
               </p>
-              <Link to="/products" className="inline-flex items-center gap-3 bg-primary text-primary-foreground px-10 py-4 rounded-xl text-sm font-semibold uppercase tracking-[2px] hover:bg-primary/90 transition-all">
-                Shop Collection <ArrowRight className="h-4 w-4" />
+              <Link to="/products" className="inline-flex items-center gap-3 bg-accent text-accent-foreground px-10 py-4 rounded-xl text-sm font-semibold uppercase tracking-[2px] hover:bg-accent/90 transition-all">
+                Shop Now <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>
@@ -64,7 +64,7 @@ export const HeroCarousel = () => {
       <AnimatePresence mode="wait">
         <motion.img
           key={slide.id}
-          src={slide.image_url || heroFallback}
+          src={slide.image_url || heroFallbackUrl}
           alt={slide.title || 'Hero banner'}
           className="absolute inset-0 w-full h-full object-cover"
           initial={{ opacity: 0, scale: 1.05 }}
@@ -75,7 +75,7 @@ export const HeroCarousel = () => {
         />
       </AnimatePresence>
 
-      <div className="absolute inset-0 bg-gradient-to-r from-foreground/60 via-foreground/30 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-foreground/70 via-foreground/40 to-transparent" />
 
       <div className="relative h-full flex items-center">
         <div className="container mx-auto px-4">
@@ -106,7 +106,7 @@ export const HeroCarousel = () => {
                 {slide.cta_primary_text && (
                   <Link
                     to={slide.cta_primary_link || '/products'}
-                    className="inline-flex items-center justify-center gap-3 bg-primary text-primary-foreground px-10 py-4 rounded-xl text-sm font-semibold uppercase tracking-[2px] hover:bg-primary/90 transition-all active:scale-[0.98]"
+                    className="inline-flex items-center justify-center gap-3 bg-accent text-accent-foreground px-10 py-4 rounded-xl text-sm font-semibold uppercase tracking-[2px] hover:bg-accent/90 transition-all active:scale-[0.98]"
                   >
                     {slide.cta_primary_text}
                     <ArrowRight className="h-4 w-4" />

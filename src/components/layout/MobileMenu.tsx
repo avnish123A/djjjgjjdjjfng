@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { X, ChevronRight, Package, Search } from 'lucide-react';
+import { X, ChevronRight, Package, Search, Cpu } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useCategories } from '@/hooks/useCategories';
 
@@ -17,7 +17,10 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="flex items-center justify-between p-5 border-b border-border">
-            <img src="/logo-ekamwear.png" alt="EkamWear" className="h-10 w-auto object-contain" />
+            <div className="flex items-center gap-2">
+              <Cpu className="h-5 w-5 text-accent" />
+              <span className="font-display text-lg font-bold tracking-tight">EkamTech</span>
+            </div>
             <button onClick={onClose} className="p-1.5 hover:bg-secondary rounded-lg transition-colors">
               <X className="h-4 w-4" />
             </button>
@@ -29,8 +32,8 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2.5 bg-secondary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                placeholder="Search phones, laptops..."
+                className="w-full pl-10 pr-4 py-2.5 bg-secondary rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent/30"
               />
             </div>
           </div>
@@ -56,7 +59,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
                 <Link
                   to="/products"
                   onClick={onClose}
-                  className="flex items-center justify-between py-3 px-3 text-sm font-semibold text-primary hover:bg-secondary rounded-lg transition-colors"
+                  className="flex items-center justify-between py-3 px-3 text-sm font-semibold text-accent hover:bg-secondary rounded-lg transition-colors"
                 >
                   View All
                   <ChevronRight className="h-3.5 w-3.5" />
