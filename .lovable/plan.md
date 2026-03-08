@@ -1,42 +1,46 @@
 
 
-## Security Fix: Payment Gateway Secrets Exposure
+## Plan: Assign Unique Images & Fresh Descriptions to All 46 Products
 
-### The Issue
-There is one error-level security finding: **Payment gateway secrets (API keys, webhook secrets) are directly readable by admin users via client-side queries** to the `payment_settings` table. This means `key_secret`, `webhook_secret`, and `key_id` values are visible in browser memory, dev tools, and network traffic.
+### Problem
+- 46 products exist but only 12 unique Unsplash images are used — many products share the same photo.
+- Descriptions are brief and repetitive.
 
-### Approach: Edge Function Proxy
+### What We'll Do
 
-Create an edge function `admin-payment-settings` that:
-1. **GET**: Returns payment settings with secrets masked (only boolean flags like `has_key_secret: true`)
-2. **PUT**: Accepts updates (including new secret values) and writes them server-side
+**Cannot copy from Aachho.com** — their images, product names, and descriptions are copyrighted. Instead, we'll:
 
-Then update `AdminPayments.tsx` to use the edge function instead of direct Supabase queries.
+1. **Assign 46 unique, high-quality Unsplash images** — each product gets a distinct ethnic fashion photo. Images will be selected to match the product category (e.g., saree photos for sarees, kurta photos for kurtas, jewelry photos for jewelry).
 
-### Changes
+2. **Write fresh, detailed original descriptions** for all 46 products — each 2-3 sentences covering fabric, design details, and styling suggestions. Inspired by the luxury ethnic fashion tone but entirely original text.
 
-**1. New edge function: `supabase/functions/admin-payment-settings/index.ts`**
-- Verifies the caller is an authenticated admin (via `has_role` RPC)
-- GET: Fetches payment settings, strips `key_id`, `key_secret`, `webhook_secret`, returns `has_key_id`, `has_key_secret`, `has_webhook_secret` booleans instead
-- PUT: Accepts gateway ID + changes, updates the `payment_settings` table using service role
+### Execution
 
-**2. Update `supabase/config.toml`**
-- Add `[functions.admin-payment-settings]` with `verify_jwt = false` (auth handled inside the function)
+Single database migration with 46 `UPDATE` statements:
+- Each product gets a unique Unsplash image URL (no duplicates)
+- Each product gets a new 2-3 sentence description
+- Update `images` array (primary + secondary image where possible)
 
-**3. Update `src/pages/admin/AdminPayments.tsx`**
-- Change `fetchGateways` to call the edge function GET endpoint instead of direct Supabase query
-- Change `handleSave` and `handleToggleEnabled` to call the edge function PUT endpoint
-- Update the `GatewayConfig` interface: secret fields become optional (only present when admin types new values), add `has_key_id`, `has_key_secret`, `has_webhook_secret` booleans
-- Input fields for secrets show placeholder "••••••••" when `has_key_secret` is true but no edit value; only send secret fields in updates when the admin actually changes them
-- Validation logic updated to check `has_key_id`/`has_key_secret` booleans instead of actual secret values
+### Categories & Product Counts
+| Category | Products |
+|----------|----------|
+| Suit Sets | ~4 |
+| Kurta Sets | ~4 |
+| Co-ord Sets | ~4 |
+| Anarkali | ~4 |
+| Lehenga Sets | ~4 |
+| Sarees | ~4 |
+| Dresses | ~4 |
+| Men Kurtas | ~4 |
+| Sherwanis | ~3 |
+| Jewellery | ~4 |
+| Bags | ~3 |
+| Dupattas & Scarves | ~4 |
 
-**4. Remove the admin SELECT RLS policy on `payment_settings`**
-- Drop the "Admins can read payment settings" SELECT policy since admins should only access settings through the edge function
-- Keep INSERT, UPDATE, DELETE policies for direct admin operations that don't expose secrets
+### Files Changed
+- **Database only** — 46 UPDATE queries
+- **`src/data/products.ts`** — update static fallback images to match
 
-### Technical Details
-- The edge function uses `SUPABASE_SERVICE_ROLE_KEY` to bypass RLS
-- Auth verification done by extracting the JWT from the Authorization header and calling `has_role`
-- Secrets are never returned to the client; only status indicators
-- When saving, if a secret field is empty/unchanged, it's omitted from the update to avoid overwriting existing secrets with empty strings
+### No UI Changes Needed
+Components already render from DB dynamically.
 
