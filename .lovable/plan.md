@@ -1,42 +1,44 @@
 
 
-## Security Fix: Payment Gateway Secrets Exposure
+## Fix: Admin Payment Gateway Panel
 
-### The Issue
-There is one error-level security finding: **Payment gateway secrets (API keys, webhook secrets) are directly readable by admin users via client-side queries** to the `payment_settings` table. This means `key_secret`, `webhook_secret`, and `key_id` values are visible in browser memory, dev tools, and network traffic.
+### Root Cause Analysis
 
-### Approach: Edge Function Proxy
+After inspecting the codebase, database, edge function logs, and live behavior:
 
-Create an edge function `admin-payment-settings` that:
-1. **GET**: Returns payment settings with secrets masked (only boolean flags like `has_key_secret: true`)
-2. **PUT**: Accepts updates (including new secret values) and writes them server-side
+1. **Backend is working**: The `admin-payment-settings` edge function is deployed, the `payment_settings` table has 3 rows (razorpay, cashfree, cod), and `get-active-gateways` returns correctly.
+2. **The edge function code is correct** — auth via `getUser()`, admin role check via service client, proper CORS headers.
+3. **The frontend code structure is correct** — proper `callEdgeFunction`, state management, toggle handlers.
 
-Then update `AdminPayments.tsx` to use the edge function instead of direct Supabase queries.
+**The likely root cause**: The edge function may not be deployed with the latest code (logs show no request processing, only boot/shutdown). Additionally, the frontend has a subtle UX issue — the `getUser(token)` call in the edge function might be failing because the deployed version still has `getClaims()` (from a previous iteration that was written but may not have been deployed).
 
-### Changes
+### Plan
 
-**1. New edge function: `supabase/functions/admin-payment-settings/index.ts`**
-- Verifies the caller is an authenticated admin (via `has_role` RPC)
-- GET: Fetches payment settings, strips `key_id`, `key_secret`, `webhook_secret`, returns `has_key_id`, `has_key_secret`, `has_webhook_secret` booleans instead
-- PUT: Accepts gateway ID + changes, updates the `payment_settings` table using service role
+#### 1. Redeploy Edge Functions
+- Force redeploy `admin-payment-settings` and `get-active-gateways` to ensure the latest code is live.
 
-**2. Update `supabase/config.toml`**
-- Add `[functions.admin-payment-settings]` with `verify_jwt = false` (auth handled inside the function)
+#### 2. Harden the Admin Payments Frontend (`src/pages/admin/AdminPayments.tsx`)
+- **Add network error handling**: Wrap `callEdgeFunction` with a try/catch that shows specific error messages (timeout, network error, auth error) instead of generic "Failed to fetch".
+- **Add request timeout**: Use `AbortController` with a 15-second timeout to prevent hanging requests.
+- **Fix toggle responsiveness**: Add optimistic UI updates — immediately flip the toggle visually, then revert on error.
+- **Improve error visibility**: Show inline error banners per-gateway card instead of only toasts (toasts can be missed on mobile).
 
-**3. Update `src/pages/admin/AdminPayments.tsx`**
-- Change `fetchGateways` to call the edge function GET endpoint instead of direct Supabase query
-- Change `handleSave` and `handleToggleEnabled` to call the edge function PUT endpoint
-- Update the `GatewayConfig` interface: secret fields become optional (only present when admin types new values), add `has_key_id`, `has_key_secret`, `has_webhook_secret` booleans
-- Input fields for secrets show placeholder "••••••••" when `has_key_secret` is true but no edit value; only send secret fields in updates when the admin actually changes them
-- Validation logic updated to check `has_key_id`/`has_key_secret` booleans instead of actual secret values
+#### 3. Ensure Checkout Sync (`src/pages/Checkout.tsx`)
+- The checkout already uses `supabase.functions.invoke('get-active-gateways')` which is correct and working (confirmed via curl — returns empty array because no gateways are enabled yet).
+- Add a fallback message when no gateways are available: "No payment methods available. Please contact support."
 
-**4. Remove the admin SELECT RLS policy on `payment_settings`**
-- Drop the "Admins can read payment settings" SELECT policy since admins should only access settings through the edge function
-- Keep INSERT, UPDATE, DELETE policies for direct admin operations that don't expose secrets
+#### 4. Edge Function Stability (`supabase/functions/admin-payment-settings/index.ts`)
+- Add request logging at the entry point (`console.log('Request received:', req.method)`) so we can confirm requests are reaching the function.
+- Add `updated_at: new Date().toISOString()` to PUT updates so the timestamp reflects when settings were last changed.
 
-### Technical Details
-- The edge function uses `SUPABASE_SERVICE_ROLE_KEY` to bypass RLS
-- Auth verification done by extracting the JWT from the Authorization header and calling `has_role`
-- Secrets are never returned to the client; only status indicators
-- When saving, if a secret field is empty/unchanged, it's omitted from the update to avoid overwriting existing secrets with empty strings
+### Files to Modify
+- `supabase/functions/admin-payment-settings/index.ts` — Add entry logging + updated_at field
+- `src/pages/admin/AdminPayments.tsx` — Add AbortController timeout, optimistic toggles, better error handling
+- Redeploy edge functions
+
+### What Will NOT Change
+- Database schema (already correct)
+- `get-active-gateways` function (already working)
+- Checkout page (already correctly fetches gateways)
+- RLS policies (correctly configured — no SELECT for anon users, admin-only via edge function proxy)
 
