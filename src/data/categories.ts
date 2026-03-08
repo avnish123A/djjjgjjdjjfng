@@ -8,10 +8,16 @@ export interface Category {
 
 // These are fallback/static categories — the app primarily uses DB categories via useCategories hook
 export const categories: Category[] = [
-  { id: '1', name: 'Desk & Gadgets', slug: 'desk-gadgets', image: 'https://rwrznilwfczmichtfyyo.supabase.co/storage/v1/object/public/product-images/categories/desk-gadgets.jpg', productCount: 5 },
-  { id: '2', name: 'Home & Living', slug: 'home-living', image: 'https://rwrznilwfczmichtfyyo.supabase.co/storage/v1/object/public/product-images/categories/home-living.jpg', productCount: 7 },
-  { id: '3', name: 'Travel Essentials', slug: 'travel-essentials', image: 'https://rwrznilwfczmichtfyyo.supabase.co/storage/v1/object/public/product-images/categories/travel.jpg', productCount: 3 },
-  { id: '4', name: 'Gifts for Her', slug: 'gifts-for-her', image: 'https://rwrznilwfczmichtfyyo.supabase.co/storage/v1/object/public/product-images/categories/gifts-her.jpg', productCount: 4 },
-  { id: '5', name: 'Gifts for Him', slug: 'gifts-for-him', image: 'https://rwrznilwfczmichtfyyo.supabase.co/storage/v1/object/public/product-images/categories/gifts-him.jpg', productCount: 2 },
-  { id: '6', name: 'Personalized Gifts', slug: 'personalized-gifts', image: 'https://rwrznilwfczmichtfyyo.supabase.co/storage/v1/object/public/product-images/categories/personalized.jpg', productCount: 2 },
+  { id: '1', name: 'Suit Sets', slug: 'suit-sets', image: '/placeholder.svg', productCount: 4 },
+  { id: '2', name: 'Kurta Sets', slug: 'kurta-sets', image: '/placeholder.svg', productCount: 5 },
+  { id: '3', name: 'Co-ord Sets', slug: 'co-ord-sets', image: '/placeholder.svg', productCount: 4 },
+  { id: '4', name: 'Anarkali', slug: 'anarkali', image: '/placeholder.svg', productCount: 4 },
+  { id: '5', name: 'Lehenga Sets', slug: 'lehenga-sets', image: '/placeholder.svg', productCount: 3 },
+  { id: '6', name: 'Sarees', slug: 'sarees', image: '/placeholder.svg', productCount: 4 },
+  { id: '7', name: 'Dresses', slug: 'dresses', image: '/placeholder.svg', productCount: 4 },
+  { id: '8', name: 'Men Kurtas', slug: 'men-kurtas', image: '/placeholder.svg', productCount: 4 },
+  { id: '9', name: 'Sherwanis', slug: 'sherwanis', image: '/placeholder.svg', productCount: 3 },
+  { id: '10', name: 'Jewellery', slug: 'jewellery', image: '/placeholder.svg', productCount: 4 },
+  { id: '11', name: 'Bags', slug: 'bags', image: '/placeholder.svg', productCount: 3 },
+  { id: '12', name: 'Dupattas & Scarves', slug: 'dupattas-scarves', image: '/placeholder.svg', productCount: 4 },
 ];
