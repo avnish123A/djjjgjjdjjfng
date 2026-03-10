@@ -18,6 +18,7 @@ const Index = () => {
       <CategoryGrid />
       <FeaturedProducts />
       <PromoBanners />
+      <FlashDeals />
       <BestSellers />
       <TrustSection />
       <FAQSection />
