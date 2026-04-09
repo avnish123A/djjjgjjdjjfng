@@ -1,36 +1,30 @@
-import { Truck, ShieldCheck, RotateCcw, CreditCard, Headphones, Award } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const trustItems = [
-  { icon: Truck, title: 'Free Delivery', description: 'On orders above ₹4999', color: 'text-blue-500' },
-  { icon: ShieldCheck, title: '100% Genuine', description: 'Authorized products', color: 'text-emerald-500' },
-  { icon: RotateCcw, title: '7-Day Returns', description: 'Easy return policy', color: 'text-violet-500' },
-  { icon: CreditCard, title: 'Secure Payments', description: 'SSL encrypted', color: 'text-cyan-500' },
-  { icon: Award, title: 'Brand Warranty', description: 'Official warranty', color: 'text-amber-500' },
-  { icon: Headphones, title: '24/7 Support', description: 'Expert help anytime', color: 'text-pink-500' },
+  { title: 'Single Estate', description: 'Direct from producer' },
+  { title: '100% Traceable', description: 'Origin verified' },
+  { title: 'Cold Chain', description: 'Temperature controlled' },
+  { title: 'No Additives', description: 'Pure ingredients' },
+  { title: 'Small Batch', description: 'Limited production' },
+  { title: 'Expert Curated', description: 'Sommelier selected' },
 ];
 
 export const TrustSection = () => {
   return (
-    <section className="py-10 lg:py-14 border-t border-border/50">
+    <section className="py-16 lg:py-20 border-t border-foreground/5">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 lg:gap-4">
           {trustItems.map((item, i) => (
             <motion.div
               key={item.title}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.4, delay: i * 0.08 }}
-              className="flex flex-col items-center text-center gap-3 p-4 rounded-2xl hover:bg-secondary/50 transition-colors group"
+              transition={{ duration: 0.5, delay: i * 0.08 }}
+              className="text-center"
             >
-              <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <item.icon className={`h-6 w-6 ${item.color}`} />
-              </div>
-              <div>
-                <h3 className="font-semibold text-sm">{item.title}</h3>
-                <p className="text-[11px] text-muted-foreground mt-0.5">{item.description}</p>
-              </div>
+              <h3 className="font-utility text-[10px] tracking-[0.15em] text-foreground/70 mb-1">{item.title.toUpperCase()}</h3>
+              <p className="font-display-italic text-xs text-foreground/35">{item.description}</p>
             </motion.div>
           ))}
         </div>

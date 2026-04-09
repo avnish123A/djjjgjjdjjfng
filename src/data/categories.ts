@@ -6,12 +6,12 @@ export interface Category {
   productCount: number;
 }
 
-// Static fallback categories — the app primarily uses DB categories via useCategories hook
+// Static fallback — app primarily uses DB categories via useCategories hook
 export const categories: Category[] = [
-  { id: '1', name: 'Smartphones', slug: 'smartphones', image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&q=80', productCount: 8 },
-  { id: '2', name: 'Laptops', slug: 'laptops', image: 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800&q=80', productCount: 8 },
-  { id: '3', name: 'Tablets', slug: 'tablets', image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800&q=80', productCount: 5 },
-  { id: '4', name: 'Mobile Accessories', slug: 'mobile-accessories', image: 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=800&q=80', productCount: 7 },
-  { id: '5', name: 'Laptop Accessories', slug: 'laptop-accessories', image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=800&q=80', productCount: 6 },
-  { id: '6', name: 'Smart Gadgets', slug: 'smart-gadgets', image: 'https://images.unsplash.com/photo-1546868871-af0de0ae72be?w=800&q=80', productCount: 8 },
+  { id: '1', name: 'Single-Origin Oils', slug: 'single-origin-oils', image: 'https://images.unsplash.com/photo-1474979266404-7eaabdf50494?w=800&q=80', productCount: 5 },
+  { id: '2', name: 'Artisan Vinegars', slug: 'artisan-vinegars', image: 'https://images.unsplash.com/photo-1609501676725-7186f017a4b7?w=800&q=80', productCount: 5 },
+  { id: '3', name: 'Heritage Spices', slug: 'heritage-spices', image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800&q=80', productCount: 5 },
+  { id: '4', name: 'Wild Honey', slug: 'wild-honey', image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=800&q=80', productCount: 5 },
+  { id: '5', name: 'Rare Teas', slug: 'rare-teas', image: 'https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=800&q=80', productCount: 5 },
+  { id: '6', name: 'Cured Salts', slug: 'cured-salts', image: 'https://images.unsplash.com/photo-1518110925495-5fe2c8dcf2f5?w=800&q=80', productCount: 5 },
 ];
