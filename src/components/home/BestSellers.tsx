@@ -1,15 +1,14 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useProducts } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
 import { ProductCard } from '@/components/products/ProductCard';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronLeft, ChevronRight, TrendingUp } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const BestSellers = () => {
   const { data: products = [] } = useProducts();
   const { data: categories = [] } = useCategories();
-  const scrollRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<string>('all');
 
   const filteredProducts = activeTab === 'all'
@@ -20,68 +19,44 @@ export const BestSellers = () => {
 
   if (displayProducts.length === 0) return null;
 
-  const scroll = (dir: 'left' | 'right') => {
-    if (!scrollRef.current) return;
-    const amount = scrollRef.current.offsetWidth * 0.7;
-    scrollRef.current.scrollBy({ left: dir === 'left' ? -amount : amount, behavior: 'smooth' });
-  };
-
   const tabs = [
     { id: 'all', name: 'All' },
     ...categories.slice(0, 6).map(c => ({ id: c.id, name: c.name })),
   ];
 
   return (
-    <section className="py-10 lg:py-14 mesh-gradient">
+    <section className="py-16 lg:py-24 border-t border-foreground/5">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="flex flex-col gap-5 mb-8"
+          transition={{ duration: 0.8 }}
+          className="text-center mb-10"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-primary uppercase tracking-widest mb-2">
-                <TrendingUp className="h-3.5 w-3.5" />
-                Trending Now
-              </div>
-              <h2 className="font-display text-2xl sm:text-3xl tracking-tight">Bestseller Deals</h2>
-            </div>
-            <div className="flex items-center gap-2">
-              <button onClick={() => scroll('left')} className="hidden sm:flex p-2.5 rounded-xl border border-border/60 hover:bg-card hover:shadow-sm transition-all" aria-label="Scroll left">
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <button onClick={() => scroll('right')} className="hidden sm:flex p-2.5 rounded-xl border border-border/60 hover:bg-card hover:shadow-sm transition-all" aria-label="Scroll right">
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Category tabs */}
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-300 ${
-                  activeTab === tab.id
-                    ? 'bg-primary text-primary-foreground shadow-glow'
-                    : 'bg-card border border-border/60 text-foreground/70 hover:border-primary/30 hover:text-primary'
-                }`}
-              >
-                {tab.name}
-              </button>
-            ))}
-          </div>
+          <p className="font-utility text-[10px] tracking-[0.3em] text-foreground/40 mb-3">MOST LOVED</p>
+          <h2 className="font-display text-3xl sm:text-4xl tracking-tighter">Bestsellers</h2>
         </motion.div>
 
-        {/* Product carousel */}
-        <div
-          ref={scrollRef}
-          className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 snap-x snap-mandatory"
-        >
+        {/* Category tabs — editorial style */}
+        <div className="flex justify-center gap-6 mb-12 overflow-x-auto scrollbar-hide">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`font-utility text-[10px] tracking-[0.15em] whitespace-nowrap pb-2 border-b transition-all duration-500 ${
+                activeTab === tab.id
+                  ? 'text-foreground border-foreground'
+                  : 'text-foreground/30 border-transparent hover:text-foreground/60'
+              }`}
+            >
+              {tab.name.toUpperCase()}
+            </button>
+          ))}
+        </div>
+
+        {/* Product grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 lg:gap-6">
           {displayProducts.map((product, i) => (
             <motion.div
               key={product.id}
@@ -89,7 +64,6 @@ export const BestSellers = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.05 }}
-              className="flex-shrink-0 w-[210px] sm:w-[230px] lg:w-[250px] snap-start"
             >
               <ProductCard product={product} />
             </motion.div>
@@ -100,13 +74,14 @@ export const BestSellers = () => {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="text-center mt-6"
+          className="text-center mt-12"
         >
           <Link
             to="/products"
-            className="group inline-flex items-center gap-2 text-sm font-semibold text-primary hover:gap-3 transition-all"
+            className="group inline-flex items-center gap-3 font-utility text-[10px] tracking-[0.2em] text-foreground border-b border-foreground/20 pb-1 hover:border-foreground transition-colors duration-500"
           >
-            View All Products <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            VIEW ALL PRODUCTS
+            <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform duration-500" strokeWidth={1.5} />
           </Link>
         </motion.div>
       </div>

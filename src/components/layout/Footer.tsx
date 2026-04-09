@@ -1,13 +1,15 @@
 import { Link } from 'react-router-dom';
-import { Mail, MapPin, Phone, Instagram, Facebook, Twitter, Youtube, Cpu, ArrowRight } from 'lucide-react';
+import { Mail, MapPin, Phone, Instagram, Facebook, Twitter, Youtube, ArrowRight } from 'lucide-react';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 const footerLinks = {
-  shop: [
-    { label: 'Smartphones', href: '/products?category=smartphones' },
-    { label: 'Laptops', href: '/products?category=laptops' },
-    { label: 'Tablets', href: '/products?category=tablets' },
-    { label: 'All Products', href: '/products' },
+  collection: [
+    { label: 'Single-Origin Oils', href: '/products?category=single-origin-oils' },
+    { label: 'Artisan Vinegars', href: '/products?category=artisan-vinegars' },
+    { label: 'Heritage Spices', href: '/products?category=heritage-spices' },
+    { label: 'Wild Honey', href: '/products?category=wild-honey' },
+    { label: 'Rare Teas', href: '/products?category=rare-teas' },
+    { label: 'Cured Salts', href: '/products?category=cured-salts' },
   ],
   support: [
     { label: 'Track Order', href: '/track-order' },
@@ -22,16 +24,6 @@ const footerLinks = {
   ],
 };
 
-const paymentLogos = [
-  { name: 'Visa', src: '/logos/visa.svg' },
-  { name: 'Mastercard', src: '/logos/mastercard.svg' },
-  { name: 'UPI', src: '/logos/upi.svg' },
-  { name: 'RuPay', src: '/logos/rupay.png' },
-  { name: 'Google Pay', src: '/logos/gpay.svg' },
-  { name: 'PhonePe', src: '/logos/phonepe.svg' },
-  { name: 'Paytm', src: '/logos/paytm.svg' },
-];
-
 const socialIcons = [
   { key: 'social_instagram', icon: Instagram, label: 'Instagram' },
   { key: 'social_facebook', icon: Facebook, label: 'Facebook' },
@@ -42,104 +34,91 @@ const socialIcons = [
 export const Footer = () => {
   const { data: s = {} } = useSiteSettings();
 
-  const email = s.contact_email || 'hello@ekamtech.com';
+  const email = s.contact_email || 'hello@terroirandco.com';
   const phone = s.contact_phone || '+91 98765 43210';
   const location = s.contact_location || 'India';
 
   const activeSocials = socialIcons.filter((si) => s[si.key]?.trim());
 
   return (
-    <footer className="relative overflow-hidden">
-      {/* Gradient top border */}
-      <div className="h-1 bg-gradient-to-r from-primary via-accent to-primary" />
-      
-      <div className="bg-foreground text-white">
-        {/* Glow effects */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
-        
-        <div className="container mx-auto px-4 py-12 lg:py-16 relative">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10">
-            {/* Brand */}
-            <div className="lg:col-span-2">
-              <div className="mb-4 flex items-center gap-2.5">
-                <div className="bg-gradient-to-br from-primary to-accent rounded-xl p-2">
-                  <Cpu className="h-5 w-5 text-white" />
-                </div>
-                <span className="font-display text-xl font-bold tracking-tight">
-                  Ekam<span className="text-primary">Tech</span>
-                </span>
+    <footer className="border-t border-foreground/8">
+      <div className="container mx-auto px-4 py-16 lg:py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
+          {/* Brand column */}
+          <div className="lg:col-span-4">
+            <h2 className="font-display text-2xl tracking-tighter mb-4">
+              Terroir <span className="font-display-italic font-normal">&</span> Co.
+            </h2>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-8 max-w-xs">
+              Curating the world's finest artisan ingredients — single-origin oils, aged vinegars, heritage spices, and rare teas — for discerning palates.
+            </p>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <div className="flex items-center gap-3">
+                <Mail className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                <span>{email}</span>
               </div>
-              <p className="text-white/35 text-sm leading-relaxed mb-5 max-w-xs">
-                Your destination for genuine electronics. Smartphones, laptops, and tablets from top brands at best prices.
-              </p>
-              <div className="space-y-2.5 text-sm text-white/35">
-                <div className="flex items-center gap-2.5 hover:text-primary transition-colors">
-                  <Mail className="h-4 w-4 shrink-0" />
-                  <span>{email}</span>
-                </div>
-                <div className="flex items-center gap-2.5 hover:text-primary transition-colors">
-                  <Phone className="h-4 w-4 shrink-0" />
-                  <span>{phone}</span>
-                </div>
-                <div className="flex items-center gap-2.5 hover:text-primary transition-colors">
-                  <MapPin className="h-4 w-4 shrink-0" />
-                  <span>{location}</span>
-                </div>
+              <div className="flex items-center gap-3">
+                <Phone className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                <span>{phone}</span>
               </div>
-              {activeSocials.length > 0 && (
-                <div className="flex items-center gap-2.5 mt-5">
-                  {activeSocials.map((si) => (
-                    <a
-                      key={si.key}
-                      href={s[si.key]}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2.5 border border-white/10 rounded-xl hover:border-primary hover:text-primary hover:bg-primary/5 transition-all"
-                      aria-label={si.label}
-                    >
-                      <si.icon className="h-4 w-4" />
-                    </a>
-                  ))}
-                </div>
-              )}
+              <div className="flex items-center gap-3">
+                <MapPin className="h-3.5 w-3.5 shrink-0" strokeWidth={1.5} />
+                <span>{location}</span>
+              </div>
             </div>
-
-            {[
-              { title: 'Shop', links: footerLinks.shop },
-              { title: 'Support', links: footerLinks.support },
-              { title: 'Company', links: footerLinks.company },
-            ].map((section) => (
-              <div key={section.title}>
-                <h4 className="font-semibold mb-5 text-[11px] uppercase tracking-[3px] text-white/40">{section.title}</h4>
-                <nav className="space-y-3">
-                  {section.links.map((link) => (
-                    <Link key={link.label} to={link.href} className="group flex items-center gap-1.5 text-sm text-white/30 hover:text-primary transition-colors">
-                      <ArrowRight className="h-3 w-3 opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all" />
-                      {link.label}
-                    </Link>
-                  ))}
-                </nav>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="border-t border-white/5">
-          <div className="container mx-auto px-4 py-5">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <p className="text-xs text-white/20">
-                &copy; {new Date().getFullYear()} EkamTech. All rights reserved.
-              </p>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] text-white/15 uppercase tracking-wider mr-2">We Accept</span>
-                {paymentLogos.map((logo) => (
-                  <div key={logo.name} className="h-6 px-2 py-1 bg-white/5 border border-white/5 rounded-md flex items-center justify-center">
-                    <img src={logo.src} alt={logo.name} className="h-3.5 w-auto object-contain brightness-0 invert opacity-50" loading="lazy" />
-                  </div>
+            {activeSocials.length > 0 && (
+              <div className="flex items-center gap-3 mt-8">
+                {activeSocials.map((si) => (
+                  <a
+                    key={si.key}
+                    href={s[si.key]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={si.label}
+                  >
+                    <si.icon className="h-4 w-4" strokeWidth={1.5} />
+                  </a>
                 ))}
               </div>
+            )}
+          </div>
+
+          {/* Link columns */}
+          {[
+            { title: 'COLLECTION', links: footerLinks.collection },
+            { title: 'SUPPORT', links: footerLinks.support },
+            { title: 'COMPANY', links: footerLinks.company },
+          ].map((section) => (
+            <div key={section.title} className="lg:col-span-2 lg:first:col-span-3">
+              <h4 className="font-utility text-[10px] tracking-[0.25em] text-foreground/40 mb-6">{section.title}</h4>
+              <nav className="space-y-3">
+                {section.links.map((link) => (
+                  <Link
+                    key={link.label}
+                    to={link.href}
+                    className="group flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <ArrowRight className="h-3 w-3 opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" strokeWidth={1.5} />
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
             </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom bar */}
+      <div className="border-t border-foreground/5">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="font-utility text-[9px] text-foreground/25 tracking-[0.2em]">
+              &copy; {new Date().getFullYear()} TERROIR & CO. ALL RIGHTS RESERVED.
+            </p>
+            <p className="font-utility text-[9px] text-foreground/15 tracking-[0.15em]">
+              CURATED WITH OBSESSION
+            </p>
           </div>
         </div>
       </div>

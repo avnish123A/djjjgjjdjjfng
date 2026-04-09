@@ -1,42 +1,55 @@
+## Plan: Editorial Gastronomy E-commerce Transformation
 
+### Phase 1: Design System Overhaul
+- **Color Palette**: Oatmeal canvas (`#F5F2EB`), Vantablack ink (`#0A0A0A`), Truffle accent (`#6B5E4C`), Oxblood hover (`#4A1515`)
+- **Typography**: Playfair Display (serif, tight tracking) for heroes + GT-style italics for whisper subheads; Inter ALL CAPS wide-tracked for utility/buttons
+- Update `index.css` and `tailwind.config.ts`
 
-## Security Fix: Payment Gateway Secrets Exposure
+### Phase 2: Database — Clear & Rebuild
+- Delete all electronics products, categories, hero_slides
+- Insert new gourmet categories: **Single-Origin Oils**, **Artisan Vinegars**, **Heritage Spices**, **Wild Honey**, **Rare Teas**, **Cured Salts**
+- Insert ~30 luxury food products with origin coordinates, harvest year, tasting notes in descriptions
+- Update site_settings for new brand name (e.g., "Terroir & Co." or keep EkamTech rebranded)
 
-### The Issue
-There is one error-level security finding: **Payment gateway secrets (API keys, webhook secrets) are directly readable by admin users via client-side queries** to the `payment_settings` table. This means `key_secret`, `webhook_secret`, and `key_id` values are visible in browser memory, dev tools, and network traffic.
+### Phase 3: Component Redesign
 
-### Approach: Edge Function Proxy
+**Header**: Minimal editorial — logo left, sparse nav, no search bar prominence. Parchment bg, serif wordmark.
 
-Create an edge function `admin-payment-settings` that:
-1. **GET**: Returns payment settings with secrets masked (only boolean flags like `has_key_secret: true`)
-2. **PUT**: Accepts updates (including new secret values) and writes them server-side
+**HeroCarousel**: Full-bleed editorial imagery, overlapping serif text, asymmetric layout. Slow transitions.
 
-Then update `AdminPayments.tsx` to use the edge function instead of direct Supabase queries.
+**CategoryGrid**: Replace circular icons with full-width editorial category cards with overlapping text.
 
-### Changes
+**ProductCard**: "Museum artifact" style — origin coordinates, harvest year, tasting notes, elegant hover scale (3-5% over 1.5s).
 
-**1. New edge function: `supabase/functions/admin-payment-settings/index.ts`**
-- Verifies the caller is an authenticated admin (via `has_role` RPC)
-- GET: Fetches payment settings, strips `key_id`, `key_secret`, `webhook_secret`, returns `has_key_id`, `has_key_secret`, `has_webhook_secret` booleans instead
-- PUT: Accepts gateway ID + changes, updates the `payment_settings` table using service role
+**New: Kinetic Marquee**: Infinite looping text band ("100% TRACEABLE — SINGLE ESTATE — COLD PRESSED").
 
-**2. Update `supabase/config.toml`**
-- Add `[functions.admin-payment-settings]` with `verify_jwt = false` (auth handled inside the function)
+**BestSellers / FeaturedProducts**: Magazine asymmetric grid layout with sticky narrative panels.
 
-**3. Update `src/pages/admin/AdminPayments.tsx`**
-- Change `fetchGateways` to call the edge function GET endpoint instead of direct Supabase query
-- Change `handleSave` and `handleToggleEnabled` to call the edge function PUT endpoint
-- Update the `GatewayConfig` interface: secret fields become optional (only present when admin types new values), add `has_key_id`, `has_key_secret`, `has_webhook_secret` booleans
-- Input fields for secrets show placeholder "••••••••" when `has_key_secret` is true but no edit value; only send secret fields in updates when the admin actually changes them
-- Validation logic updated to check `has_key_id`/`has_key_secret` booleans instead of actual secret values
+**TrustSection**: Refined with editorial trust language.
 
-**4. Remove the admin SELECT RLS policy on `payment_settings`**
-- Drop the "Admins can read payment settings" SELECT policy since admins should only access settings through the edge function
-- Keep INSERT, UPDATE, DELETE policies for direct admin operations that don't expose secrets
+**Footer**: Minimal, editorial. Serif headings, wide-tracked links.
 
-### Technical Details
-- The edge function uses `SUPABASE_SERVICE_ROLE_KEY` to bypass RLS
-- Auth verification done by extracting the JWT from the Authorization header and calling `has_role`
-- Secrets are never returned to the client; only status indicators
-- When saving, if a secret field is empty/unchanged, it's omitted from the update to avoid overwriting existing secrets with empty strings
+**BankOffersStrip → Remove** (not relevant to gastronomy)
 
+### Phase 4: Micro-interactions
+- Image hover: scale 1.03-1.05 over 1.5s ease
+- Button hover: color inversion with line-draw effect
+- Hardware-accelerated animations only (transform, opacity)
+- Lazy loading with blur placeholders
+
+### Phase 5: Brand Identity
+- New brand name decision needed
+- Update all text references
+
+### Files Changed
+- `src/index.css` — full palette + utilities
+- `tailwind.config.ts` — typography + colors
+- All homepage components
+- `Header.tsx`, `Footer.tsx`, `MobileMenu.tsx`
+- `ProductCard.tsx`
+- New `Marquee.tsx` component
+- Database: categories, products, hero_slides, site_settings
+- `src/data/products.ts`, `src/data/categories.ts`
+
+### No Changes
+- Checkout flow, cart logic, admin panel, payment integrations

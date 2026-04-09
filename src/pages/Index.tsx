@@ -1,4 +1,5 @@
 import { HeroCarousel } from '@/components/home/HeroCarousel';
+import { Marquee } from '@/components/home/Marquee';
 import { CategoryGrid } from '@/components/home/CategoryGrid';
 import { FeaturedProducts } from '@/components/home/FeaturedProducts';
 import { PromoBanners } from '@/components/home/PromoBanners';
@@ -8,21 +9,20 @@ import { TrustSection } from '@/components/home/TrustSection';
 import { NewsletterSignup } from '@/components/home/NewsletterSignup';
 import { Testimonials } from '@/components/home/Testimonials';
 import { FAQSection } from '@/components/home/FAQSection';
-import { BankOffersStrip } from '@/components/home/BankOffersStrip';
 
 const Index = () => {
   return (
     <main>
       <HeroCarousel />
-      <BankOffersStrip />
+      <Marquee />
       <CategoryGrid />
       <FeaturedProducts />
       <PromoBanners />
       <FlashDeals />
       <BestSellers />
       <TrustSection />
-      <FAQSection />
       <Testimonials />
+      <FAQSection />
       <NewsletterSignup />
     </main>
   );
