@@ -28,21 +28,24 @@ Deno.serve(async (req) => {
 
     if (!config?.webhook_secret) {
       console.error('Razorpay webhook secret not configured')
-      return new Response('OK', { status: 200 })
+      return new Response('Unauthorized', { status: 401 })
     }
 
-    // Verify signature
-    if (signature) {
-      const encoder = new TextEncoder()
-      const key = await crypto.subtle.importKey(
-        'raw', encoder.encode(config.webhook_secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-      )
-      const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(rawBody))
-      const expectedSig = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('')
-      if (expectedSig !== signature) {
-        console.error('Invalid Razorpay webhook signature')
-        return new Response('Invalid signature', { status: 400 })
-      }
+    // Signature is REQUIRED — reject unsigned requests
+    if (!signature) {
+      console.error('Missing Razorpay webhook signature header')
+      return new Response('Unauthorized', { status: 401 })
+    }
+
+    const encoder = new TextEncoder()
+    const key = await crypto.subtle.importKey(
+      'raw', encoder.encode(config.webhook_secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+    )
+    const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(rawBody))
+    const expectedSig = Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('')
+    if (expectedSig !== signature) {
+      console.error('Invalid Razorpay webhook signature')
+      return new Response('Invalid signature', { status: 401 })
     }
 
     const event = JSON.parse(rawBody)

@@ -27,31 +27,34 @@ Deno.serve(async (req) => {
       .eq('gateway_name', 'cashfree')
       .single()
 
-    // Verify Cashfree webhook signature using HMAC-SHA256
-    if (signature && config?.webhook_secret) {
-      try {
-        const encoder = new TextEncoder()
-        const key = await crypto.subtle.importKey(
-          'raw',
-          encoder.encode(config.webhook_secret),
-          { name: 'HMAC', hash: 'SHA-256' },
-          false,
-          ['sign']
-        )
-        const payload = timestamp + rawBody
-        const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(payload))
-        const expectedSig = Array.from(new Uint8Array(sig))
-          .map(b => b.toString(16).padStart(2, '0'))
-          .join('')
-        if (expectedSig !== signature) {
-          console.error('Cashfree webhook signature mismatch')
-          return new Response('Invalid signature', { status: 401, headers: corsHeaders })
-        }
-        console.log('Cashfree webhook signature verified')
-      } catch (sigError) {
-        console.error('Signature verification error:', sigError)
-        // Fall through to API verification below
+    // Signature is REQUIRED — reject unsigned requests
+    if (!signature || !timestamp || !config?.webhook_secret) {
+      console.error('Missing Cashfree webhook signature, timestamp, or secret')
+      return new Response('Unauthorized', { status: 401, headers: corsHeaders })
+    }
+
+    try {
+      const encoder = new TextEncoder()
+      const key = await crypto.subtle.importKey(
+        'raw',
+        encoder.encode(config.webhook_secret),
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign']
+      )
+      const payload = timestamp + rawBody
+      const sig = await crypto.subtle.sign('HMAC', key, encoder.encode(payload))
+      const expectedSig = Array.from(new Uint8Array(sig))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('')
+      if (expectedSig !== signature) {
+        console.error('Cashfree webhook signature mismatch')
+        return new Response('Invalid signature', { status: 401, headers: corsHeaders })
       }
+      console.log('Cashfree webhook signature verified')
+    } catch (sigError) {
+      console.error('Signature verification error:', sigError)
+      return new Response('Invalid signature', { status: 401, headers: corsHeaders })
     }
 
     const event = JSON.parse(rawBody)
