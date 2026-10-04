@@ -89,7 +89,7 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        truffle: "hsl(30 11% 37%)",
+        gold: "hsl(var(--accent))",
         oxblood: "hsl(0 50% 17%)",
         parchment: "hsl(36 33% 95%)",
         ink: "hsl(0 0% 4%)",

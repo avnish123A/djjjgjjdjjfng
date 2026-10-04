@@ -6,27 +6,28 @@
 
 @layer base {
   :root {
-    /* CartZebra — Editorial Gastronomy */
-    --background: 36 33% 95%;               /* #F5F2EB Oatmeal/Parchment */
-    --foreground: 0 0% 4%;                   /* #0A0A0A Vantablack */
-    --card: 36 33% 97%;
-    --card-foreground: 0 0% 4%;
-    --popover: 36 33% 97%;
-    --popover-foreground: 0 0% 4%;
-    --primary: 30 11% 37%;                   /* #6B5E4C Truffle */
-    --primary-foreground: 36 33% 95%;
-    --secondary: 36 20% 90%;
-    --secondary-foreground: 0 0% 4%;
-    --muted: 36 15% 88%;
-    --muted-foreground: 30 8% 45%;
-    --accent: 0 50% 17%;                     /* #4A1515 Oxblood */
-    --accent-foreground: 36 33% 95%;
-    --destructive: 0 50% 17%;
-    --destructive-foreground: 36 33% 95%;
-    --border: 36 15% 85%;
-    --input: 36 15% 85%;
+    /* CartZebra */
+    --background: 60 9% 98%;
+    --foreground: 0 0% 8%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 8%;
+    --primary: 240 5% 4%;
+    --primary-foreground: 60 9% 98%;
+    --secondary: 60 6% 95%;
+    --secondary-foreground: 0 0% 8%;
+    --muted: 60 6% 95%;
+    --muted-foreground: 60 2% 41%;
+    --accent: 46 68% 47%;
+    --accent-foreground: 240 5% 4%;
+    --gold-muted: 44 56% 42%;
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 43 13% 89%;
+    --input: 43 13% 89%;
     --ring: 46 68% 47%;
-    --radius: 0.25rem;
+    --radius: 0.75rem;
 
     /* Functional */
     --success: 142 40% 35%;
