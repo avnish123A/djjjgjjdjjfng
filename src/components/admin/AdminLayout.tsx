@@ -6,6 +6,7 @@ import {
   Search, ExternalLink, PlusCircle, Power,
 } from 'lucide-react';
 import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useSiteMode } from '@/contexts/SiteModeContext';
 import { useInactivityLogout } from '@/hooks/useInactivityLogout';
 import { cn } from '@/lib/utils';
@@ -247,7 +248,9 @@ const AdminLayout: React.FC = () => {
         </header>
 
         <main className="flex-1 overflow-y-auto p-4 lg:p-8">
-          <div key={location.pathname} className="animate-fade-in"><Outlet /></div>
+          <ErrorBoundary variant="page" admin resetKey={location.pathname}>
+            <div key={location.pathname} className="animate-fade-in"><Outlet /></div>
+          </ErrorBoundary>
         </main>
       </div>
 
