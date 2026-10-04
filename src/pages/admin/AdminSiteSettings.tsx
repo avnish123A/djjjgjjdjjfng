@@ -322,6 +322,11 @@ const AdminSiteSettings: React.FC = () => {
               <Label className="text-xs font-medium">Message</Label>
               <Textarea value={formValues['maintenance_message'] || ''} onChange={(e) => updateField('maintenance_message', e.target.value)} placeholder="We're making improvements..." rows={3} />
             </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Back online around (optional)</Label>
+              <Input value={formValues['maintenance_return_time'] || ''} onChange={(e) => updateField('maintenance_return_time', e.target.value)} placeholder="e.g. 3:30 PM" />
+              <p className="text-xs text-muted-foreground">Leave empty to hide the return time.</p>
+            </div>
 
             <div className="border-t border-border pt-6">
               <h2 className="font-semibold flex items-center gap-2"><Rocket className="h-4 w-4 text-primary" /> Coming Soon Page</h2>
