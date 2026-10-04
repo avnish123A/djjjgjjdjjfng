@@ -16,27 +16,48 @@ export type Database = {
     Tables: {
       categories: {
         Row: {
+          archived_at: string | null
           created_at: string
+          description: string | null
           id: string
           image: string | null
           is_active: boolean
+          is_featured: boolean
           name: string
+          seo_description: string | null
+          seo_title: string | null
+          slug: string | null
+          sort_order: number
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           image?: string | null
           is_active?: boolean
+          is_featured?: boolean
           name: string
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string | null
+          sort_order?: number
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           image?: string | null
           is_active?: boolean
+          is_featured?: boolean
           name?: string
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string | null
+          sort_order?: number
           updated_at?: string
         }
         Relationships: []
@@ -157,6 +178,7 @@ export type Database = {
       }
       hero_slides: {
         Row: {
+          archived_at: string | null
           created_at: string
           cta_primary_link: string | null
           cta_primary_text: string | null
@@ -164,6 +186,7 @@ export type Database = {
           cta_secondary_text: string | null
           description: string | null
           id: string
+          image_alt: string | null
           image_url: string | null
           is_active: boolean
           sort_order: number
@@ -172,6 +195,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
           created_at?: string
           cta_primary_link?: string | null
           cta_primary_text?: string | null
@@ -179,6 +203,7 @@ export type Database = {
           cta_secondary_text?: string | null
           description?: string | null
           id?: string
+          image_alt?: string | null
           image_url?: string | null
           is_active?: boolean
           sort_order?: number
@@ -187,6 +212,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
           created_at?: string
           cta_primary_link?: string | null
           cta_primary_text?: string | null
@@ -194,6 +220,7 @@ export type Database = {
           cta_secondary_text?: string | null
           description?: string | null
           id?: string
+          image_alt?: string | null
           image_url?: string | null
           is_active?: boolean
           sort_order?: number
@@ -528,66 +555,90 @@ export type Database = {
       }
       products: {
         Row: {
+          archived_at: string | null
           badge: string | null
           brand: string | null
           category_id: string | null
           colors: string[] | null
           created_at: string
           description: string | null
+          features: Json
           id: string
           images: string[] | null
           is_active: boolean
+          is_featured: boolean
           low_stock_threshold: number
           original_price: number | null
           price: number
           product_type: string
           rating: number | null
           review_count: number | null
+          seo_description: string | null
+          seo_title: string | null
           sizes: string[] | null
+          slug: string | null
+          sort_order: number
+          specifications: Json
           stock: number
           title: string
           track_inventory: boolean
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
           badge?: string | null
           brand?: string | null
           category_id?: string | null
           colors?: string[] | null
           created_at?: string
           description?: string | null
+          features?: Json
           id?: string
           images?: string[] | null
           is_active?: boolean
+          is_featured?: boolean
           low_stock_threshold?: number
           original_price?: number | null
           price?: number
           product_type?: string
           rating?: number | null
           review_count?: number | null
+          seo_description?: string | null
+          seo_title?: string | null
           sizes?: string[] | null
+          slug?: string | null
+          sort_order?: number
+          specifications?: Json
           stock?: number
           title: string
           track_inventory?: boolean
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
           badge?: string | null
           brand?: string | null
           category_id?: string | null
           colors?: string[] | null
           created_at?: string
           description?: string | null
+          features?: Json
           id?: string
           images?: string[] | null
           is_active?: boolean
+          is_featured?: boolean
           low_stock_threshold?: number
           original_price?: number | null
           price?: number
           product_type?: string
           rating?: number | null
           review_count?: number | null
+          seo_description?: string | null
+          seo_title?: string | null
           sizes?: string[] | null
+          slug?: string | null
+          sort_order?: number
+          specifications?: Json
           stock?: number
           title?: string
           track_inventory?: boolean
@@ -602,6 +653,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      promo_banners: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          eyebrow: string
+          id: string
+          image_alt: string
+          image_url: string
+          is_active: boolean
+          link: string
+          sort_order: number
+          subtitle: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          eyebrow?: string
+          id?: string
+          image_alt?: string
+          image_url?: string
+          is_active?: boolean
+          link?: string
+          sort_order?: number
+          subtitle?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          eyebrow?: string
+          id?: string
+          image_alt?: string
+          image_url?: string
+          is_active?: boolean
+          link?: string
+          sort_order?: number
+          subtitle?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       site_pages: {
         Row: {

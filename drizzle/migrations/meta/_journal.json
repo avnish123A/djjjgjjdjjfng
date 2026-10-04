@@ -15,6 +15,13 @@
       "when": 1791095964217,
       "tag": "0001_payment_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791097551609,
+      "tag": "0002_catalog_merchandising_foundation",
+      "breakpoints": true
     }
   ]
 }
