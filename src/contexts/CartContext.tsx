@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface CartItem {
   id: string;
@@ -29,20 +30,46 @@ interface CartContextType {
   discountAmount: number;
   applyCoupon: (coupon: AppliedCoupon) => void;
   removeCoupon: () => void;
+  /** Re-checks prices/stock against the store. Returns a message if anything changed. */
+  refreshCart: () => Promise<string | null>;
 }
 
+const STORAGE_KEY = 'cz_cart_v1';
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function loadCart(): CartItem[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    // Only keep well-formed entries; prices are re-verified before checkout
+    return parsed.filter(
+      (i: any) => i && typeof i.id === 'string' && typeof i.name === 'string' &&
+        typeof i.price === 'number' && i.price >= 0 &&
+        Number.isInteger(i.quantity) && i.quantity > 0 && i.quantity <= 99
+    ).slice(0, 50);
+  } catch {
+    return [];
+  }
+}
+
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [items, setItems] = useState<CartItem[]>([]);
+  const [items, setItems] = useState<CartItem[]>(loadCart);
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+
+  useEffect(() => {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch { /* storage full/blocked */ }
+  }, [items]);
 
   const addItem = useCallback((item: Omit<CartItem, 'quantity'>) => {
     setItems(prev => {
       const itemKey = item.variantKey || item.id;
       const existing = prev.find(i => (i.variantKey || i.id) === itemKey);
       if (existing) {
-        return prev.map(i => (i.variantKey || i.id) === itemKey ? { ...i, quantity: i.quantity + 1 } : i);
+        return prev.map(i => (i.variantKey || i.id) === itemKey ? { ...i, quantity: Math.min(99, i.quantity + 1) } : i);
       }
       return [...prev, { ...item, quantity: 1 }];
     });
@@ -56,7 +83,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (quantity <= 0) {
       setItems(prev => prev.filter(i => (i.variantKey || i.id) !== id));
     } else {
-      setItems(prev => prev.map(i => (i.variantKey || i.id) === id ? { ...i, quantity } : i));
+      setItems(prev => prev.map(i => (i.variantKey || i.id) === id ? { ...i, quantity: Math.min(99, quantity) } : i));
     }
   }, []);
 
@@ -64,6 +91,37 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setItems([]);
     setAppliedCoupon(null);
   }, []);
+
+  const refreshCart = useCallback(async (): Promise<string | null> => {
+    const current = items;
+    const ids = [...new Set(current.map(i => i.id).filter(id => UUID_RE.test(id)))];
+    if (current.length === 0) return null;
+    const { data, error } = ids.length
+      ? await supabase.from('products').select('id, price, stock, is_active, track_inventory').in('id', ids)
+      : { data: [], error: null };
+    if (error) return null; // network issue: server still re-validates at order time
+    const map = new Map((data || []).map(p => [p.id, p]));
+    let changed = false;
+    const next: CartItem[] = [];
+    for (const item of current) {
+      const p = map.get(item.id);
+      if (!p || !p.is_active) { changed = true; continue; }
+      let qty = item.quantity;
+      if (p.track_inventory !== false) {
+        if (p.stock <= 0) { changed = true; continue; }
+        if (qty > p.stock) { qty = p.stock; changed = true; }
+      }
+      // Base price changes only apply to items without variant modifiers
+      let price = item.price;
+      if (!item.variantKey && Math.abs(Number(p.price) - item.price) > 0.01) {
+        price = Number(p.price); changed = true;
+      }
+      next.push({ ...item, quantity: qty, price });
+    }
+    if (!changed) return null;
+    setItems(next);
+    return 'Your cart was updated because product availability or pricing changed.';
+  }, [items]);
 
   const totalItems = items.reduce((sum, i) => sum + i.quantity, 0);
   const totalPrice = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
@@ -84,7 +142,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <CartContext.Provider value={{
       items, addItem, removeItem, updateQuantity, clearCart,
       totalItems, totalPrice,
-      appliedCoupon, discountAmount, applyCoupon, removeCoupon,
+      appliedCoupon, discountAmount, applyCoupon, removeCoupon, refreshCart,
     }}>
       {children}
     </CartContext.Provider>
