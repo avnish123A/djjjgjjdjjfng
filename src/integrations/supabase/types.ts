@@ -256,6 +256,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          checkout_token: string | null
           cod_extra_charge: number
           courier_name: string | null
           created_at: string
@@ -274,12 +275,14 @@ export type Database = {
           payment_status: string
           shipping: number
           shipping_address: Json
+          stock_released: boolean
           subtotal: number
           total: number
           tracking_number: string | null
           updated_at: string
         }
         Insert: {
+          checkout_token?: string | null
           cod_extra_charge?: number
           courier_name?: string | null
           created_at?: string
@@ -298,12 +301,14 @@ export type Database = {
           payment_status?: string
           shipping?: number
           shipping_address?: Json
+          stock_released?: boolean
           subtotal?: number
           total?: number
           tracking_number?: string | null
           updated_at?: string
         }
         Update: {
+          checkout_token?: string | null
           cod_extra_charge?: number
           courier_name?: string | null
           created_at?: string
@@ -322,6 +327,7 @@ export type Database = {
           payment_status?: string
           shipping?: number
           shipping_address?: Json
+          stock_released?: boolean
           subtotal?: number
           total?: number
           tracking_number?: string | null
@@ -688,6 +694,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      release_order_stock: { Args: { p_order_id: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user"

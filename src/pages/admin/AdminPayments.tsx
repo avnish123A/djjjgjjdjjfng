@@ -523,6 +523,11 @@ const AdminPayments: React.FC = () => {
                 <div>
                   <label className="block text-sm font-medium mb-1.5 flex items-center gap-1.5">
                     <Webhook className="h-3.5 w-3.5" /> Webhook Secret
+                    {!gw.has_webhook_secret && (
+                      <span className="ml-2 rounded-full border border-destructive/40 bg-destructive/10 px-2 py-0.5 text-[10px] font-bold text-destructive">
+                        Webhook NOT CONFIGURED
+                      </span>
+                    )}
                   </label>
                   <div className="relative">
                     <input

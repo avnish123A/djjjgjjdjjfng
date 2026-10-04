@@ -199,32 +199,42 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Server-side COD charge verification
-    let validatedCodCharge = 0
-    if (paymentMethod === 'cod' && codExtraCharge > 0) {
-      const { data: codConfig } = await supabase
-        .from('payment_settings')
-        .select('cod_extra_charge, cod_min_order, is_enabled')
-        .eq('gateway_name', 'cod')
-        .eq('is_enabled', true)
-        .maybeSingle()
+    // The chosen payment method must be enabled server-side (COD needs no credentials)
+    const { data: methodConfig } = await supabase
+      .from('payment_settings')
+      .select('cod_extra_charge, cod_min_order, is_enabled')
+      .eq('gateway_name', paymentMethod)
+      .eq('is_enabled', true)
+      .maybeSingle()
+    if (!methodConfig) {
+      return new Response(
+        JSON.stringify({ error: 'This payment method is currently unavailable. Please choose another.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
-      if (codConfig) {
-        validatedCodCharge = Number(codConfig.cod_extra_charge) || 0
-        if (Math.abs(validatedCodCharge - codExtraCharge) > 0.01) {
-          return new Response(
-            JSON.stringify({ error: 'COD charge mismatch. Please refresh and try again.' }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
-        }
-        const codMinOrder = Number(codConfig.cod_min_order) || 0
-        if (codMinOrder > 0 && subtotal < codMinOrder) {
-          return new Response(
-            JSON.stringify({ error: `Minimum order of ₹${codMinOrder} required for COD` }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
-        }
+    // Server-side COD fee + minimum (authoritative)
+    let validatedCodCharge = 0
+    if (paymentMethod === 'cod') {
+      validatedCodCharge = Number(methodConfig.cod_extra_charge) || 0
+      if (Math.abs(validatedCodCharge - codExtraCharge) > 0.01) {
+        return new Response(
+          JSON.stringify({ error: 'COD charge mismatch. Please refresh and try again.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
       }
+      const codMinOrder = Number(methodConfig.cod_min_order) || 0
+      if (codMinOrder > 0 && subtotal < codMinOrder) {
+        return new Response(
+          JSON.stringify({ error: `Minimum order of ₹${codMinOrder} required for COD` }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+    } else if (codExtraCharge > 0) {
+      return new Response(
+        JSON.stringify({ error: 'COD charge applied to an online payment. Please refresh and try again.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     // Verify total calculation server-side
@@ -362,7 +372,7 @@ Deno.serve(async (req) => {
         cod_extra_charge: validatedCodCharge,
         idempotency_key: idempotencyKey || null,
       })
-      .select('id')
+      .select('id, checkout_token')
       .single()
 
     if (orderError) {
@@ -419,6 +429,7 @@ Deno.serve(async (req) => {
         success: true,
         orderId: order.id,
         orderNumber: serverOrderNumber,
+        checkoutToken: order.checkout_token,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
