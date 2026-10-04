@@ -5,6 +5,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useCategories } from '@/hooks/useCategories';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { MobileMenu } from './MobileMenu';
+import { Logo } from '@/components/brand/Logo';
 import { AnimatePresence, motion } from 'framer-motion';
 
 export const Header = () => {
@@ -22,7 +23,7 @@ export const Header = () => {
   const { data: settings = {} } = useSiteSettings();
 
   const announcementEnabled = settings['announcement_enabled'] !== 'false';
-  const announcementText = settings['announcement_text'] || 'Complimentary shipping on orders above ₹5,000 · Use code HARVEST10 for 10% off';
+  const announcementText = settings['announcement_text'] || 'Smart shopping starts here — discover exclusive deals, trending products & more.';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -66,8 +67,8 @@ export const Header = () => {
             <div className="flex items-center h-9">
               <div className="animate-marquee flex whitespace-nowrap">
                 {[...Array(4)].map((_, i) => (
-                  <span key={i} className="font-utility text-[10px] tracking-[0.25em] mx-12 opacity-60">
-                    {announcementText.toUpperCase()}
+                  <span key={i} className="text-xs font-medium mx-12 opacity-80">
+                    {announcementText}
                   </span>
                 ))}
               </div>
@@ -90,42 +91,31 @@ export const Header = () => {
         } ${headerVisible ? 'translate-y-0' : '-translate-y-full'}`}
       >
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-20 lg:h-24">
-            {/* Left — Hamburger + Nav */}
-            <div className="flex items-center gap-8">
-              <button
-                className="lg:hidden p-2 -ml-2"
-                onClick={() => setMobileMenuOpen(true)}
-                aria-label="Open menu"
-              >
+          <div className="flex items-center justify-between h-16 lg:h-20">
+            {/* Left — Hamburger + Logo */}
+            <div className="flex items-center gap-3">
+              <button className="lg:hidden p-2 -ml-2" onClick={() => setMobileMenuOpen(true)} aria-label="Open menu">
                 <div className="space-y-1.5">
-                  <span className="block w-5 h-[1px] bg-foreground" />
-                  <span className="block w-5 h-[1px] bg-foreground" />
+                  <span className="block w-5 h-0.5 bg-foreground rounded" />
+                  <span className="block w-3.5 h-0.5 bg-foreground rounded" />
                 </div>
               </button>
-
-              <nav className="hidden lg:flex items-center gap-8">
-                <Link to="/products" className="font-utility text-[10px] text-foreground/60 hover:text-foreground btn-editorial transition-colors">
-                  SHOP
-                </Link>
-                {categories.slice(0, 4).map((cat) => (
-                  <Link
-                    key={cat.id}
-                    to={`/products?category=${cat.slug}`}
-                    className="font-utility text-[10px] text-foreground/60 hover:text-foreground btn-editorial transition-colors"
-                  >
-                    {cat.name.toUpperCase()}
-                  </Link>
-                ))}
-              </nav>
+              <Link to="/" aria-label="CartZebra home"><Logo /></Link>
             </div>
 
-            {/* Center — Logo */}
-            <Link to="/" className="absolute left-1/2 -translate-x-1/2">
-              <h1 className="font-display text-xl sm:text-2xl tracking-tighter text-foreground">
-                CartZebra
-              </h1>
-            </Link>
+            {/* Center — Nav */}
+            <nav className="hidden lg:flex items-center gap-7">
+              {[
+                { label: 'Shop', to: '/products' },
+                { label: 'Deals', to: '/products?sort=discount' },
+                { label: 'New Arrivals', to: '/products?sort=newest' },
+                ...categories.slice(0, 3).map((c) => ({ label: c.name, to: `/products?category=${c.slug}` })),
+              ].map((l) => (
+                <Link key={l.label} to={l.to} className="text-sm font-semibold text-foreground/70 hover:text-foreground btn-editorial transition-colors">
+                  {l.label}
+                </Link>
+              ))}
+            </nav>
 
             {/* Right — Icons */}
             <div className="flex items-center gap-4">
@@ -152,7 +142,7 @@ export const Header = () => {
               >
                 <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.5} />
                 {totalItems > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-foreground text-background text-[8px] font-bold h-4 w-4 flex items-center justify-center rounded-full">
+                  <span className="absolute -top-0.5 -right-0.5 bg-accent text-accent-foreground text-[9px] font-bold h-4 w-4 flex items-center justify-center rounded-full">
                     {totalItems}
                   </span>
                 )}
@@ -180,8 +170,8 @@ export const Header = () => {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search oils, vinegars, spices, teas..."
-                    className="w-full bg-transparent border-b border-foreground/20 pb-3 text-lg font-display-italic text-foreground placeholder:text-foreground/25 focus:outline-none focus:border-foreground/50 transition-colors"
+                    placeholder="Search products, brands and categories..."
+                    className="w-full bg-transparent border-b border-foreground/20 pb-3 text-lg text-foreground placeholder:text-foreground/25 focus:outline-none focus:border-foreground/50 transition-colors"
                   />
                   <button type="submit" className="absolute right-0 bottom-3">
                     <Search className="h-5 w-5 text-foreground/40" strokeWidth={1.5} />

@@ -30,7 +30,7 @@ export const FlashDeals = () => {
         >
           <p className="font-utility text-[10px] tracking-[0.3em] text-foreground/40 mb-3">LIMITED OFFERING</p>
           <h2 className="font-display text-3xl sm:text-4xl tracking-tighter">The Cellar Sale</h2>
-          <p className="font-display-italic text-sm text-muted-foreground mt-3 max-w-md mx-auto">
+          <p className="text-sm text-muted-foreground mt-3 max-w-md mx-auto">
             Select vintages and rare finds at exceptional value. Once they're gone, they're gone.
           </p>
         </motion.div>

@@ -10,20 +10,20 @@ import {
 
 const topFaqs = [
   {
-    question: 'How do you ensure freshness?',
-    answer: 'All oils and spices are shipped within weeks of harvest or pressing. Our cold chain logistics maintain optimal temperature from producer to your doorstep.',
+    question: 'Are all products on CartZebra genuine?',
+    answer: 'Yes. Every product is sourced from trusted brands and verified sellers, and checked before it is shipped to you.',
   },
   {
-    question: 'Are these products genuinely single-origin?',
-    answer: 'Yes. Every product on CartZebra comes with full traceability — including origin coordinates, harvest date, and producer information.',
+    question: 'How long does delivery take?',
+    answer: 'Most orders are delivered within 7–14 days. You can track your order any time from the Track Order page.',
   },
   {
     question: 'What is your return policy?',
-    answer: 'We offer a 14-day satisfaction guarantee. If a product doesn\'t meet your expectations, we\'ll replace it or provide a full refund.',
+    answer: 'Eligible products can be returned within 7 days of delivery. See our Return & Refund policy for details.',
   },
   {
-    question: 'Do you ship internationally?',
-    answer: 'Currently we deliver across India with complimentary shipping on orders above ₹5,000. International shipping is coming soon.',
+    question: 'Do you offer Cash on Delivery?',
+    answer: 'Yes, Cash on Delivery is available on eligible PIN codes, along with UPI, cards and net banking.',
   },
 ];
 

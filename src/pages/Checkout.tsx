@@ -385,7 +385,7 @@ const Checkout = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link to="/" className="text-xl font-extrabold tracking-tight font-display">
-              EKAM<span className="text-primary">GIFT</span>
+              CART<span className="text-accent">ZEBRA</span>
             </Link>
             <nav className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
               <Link to="/cart" className="hover:text-foreground transition-colors">Cart</Link>

@@ -23,8 +23,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "system-ui", "sans-serif"],
-        display: ["Playfair Display", "Georgia", "Times New Roman", "serif"],
+        sans: ["Plus Jakarta Sans", "Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "system-ui", "sans-serif"],
+        display: ["Plus Jakarta Sans", "Inter", "sans-serif"], serif: ["Fraunces", "Georgia", "serif"],
         body: ["Inter", "system-ui", "sans-serif"],
       },
       fontSize: {
@@ -89,7 +89,7 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        truffle: "hsl(30 11% 37%)",
+        gold: "hsl(var(--accent))",
         oxblood: "hsl(0 50% 17%)",
         parchment: "hsl(36 33% 95%)",
         ink: "hsl(0 0% 4%)",
