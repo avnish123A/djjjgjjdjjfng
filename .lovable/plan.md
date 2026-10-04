@@ -1,55 +1,56 @@
-## Plan: Editorial Gastronomy E-commerce Transformation
+# CartZebra Storefront and Catalog Refresh
 
-### Phase 1: Design System Overhaul
-- **Color Palette**: Oatmeal canvas (`#F5F2EB`), Vantablack ink (`#0A0A0A`), Truffle accent (`#6B5E4C`), Oxblood hover (`#4A1515`)
-- **Typography**: Playfair Display (serif, tight tracking) for heroes + GT-style italics for whisper subheads; Inter ALL CAPS wide-tracked for utility/buttons
-- Update `index.css` and `tailwind.config.ts`
+## Goal
+Refresh the existing CartZebra shopping experience and starter catalog without changing its brand, authentication, checkout, payments, stock controls, or order security.
 
-### Phase 2: Database — Clear & Rebuild
-- Delete all electronics products, categories, hero_slides
-- Insert new gourmet categories: **Single-Origin Oils**, **Artisan Vinegars**, **Heritage Spices**, **Wild Honey**, **Rare Teas**, **Cured Salts**
-- Insert ~30 luxury food products with origin coordinates, harvest year, tasting notes in descriptions
-- Update site_settings for new brand name (e.g., "Terroir & Co." or keep EkamTech rebranded)
+## Implementation
+1. **Audit and protect existing data**
+   - Map catalog foreign keys and inspect categories, products, orders, customers, order items, and payment records.
+   - Classify only unmistakable test/demo rows for removal or archiving; preserve every uncertain or historical customer, order, payment, and audit record.
+   - Use inactive/archive states instead of destructive deletion where records may be referenced.
 
-### Phase 3: Component Redesign
+2. **Create an admin-managed catalog foundation**
+   - Add safe, additive catalog fields where missing: stable slugs, SKU, SEO title/description, featured state, sort order, specifications/features, and archive timestamps.
+   - Extend category management with image, slug, SEO, active state, and sort order.
+   - Replace destructive catalog actions with archive/deactivate behavior where practical.
+   - Keep all product and category content editable in Admin.
 
-**Header**: Minimal editorial — logo left, sparse nav, no search bar prominence. Parchment bg, serif wordmark.
+3. **Seed a coherent starter catalog**
+   - Establish six focused categories: Accessories, Beauty, Electronics, Fashion, Gifts, and Home & Living, adjusted only if existing real products require it.
+   - Add original CartZebra product names, descriptions, prices, stock, SKUs, SEO, and licensed/generated imagery.
+   - Do not create ratings, reviews, comparison prices, discounts, or urgency unless supported by real data.
 
-**HeroCarousel**: Full-bleed editorial imagery, overlapping serif text, asymmetric layout. Slow transitions.
+4. **Refresh the storefront**
+   - Upgrade category cards and two editorial campaign banners with consistent crops, readable overlays, restrained motion, and clear Explore links.
+   - Remove stale flash-countdown, gourmet, ethnic, EkamTech, and other legacy sample language.
+   - Improve product cards with mobile Quick Add, database stock messaging, real compare-price logic, optional second-image hover, and smooth cart feedback.
+   - Make search and category URLs reliably filter live catalog data.
 
-**CategoryGrid**: Replace circular icons with full-width editorial category cards with overlapping text.
+5. **Complete product detail behavior**
+   - Refine gallery, pricing, stock, quantity, cart, Buy Now, delivery check, details, specifications, shipping/returns, related products, and mobile purchase bar.
+   - Add persistent wishlist behavior only if wishlist controls remain visible.
+   - Remove unsupported ratings, reviews, guarantees, delivery promises, and fake serviceability results.
 
-**ProductCard**: "Museum artifact" style — origin coordinates, harvest year, tasting notes, elegant hover scale (3-5% over 1.5s).
+6. **Preserve recently improved flows**
+   - Keep the one-page Contact → Delivery → Payment checkout and all payment-security logic unchanged.
+   - Retain the neutral order-tracking experience and truthful status timeline.
+   - Retain progressive Admin loading, local retries, and immediate shell rendering.
 
-**New: Kinetic Marquee**: Infinite looping text band ("100% TRACEABLE — SINGLE ESTATE — COLD PRESSED").
+7. **Authorized-source decision**
+   - Check only for a public/official Propshop24 API, export, affiliate feed, or authorized integration.
+   - If none is available, import nothing from Propshop24 and use original CartZebra content while keeping the schema import-ready.
 
-**BestSellers / FeaturedProducts**: Magazine asymmetric grid layout with sticky narrative panels.
+8. **Verification**
+   - Run typecheck and inspect the generated build status.
+   - Browser-test homepage, search/category filtering, product detail, cart, checkout, tracking, and responsive layouts.
+   - Test Admin product/category/banner editing when an authorized admin session is available.
+   - Search source and live content for prohibited legacy references and report only tests actually completed.
 
-**TrustSection**: Refined with editorial trust language.
+## Technical notes
+- Database changes will be additive migrations with explicit grants and existing RLS preserved.
+- Existing order/payment foreign keys and historical rows remain intact.
+- Images will be generated or licensed project assets; no hotlinks or copied third-party media.
+- Motion stays transform/opacity-based, approximately 150–350ms, with reduced-motion support.
 
-**Footer**: Minimal, editorial. Serif headings, wide-tracked links.
-
-**BankOffersStrip → Remove** (not relevant to gastronomy)
-
-### Phase 4: Micro-interactions
-- Image hover: scale 1.03-1.05 over 1.5s ease
-- Button hover: color inversion with line-draw effect
-- Hardware-accelerated animations only (transform, opacity)
-- Lazy loading with blur placeholders
-
-### Phase 5: Brand Identity
-- New brand name decision needed
-- Update all text references
-
-### Files Changed
-- `src/index.css` — full palette + utilities
-- `tailwind.config.ts` — typography + colors
-- All homepage components
-- `Header.tsx`, `Footer.tsx`, `MobileMenu.tsx`
-- `ProductCard.tsx`
-- New `Marquee.tsx` component
-- Database: categories, products, hero_slides, site_settings
-- `src/data/products.ts`, `src/data/categories.ts`
-
-### No Changes
-- Checkout flow, cart logic, admin panel, payment integrations
+## Assumption
+The lone ₹1 “sample” product is clearly demo data, but it will only be archived after confirming it is not referenced by historical order items. Any ambiguous row will be preserved.
