@@ -25,7 +25,7 @@ const Maintenance: React.FC = () => {
   useEffect(() => {
     const pageTitle = isComingSoon ? 'Coming Soon — CartZebra' : 'Under Maintenance — CartZebra';
     const pageDesc = isComingSoon
-      ? 'CartZebra is launching soon! Premium curated gifts for every occasion. Sign up to be notified.'
+      ? 'CartZebra is launching soon! Shop smart. Discover more. Sign up to be notified.'
       : 'CartZebra is currently under maintenance. We\'ll be back shortly with an even better experience.';
     
     document.title = pageTitle;
@@ -81,7 +81,7 @@ const Maintenance: React.FC = () => {
               >
                 <img
                   src="/logo-cartzebra.png"
-                  alt="CartZebra — Premium Curated Gifts"
+                  alt="CartZebra"
                   className="h-20 w-auto object-contain"
                   loading="eager"
                 />
