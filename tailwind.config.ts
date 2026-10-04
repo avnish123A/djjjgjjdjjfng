@@ -23,8 +23,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "system-ui", "sans-serif"],
-        display: ["Playfair Display", "Georgia", "Times New Roman", "serif"],
+        sans: ["Plus Jakarta Sans", "Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "system-ui", "sans-serif"],
+        display: ["Plus Jakarta Sans", "Inter", "sans-serif"], serif: ["Fraunces", "Georgia", "serif"],
         body: ["Inter", "system-ui", "sans-serif"],
       },
       fontSize: {
