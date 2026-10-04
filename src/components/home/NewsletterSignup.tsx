@@ -27,7 +27,7 @@ export const NewsletterSignup = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      toast.success('Welcome to the inner circle.');
+      toast.success('You're in! Watch your inbox for CartZebra deals.');
       setEmail('');
     } catch {
       toast.error('Something went wrong. Please try again.');
@@ -46,12 +46,12 @@ export const NewsletterSignup = () => {
           transition={{ duration: 0.8 }}
           className="max-w-xl mx-auto text-center"
         >
-          <p className="font-utility text-[10px] tracking-[0.3em] text-foreground/40 mb-4">THE INNER CIRCLE</p>
+          <p className="font-utility text-[10px] tracking-[0.3em] text-foreground/40 mb-4">NEWSLETTER</p>
           <h2 className="font-display text-3xl sm:text-4xl tracking-tighter mb-4">
-            First Access to<br />New Harvests
+            Deals & discoveries,<br />first.
           </h2>
-          <p className="font-display-italic text-sm text-muted-foreground mb-10 leading-relaxed">
-            Be the first to know when rare ingredients arrive. No noise — only what matters.
+          <p className="text-sm text-muted-foreground mb-10 leading-relaxed">
+            Get early access to exclusive deals, new arrivals and trending finds. No spam.
           </p>
           <form onSubmit={handleSubmit} className="flex gap-0 max-w-md mx-auto">
             <input
@@ -61,12 +61,12 @@ export const NewsletterSignup = () => {
               placeholder="your@email.com"
               required
               maxLength={255}
-              className="flex-1 px-5 py-4 bg-transparent border border-foreground/15 border-r-0 text-sm text-foreground placeholder:text-foreground/25 focus:outline-none focus:border-foreground/40 transition-colors"
+              className="flex-1 px-5 py-4 bg-transparent border border-border border-r-0 rounded-l-full bg-card text-sm text-foreground placeholder:text-foreground/25 focus:outline-none focus:border-foreground/40 transition-colors"
             />
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="px-6 bg-foreground text-background hover:bg-foreground/90 text-sm font-utility tracking-[0.1em] h-auto rounded-none transition-colors"
+              className="px-6 bg-primary text-primary-foreground hover:bg-accent hover:text-accent-foreground text-sm h-auto rounded-r-full transition-colors"
             >
               {isSubmitting ? '...' : <><ArrowRight className="h-4 w-4" strokeWidth={1.5} /></>}
             </Button>

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { X, ChevronRight, Package } from 'lucide-react';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useCategories } from '@/hooks/useCategories';
+import { Logo } from '@/components/brand/Logo';
 
 interface MobileMenuProps {
   open: boolean;
@@ -16,9 +17,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
       <SheetContent side="left" className="w-[300px] sm:w-[340px] p-0 border-r-0 rounded-none bg-background">
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-6 border-b border-foreground/8">
-            <h2 className="font-display text-lg tracking-tighter">
-              CartZebra
-            </h2>
+            <Link to="/" onClick={onClose} aria-label="CartZebra home"><Logo /></Link>
             <button onClick={onClose} className="p-1 text-foreground/40 hover:text-foreground transition-colors">
               <X className="h-4 w-4" strokeWidth={1.5} />
             </button>
@@ -26,7 +25,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
 
           <div className="flex-1 overflow-y-auto">
             <div className="px-6 pt-6 pb-3">
-              <p className="font-utility text-[9px] tracking-[0.25em] text-foreground/30 mb-4">COLLECTION</p>
+              <p className="font-utility text-[9px] tracking-[0.25em] text-foreground/30 mb-4">CATEGORIES</p>
               <nav className="space-y-1">
                 {categories.map((cat) => (
                   <Link
