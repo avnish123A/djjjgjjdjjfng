@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
       .select(`
         id, order_number, order_status, payment_status, payment_method,
         subtotal, shipping, discount, total,
-        created_at, tracking_number, courier_name,
+        created_at, tracking_number, courier_name, estimated_delivery_date, shipping_address,
         customer_name, customer_email, customer_phone,
         order_items (
           id, title, price, quantity, image, color, size
@@ -123,6 +123,13 @@ Deno.serve(async (req) => {
       created_at: o.created_at,
       tracking_number: o.tracking_number,
       courier_name: o.courier_name,
+      estimated_delivery_date: o.estimated_delivery_date,
+      // Only city/state/PIN — never the street address
+      ship_to: o.shipping_address ? {
+        city: (o.shipping_address as any).city || '',
+        state: (o.shipping_address as any).state || '',
+        pincode: (o.shipping_address as any).pincode || '',
+      } : null,
       customer_name: o.customer_name,
       customer_email: maskEmail(o.customer_email),
       customer_phone: maskPhone(o.customer_phone || ''),
