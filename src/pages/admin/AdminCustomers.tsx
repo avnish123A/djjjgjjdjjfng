@@ -1,28 +1,32 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, Loader2, Eye, X, ShoppingCart, Mail, Phone, Calendar } from 'lucide-react';
+import { Search, Eye, X, ShoppingCart, Mail, Phone, Calendar } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { InlineError, TableRowsSkeleton } from '@/components/admin/AdminSkeletons';
+
+const fmtDate = (d?: string | null) => { const t = d ? new Date(d) : null; return t && !isNaN(t.getTime()) ? t.toLocaleDateString('en-IN') : '—'; };
 
 const AdminCustomers: React.FC = () => {
   const [search, setSearch] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
 
-  const { data: customers = [], isLoading } = useQuery({
+  const { data: customers = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['admin-customers'],
-    queryFn: async () => {
+    queryFn: async ({ signal }) => {
       const { data, error } = await supabase
         .from('customers')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('id, name, email, phone, total_orders, total_spent, created_at')
+        .order('created_at', { ascending: false })
+        .abortSignal(signal);
       if (error) throw error;
-      return data;
+      return data ?? [];
     },
   });
 
   // Fetch orders for selected customer
-  const { data: customerOrders = [] } = useQuery({
+  const { data: customerOrders = [], isLoading: ordersLoading, isError: ordersError, refetch: refetchOrders } = useQuery({
     queryKey: ['customer-orders', selectedCustomer?.id],
     queryFn: async () => {
       if (!selectedCustomer) return [];
@@ -38,25 +42,17 @@ const AdminCustomers: React.FC = () => {
   });
 
   const filtered = useMemo(() => customers.filter((c: any) =>
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
-    c.email.toLowerCase().includes(search.toLowerCase()) ||
+    (c.name || '').toLowerCase().includes(search.toLowerCase()) ||
+    (c.email || '').toLowerCase().includes(search.toLowerCase()) ||
     (c.phone || '').includes(search)
   ), [customers, search]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold">Customers</h1>
-          <p className="text-sm text-muted-foreground mt-1">{customers.length} total customers</p>
+          <p className="text-sm text-muted-foreground mt-1">{isLoading ? 'Loading customers…' : isError ? 'Customer list unavailable' : `${customers.length} total customers`}</p>
         </div>
       </div>
 
@@ -65,7 +61,10 @@ const AdminCustomers: React.FC = () => {
         <Input placeholder="Search customers..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
       </div>
 
+      {isError && <InlineError message="Couldn’t load customers. Your data is safe." onRetry={() => refetch()} />}
+
       <div className="bg-card border border-border rounded-xl overflow-x-auto">
+        {isLoading ? <TableRowsSkeleton /> : !isError && (<>
         <table className="w-full">
           <thead>
             <tr className="border-b border-border">
@@ -87,7 +86,7 @@ const AdminCustomers: React.FC = () => {
                 <td className="px-6 py-4 text-sm">{customer.total_orders}</td>
                 <td className="px-6 py-4 text-sm font-medium">₹{Number(customer.total_spent).toLocaleString()}</td>
                 <td className="px-6 py-4 text-sm text-muted-foreground">
-                  {new Date(customer.created_at).toLocaleDateString()}
+                  {fmtDate(customer.created_at)}
                 </td>
                 <td className="px-6 py-4">
                   <Button variant="ghost" size="sm" className="gap-1 text-accent" onClick={() => setSelectedCustomer(customer)}>
@@ -100,9 +99,10 @@ const AdminCustomers: React.FC = () => {
         </table>
         {filtered.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
-            {customers.length === 0 ? 'No customers yet' : 'No customers found'}
+            {customers.length === 0 ? 'No customers yet' : 'No customers match your search'}
           </div>
         )}
+        </>)}
       </div>
 
       {/* Customer Detail Modal */}
@@ -120,7 +120,7 @@ const AdminCustomers: React.FC = () => {
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                    {selectedCustomer.name.charAt(0).toUpperCase()}
+                    {(selectedCustomer.name || '?').charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <p className="font-semibold">{selectedCustomer.name}</p>
@@ -135,7 +135,7 @@ const AdminCustomers: React.FC = () => {
                     <Phone className="h-3.5 w-3.5" /> {selectedCustomer.phone || '—'}
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    <Calendar className="h-3.5 w-3.5" /> Joined {new Date(selectedCustomer.created_at).toLocaleDateString()}
+                    <Calendar className="h-3.5 w-3.5" /> Joined {fmtDate(selectedCustomer.created_at)}
                   </div>
                 </div>
               </div>
@@ -157,7 +157,11 @@ const AdminCustomers: React.FC = () => {
                 <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
                   <ShoppingCart className="h-4 w-4" /> Order History
                 </h3>
-                {customerOrders.length === 0 ? (
+                {ordersLoading ? (
+                  <TableRowsSkeleton rows={2} />
+                ) : ordersError ? (
+                  <InlineError message="Couldn’t load order history." onRetry={() => refetchOrders()} />
+                ) : customerOrders.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No orders found</p>
                 ) : (
                   <div className="space-y-2">
@@ -165,7 +169,7 @@ const AdminCustomers: React.FC = () => {
                       <div key={order.id} className="flex items-center justify-between bg-secondary/30 rounded-lg px-4 py-3 text-sm">
                         <div>
                           <span className="font-medium">{order.order_number}</span>
-                          <span className="text-muted-foreground ml-2">{new Date(order.order_date).toLocaleDateString()}</span>
+                          <span className="text-muted-foreground ml-2">{fmtDate(order.order_date)}</span>
                         </div>
                         <div className="flex items-center gap-3">
                           <span className="font-medium">₹{Number(order.total).toLocaleString()}</span>
