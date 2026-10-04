@@ -41,11 +41,11 @@ export const FeaturedProducts = () => {
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}
               >
-                <p className="font-utility text-[10px] tracking-[0.3em] text-foreground/40 mb-4">CURATED</p>
+                <p className="font-utility text-[10px] tracking-[0.3em] text-foreground/40 mb-4">TRENDING NOW</p>
                 <h2 className="font-display text-3xl sm:text-4xl tracking-tighter mb-5 leading-[1.05]">
                   Editor's<br />Selection
                 </h2>
-                <p className="font-display-italic text-sm text-muted-foreground leading-relaxed mb-8">
+                <p className="text-sm text-muted-foreground leading-relaxed mb-8">
                   Hand-picked trending finds and everyday upgrades, chosen for real value.
                 </p>
                 <Link

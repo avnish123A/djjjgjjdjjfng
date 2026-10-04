@@ -46,12 +46,12 @@ export const Testimonials = () => {
               transition={{ duration: 0.6, delay: i * 0.15 }}
               className="text-center"
             >
-              <p className="font-display-italic text-sm text-foreground/70 leading-relaxed mb-8">
+              <p className="text-sm text-foreground/70 leading-relaxed mb-8">
                 "{t.text}"
               </p>
               <div>
                 <p className="font-utility text-[10px] tracking-[0.15em] text-foreground/70">{t.name.toUpperCase()}</p>
-                <p className="font-display-italic text-xs text-foreground/30 mt-0.5">{t.location}</p>
+                <p className="text-xs text-foreground/30 mt-0.5">{t.location}</p>
               </div>
             </motion.div>
           ))}

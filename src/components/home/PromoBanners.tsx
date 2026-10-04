@@ -38,7 +38,7 @@ export const PromoBanners = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
                   <h3 className="font-display text-xl sm:text-2xl text-white tracking-tight mb-1">{banner.title}</h3>
-                  <p className="font-display-italic text-sm text-white/50 mb-4">{banner.subtitle}</p>
+                  <p className="text-sm text-white/50 mb-4">{banner.subtitle}</p>
                   <span className="inline-flex items-center gap-2 font-utility text-[9px] tracking-[0.2em] text-white/50 group-hover:text-white transition-colors duration-500">
                     SHOP NOW <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform duration-500" strokeWidth={1.5} />
                   </span>
