@@ -18,6 +18,10 @@ export interface Product {
   description: string;
   lowStockThreshold?: number;
   trackInventory?: boolean;
+  slug?: string;
+  isFeatured?: boolean;
+  features: string[];
+  specifications: Record<string, string>;
 }
 
 export interface Category {
@@ -25,4 +29,6 @@ export interface Category {
   name: string;
   slug: string;
   image: string;
+  description?: string;
+  sortOrder?: number;
 }

@@ -1,15 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useCategories } from '@/hooks/useCategories';
 import { motion } from 'framer-motion';
-
-const fallbackCategories = [
-  { id: 'f1', name: 'Electronics', slug: 'electronics', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=800&q=80' },
-  { id: 'f2', name: 'Fashion', slug: 'fashion', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&q=80' },
-  { id: 'f3', name: 'Home & Living', slug: 'home-living', image: 'https://images.unsplash.com/photo-1484101403633-562f891dc89a?w=800&q=80' },
-  { id: 'f4', name: 'Beauty', slug: 'beauty', image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80' },
-  { id: 'f5', name: 'Gifts', slug: 'gifts', image: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=800&q=80' },
-  { id: 'f6', name: 'Accessories', slug: 'accessories', image: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=800&q=80' },
-];
+import { ArrowUpRight } from 'lucide-react';
 
 export const CategoryGrid = () => {
   const { data: categories = [], isLoading } = useCategories();
@@ -28,47 +20,55 @@ export const CategoryGrid = () => {
     );
   }
 
-  const displayCategories = categories.length > 0 ? categories : fallbackCategories;
+  if (categories.length === 0) return null;
 
   return (
-    <section className="py-16 lg:py-24">
+    <section className="py-14 lg:py-24 overflow-hidden">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-14"
+          transition={{ duration: 0.3 }}
+          className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 lg:mb-14"
         >
-          <p className="font-utility text-[10px] tracking-[0.3em] text-foreground/40 mb-3">EXPLORE</p>
-          <h2 className="font-display text-3xl sm:text-4xl tracking-tighter">Shop by Category</h2>
+          <div>
+            <p className="font-utility text-foreground/45 mb-3">Explore the edit</p>
+            <h2 className="font-display text-3xl sm:text-4xl">Shop by category</h2>
+          </div>
+          <p className="max-w-sm text-sm leading-6 text-muted-foreground">Six considered worlds, photographed as one CartZebra collection.</p>
         </motion.div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
-          {displayCategories.map((cat, i) => (
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
+          {categories.map((cat, i) => (
             <motion.div
               key={cat.id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
+              transition={{ duration: 0.3, delay: i * 0.04 }}
             >
               <Link
                 to={`/products?category=${cat.slug}`}
-                className="group relative block overflow-hidden aspect-[4/5] rounded-2xl"
+                className="group relative block overflow-hidden aspect-[4/5] rounded-lg bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <img
                   src={cat.image || '/placeholder.svg'}
                   alt={cat.name}
-                  className="absolute inset-0 w-full h-full object-cover sensory-hover"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out motion-safe:group-hover:scale-[1.035]"
                   loading="lazy"
+                  width={1024}
+                  height={1280}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent group-hover:from-black/60 transition-colors duration-700" />
-                <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
-                  <h3 className="font-display text-lg sm:text-xl text-white tracking-tight mb-1">{cat.name}</h3>
-                  <span className="font-utility text-[9px] tracking-[0.2em] text-white/40 group-hover:text-white/60 transition-colors duration-500">
-                    EXPLORE →
-                  </span>
+                <div className="absolute inset-0 bg-gradient-to-t from-foreground/75 via-foreground/5 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6 text-primary-foreground">
+                  <div className="flex items-end justify-between gap-3">
+                    <div>
+                      <h3 className="font-display text-lg sm:text-xl mb-1">{cat.name}</h3>
+                      <span className="font-utility text-primary-foreground/70">Explore</span>
+                    </div>
+                    <ArrowUpRight className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                  </div>
                 </div>
               </Link>
             </motion.div>
