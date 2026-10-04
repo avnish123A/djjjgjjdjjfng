@@ -51,7 +51,13 @@ const stepConfig: { key: Step; label: string; icon: React.ElementType }[] = [
 ];
 
 const Checkout = () => {
-  const { items, totalPrice, clearCart, appliedCoupon, discountAmount, removeCoupon } = useCart();
+  const { items, totalPrice, clearCart, appliedCoupon, discountAmount, removeCoupon, refreshCart } = useCart();
+
+  // Re-check prices & stock once when checkout opens; never silently charge a different amount
+  useEffect(() => {
+    refreshCart().then((msg) => { if (msg) toast.warning(msg); });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<string>('cod');

@@ -146,6 +146,23 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Every item must reference a real product so its price can be verified
+    if (items.some(i => !i.productId)) {
+      return new Response(
+        JSON.stringify({ error: 'Your cart contains an unavailable item. Please refresh and try again.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Server-side shipping verification (free at ₹999+, else ₹99)
+    const expectedShipping = subtotal >= 999 ? 0 : 99
+    if (Math.abs(expectedShipping - shipping) > 0.01) {
+      return new Response(
+        JSON.stringify({ error: 'Delivery charge mismatch. Please refresh and try again.' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // Server-side price verification against database
     for (const item of items) {
       if (item.productId) {
