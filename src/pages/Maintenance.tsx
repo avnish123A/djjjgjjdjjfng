@@ -103,7 +103,6 @@ const Maintenance: React.FC = () => {
 const ComingSoon: React.FC<{ s: Record<string, string> }> = ({ s }) => {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'done'>('idle');
-  const date = s.coming_soon_date || '';
   const message = s.coming_soon_message || "A smarter shopping experience is on the way. Be among the first to discover what's next.";
 
   const submit = async (e: React.FormEvent) => {
@@ -145,8 +144,6 @@ const ComingSoon: React.FC<{ s: Record<string, string> }> = ({ s }) => {
         {message}
       </motion.p>
 
-      {date && <Countdown target={date} />}
-
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9, duration: 0.6, ease }} className="max-w-md mx-auto">
         <AnimatePresence mode="wait">
           {status === 'done' ? (
@@ -156,54 +153,23 @@ const ComingSoon: React.FC<{ s: Record<string, string> }> = ({ s }) => {
             </motion.p>
           ) : (
             <motion.form key="form" onSubmit={submit} exit={{ opacity: 0 }} className="flex rounded-full border border-primary-foreground/15 bg-primary-foreground/5 p-1.5 focus-within:border-accent/60 transition-colors">
-              <Mail className="ml-3 h-4 w-4 self-center text-primary-foreground/40" />
+              <Mail className="ml-3 h-4 w-4 self-center shrink-0 text-primary-foreground/40" />
               <label htmlFor="cs-email" className="sr-only">Email address</label>
               <input id="cs-email" type="email" required maxLength={255} value={email} onChange={(e) => setEmail(e.target.value)}
                 placeholder="your@email.com" className="flex-1 min-w-0 bg-transparent px-3 text-sm placeholder:text-primary-foreground/30 focus:outline-none" />
               <button type="submit" disabled={status === 'loading'}
-                className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-5 py-2.5 text-sm font-bold hover:brightness-110 disabled:opacity-70 transition">
-                {status === 'loading' ? <Loader2 className="h-4 w-4 animate-spin" /> : <>Notify me <ArrowRight className="h-4 w-4" /></>}
+                className="inline-flex shrink-0 items-center gap-2 rounded-full bg-accent text-accent-foreground px-4 sm:px-5 py-2.5 text-sm font-bold hover:brightness-110 disabled:opacity-70 transition">
+                {status === 'loading' ? <Loader2 className="h-4 w-4 animate-spin" /> : <>NOTIFY ME <ArrowRight className="h-4 w-4" /></>}
               </button>
             </motion.form>
           )}
         </AnimatePresence>
       </motion.div>
-    </div>
-  );
-};
 
-const Countdown: React.FC<{ target: string }> = ({ target }) => {
-  const [diff, setDiff] = useState(() => new Date(target).getTime() - Date.now());
-  useEffect(() => {
-    const t = setInterval(() => setDiff(new Date(target).getTime() - Date.now()), 1000);
-    return () => clearInterval(t);
-  }, [target]);
-
-  if (isNaN(diff)) return null;
-  if (diff <= 0) {
-    return <p className="font-display text-2xl text-accent mb-10">WE'RE READY.</p>;
-  }
-  const blocks = [
-    { l: 'Days', v: Math.floor(diff / 86400000) },
-    { l: 'Hours', v: Math.floor((diff / 3600000) % 24) },
-    { l: 'Minutes', v: Math.floor((diff / 60000) % 60) },
-    { l: 'Seconds', v: Math.floor((diff / 1000) % 60) },
-  ];
-  return (
-    <div className="flex justify-center gap-3 sm:gap-4 mb-10" aria-label="Launch countdown">
-      {blocks.map((b) => (
-        <div key={b.l} className="w-[72px] sm:w-20 rounded-2xl border border-primary-foreground/10 bg-primary-foreground/[0.04] py-4">
-          <div className="h-8 overflow-hidden relative">
-            <AnimatePresence mode="popLayout" initial={false}>
-              <motion.span key={b.v} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ duration: 0.35 }}
-                className="absolute inset-0 font-display text-2xl sm:text-3xl tabular-nums">
-                {String(b.v).padStart(2, '0')}
-              </motion.span>
-            </AnimatePresence>
-          </div>
-          <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.12em] text-primary-foreground/40">{b.l}</span>
-        </div>
-      ))}
+      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1, duration: 0.6 }}
+        className="mt-8 inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary-foreground/50">
+        <span className="h-1.5 w-1.5 rounded-full bg-accent animate-pulse" /> Launching soon
+      </motion.p>
     </div>
   );
 };

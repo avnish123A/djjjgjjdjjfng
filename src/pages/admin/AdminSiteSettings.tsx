@@ -330,7 +330,7 @@ const AdminSiteSettings: React.FC = () => {
 
             <div className="border-t border-border pt-6">
               <h2 className="font-semibold flex items-center gap-2"><Rocket className="h-4 w-4 text-primary" /> Coming Soon Page</h2>
-              <p className="text-xs text-muted-foreground mt-1">Customize the coming soon page with a countdown timer</p>
+              <p className="text-xs text-muted-foreground mt-1">Customize the heading and message shown on the coming soon page</p>
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Heading</Label>
@@ -339,11 +339,6 @@ const AdminSiteSettings: React.FC = () => {
             <div className="space-y-1.5">
               <Label className="text-xs font-medium">Message</Label>
               <Textarea value={formValues['coming_soon_message'] || ''} onChange={(e) => updateField('coming_soon_message', e.target.value)} placeholder="Our curated gifting experience is almost ready..." rows={3} />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-medium">Launch Date (for countdown timer)</Label>
-              <Input type="datetime-local" value={formValues['coming_soon_date'] || ''} onChange={(e) => updateField('coming_soon_date', e.target.value)} />
-              <p className="text-[10px] text-muted-foreground">Leave empty to hide the countdown timer</p>
             </div>
 
             <Button onClick={handleSaveSettings} disabled={savingSettings} className="w-full">
