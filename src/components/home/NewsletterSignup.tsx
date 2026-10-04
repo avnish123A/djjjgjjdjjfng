@@ -27,7 +27,7 @@ export const NewsletterSignup = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      toast.success('You're in! Watch your inbox for CartZebra deals.');
+      toast.success("You're in! Watch your inbox for CartZebra deals.");
       setEmail('');
     } catch {
       toast.error('Something went wrong. Please try again.');

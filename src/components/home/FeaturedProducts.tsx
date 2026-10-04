@@ -46,7 +46,7 @@ export const FeaturedProducts = () => {
                   Editor's<br />Selection
                 </h2>
                 <p className="font-display-italic text-sm text-muted-foreground leading-relaxed mb-8">
-                  Hand-selected for provenance, complexity, and craft. Each product represents the pinnacle of its category.
+                  Hand-picked trending finds and everyday upgrades, chosen for real value.
                 </p>
                 <Link
                   to="/products"
