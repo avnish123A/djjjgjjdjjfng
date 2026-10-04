@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
     // Order must belong to the browser holding the server-issued checkout token
     const { data: order } = await supabase
       .from('orders')
-      .select('id, total, payment_method, payment_status')
+      .select('id, order_number, total, payment_method, payment_status')
       .eq('id', orderId)
       .eq('checkout_token', checkoutToken)
       .maybeSingle()
@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
       verified = sigOk && await confirmRazorpayPayment(razorpayPaymentId, txn, gatewayConfig)
       paymentId = razorpayPaymentId
     } else if (gateway === 'cashfree') {
-      const res = await verifyCashfreePayment(txn, gatewayConfig)
+      const res = await verifyCashfreePayment(txn, gatewayConfig, order.order_number)
       verified = res.ok
       paymentId = res.paymentId
     }
@@ -136,13 +136,11 @@ async function confirmRazorpayPayment(paymentId: string, txn: any, config: any):
   }
 }
 
-async function verifyCashfreePayment(txn: any, config: any): Promise<{ ok: boolean; paymentId: string | null }> {
+async function verifyCashfreePayment(txn: any, config: any, orderNumber: string): Promise<{ ok: boolean; paymentId: string | null }> {
   try {
     const baseUrl = config.environment === 'test' ? 'https://sandbox.cashfree.com/pg' : 'https://api.cashfree.com/pg'
-    // Cashfree order_id is our order_number; gateway_order_id may hold cf_order_id, so look up by receipt
-    const { data: orderRow } = await (globalThis as any).__sb?.from?.('orders') ?? { data: null }
-    void orderRow
-    const response = await fetch(`${baseUrl}/orders/${encodeURIComponent(txn.cf_lookup_id || txn.gateway_order_id)}/payments`, {
+    // Cashfree identifies orders by our merchant order_id (order_number), not cf_order_id
+    const response = await fetch(`${baseUrl}/orders/${encodeURIComponent(orderNumber)}/payments`, {
       headers: {
         'x-client-id': config.key_id,
         'x-client-secret': config.key_secret,
