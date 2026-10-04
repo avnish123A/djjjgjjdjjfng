@@ -15,21 +15,23 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    const { orderId, gateway } = await req.json()
+    const { orderId, gateway, checkoutToken } = await req.json()
+    const UUID = /^[0-9a-f-]{36}$/i
 
-    if (!orderId || !gateway) {
+    if (!orderId || !gateway || !checkoutToken || !UUID.test(orderId) || !UUID.test(checkoutToken) || !['razorpay', 'cashfree'].includes(gateway)) {
       return new Response(
-        JSON.stringify({ error: 'Missing orderId or gateway' }),
+        JSON.stringify({ error: 'Missing or invalid payment request' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Fetch order
+    // Fetch order — the server-issued checkout token proves this browser created it
     const { data: order, error: orderErr } = await supabase
       .from('orders')
       .select('*')
       .eq('id', orderId)
-      .single()
+      .eq('checkout_token', checkoutToken)
+      .maybeSingle()
 
     if (orderErr || !order) {
       return new Response(
@@ -38,10 +40,22 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Check if already paid
-    if (order.payment_status === 'paid') {
+    // Order must be payable with this gateway
+    if (order.payment_status !== 'pending' && order.payment_status !== 'failed') {
       return new Response(
-        JSON.stringify({ error: 'Order already paid' }),
+        JSON.stringify({ error: 'This order cannot be paid' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    if (order.payment_method !== gateway) {
+      return new Response(
+        JSON.stringify({ error: 'Payment method does not match this order' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    if (order.order_status === 'cancelled' || order.stock_released) {
+      return new Response(
+        JSON.stringify({ error: 'This order has expired. Please place a new order.' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -54,7 +68,7 @@ Deno.serve(async (req) => {
       .eq('is_enabled', true)
       .single()
 
-    if (!gatewayConfig) {
+    if (!gatewayConfig || !gatewayConfig.key_id || !gatewayConfig.key_secret) {
       return new Response(
         JSON.stringify({ error: `${gateway} is not enabled` }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -62,6 +76,35 @@ Deno.serve(async (req) => {
     }
 
     const amountInPaise = Math.round(Number(order.total) * 100)
+
+    // Idempotency: reuse a recent open session for the same order and amount
+    const { data: existing } = await supabase
+      .from('payment_transactions')
+      .select('gateway_order_id, amount, created_at')
+      .eq('order_id', order.id)
+      .eq('gateway', gateway)
+      .eq('status', 'created')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    const fresh = existing && Date.now() - new Date(existing.created_at).getTime() < 15 * 60_000
+    if (gateway === 'razorpay' && fresh && Number(existing.amount) === Number(order.total) && existing.gateway_order_id) {
+      return new Response(
+        JSON.stringify({
+          gateway: 'razorpay',
+          razorpayOrderId: existing.gateway_order_id,
+          razorpayKeyId: gatewayConfig.key_id,
+          amount: amountInPaise,
+          currency: 'INR',
+          orderNumber: order.order_number,
+          customerName: order.customer_name,
+          customerEmail: order.customer_email,
+          customerPhone: order.customer_phone,
+          isTest: gatewayConfig.environment === 'test',
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
     if (gateway === 'razorpay') {
       return await handleRazorpay(supabase, order, gatewayConfig, amountInPaise)
