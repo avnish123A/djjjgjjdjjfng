@@ -15,7 +15,7 @@ const topFaqs = [
   },
   {
     question: 'Are these products genuinely single-origin?',
-    answer: 'Yes. Every product on Terroir & Co. comes with full traceability — including origin coordinates, harvest date, and producer information.',
+    answer: 'Yes. Every product on CartZebra comes with full traceability — including origin coordinates, harvest date, and producer information.',
   },
   {
     question: 'What is your return policy?',

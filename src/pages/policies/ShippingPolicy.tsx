@@ -14,7 +14,7 @@ const ShippingPolicy = () => (
       <h1 className="text-3xl font-bold mb-8">Shipping Policy</h1>
       <div className="prose prose-sm max-w-none space-y-6 text-muted-foreground">
         <p><strong className="text-foreground">Last Updated:</strong> February 2026</p>
-        <p>At EkamGift, we take special care in packaging and shipping your gifts so they arrive beautifully and on time. Here's everything you need to know about our delivery process.</p>
+        <p>At CartZebra, we take special care in packaging and shipping your gifts so they arrive beautifully and on time. Here's everything you need to know about our delivery process.</p>
 
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-2">1. Delivery Areas</h2>
@@ -87,7 +87,7 @@ const ShippingPolicy = () => (
 
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-2">7. Gift Packaging & Presentation</h2>
-          <p>Every EkamGift order is carefully gift-wrapped in premium packaging — free of charge. Special care is taken for fragile items. If you're sending a gift directly to someone:</p>
+          <p>Every CartZebra order is carefully gift-wrapped in premium packaging — free of charge. Special care is taken for fragile items. If you're sending a gift directly to someone:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li>Add a personalised message during checkout</li>
             <li>The invoice/price will <strong className="text-foreground">not</strong> be included in the package</li>
@@ -109,8 +109,8 @@ const ShippingPolicy = () => (
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-2">9. Contact Us</h2>
           <p>For shipping-related queries, reach out to us:</p>
-          <p><strong className="text-foreground">EkamGift Support</strong><br/>
-          Email: <a href="mailto:support@ekamgift.com" className="text-primary hover:underline">support@ekamgift.com</a><br/>
+          <p><strong className="text-foreground">CartZebra Support</strong><br/>
+          Email: <a href="mailto:support@cartzebra.com" className="text-primary hover:underline">support@cartzebra.com</a><br/>
           Phone: +91 98765 43210<br/>
           WhatsApp: Available on our website</p>
         </section>

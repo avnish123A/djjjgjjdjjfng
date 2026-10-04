@@ -62,7 +62,7 @@ const faqCategories = [
       {
         question: 'How do I initiate a return?',
         answer:
-          'Contact our support team at support@ekamgift.com with your order number. We\'ll arrange a pickup or provide return shipping instructions.',
+          'Contact our support team at support@cartzebra.com with your order number. We\'ll arrange a pickup or provide return shipping instructions.',
       },
       {
         question: 'How long do refunds take?',
@@ -97,7 +97,7 @@ const faqCategories = [
       {
         question: 'How can I contact customer support?',
         answer:
-          'Email us at support@ekamgift.com. Our team is available Monday–Saturday, 10 AM – 7 PM IST. We typically respond within 24 hours.',
+          'Email us at support@cartzebra.com. Our team is available Monday–Saturday, 10 AM – 7 PM IST. We typically respond within 24 hours.',
       },
       {
         question: 'Do I need an account to place an order?',
@@ -122,7 +122,7 @@ const FAQ = () => {
               FAQs
             </h1>
             <p className="text-muted-foreground max-w-lg mx-auto text-sm leading-relaxed">
-              Everything you need to know about shopping with EkamGift. Can't find what you're looking for? Reach out to our support team.
+              Everything you need to know about shopping with CartZebra. Can't find what you're looking for? Reach out to our support team.
             </p>
           </div>
 

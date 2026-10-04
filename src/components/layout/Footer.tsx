@@ -34,7 +34,7 @@ const socialIcons = [
 export const Footer = () => {
   const { data: s = {} } = useSiteSettings();
 
-  const email = s.contact_email || 'hello@terroirandco.com';
+  const email = s.contact_email || 'hello@cartzebra.com';
   const phone = s.contact_phone || '+91 98765 43210';
   const location = s.contact_location || 'India';
 
@@ -47,7 +47,7 @@ export const Footer = () => {
           {/* Brand column */}
           <div className="lg:col-span-4">
             <h2 className="font-display text-2xl tracking-tighter mb-4">
-              Terroir <span className="font-display-italic font-normal">&</span> Co.
+              CartZebra
             </h2>
             <p className="text-sm text-muted-foreground leading-relaxed mb-8 max-w-xs">
               Curating the world's finest artisan ingredients — single-origin oils, aged vinegars, heritage spices, and rare teas — for discerning palates.
@@ -114,7 +114,7 @@ export const Footer = () => {
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="font-utility text-[9px] text-foreground/25 tracking-[0.2em]">
-              &copy; {new Date().getFullYear()} TERROIR & CO. ALL RIGHTS RESERVED.
+              &copy; {new Date().getFullYear()} CARTZEBRA ALL RIGHTS RESERVED.
             </p>
             <p className="font-utility text-[9px] text-foreground/15 tracking-[0.15em]">
               CURATED WITH OBSESSION

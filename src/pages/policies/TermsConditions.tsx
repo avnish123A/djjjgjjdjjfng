@@ -14,16 +14,16 @@ const TermsConditions = () => (
       <h1 className="text-3xl font-bold mb-8">Terms & Conditions</h1>
       <div className="prose prose-sm max-w-none space-y-6 text-muted-foreground">
         <p><strong className="text-foreground">Last Updated:</strong> February 2026</p>
-        <p>Welcome to EkamGift. By accessing and using our website <strong className="text-foreground">ekamgift.com</strong>, you agree to be bound by these Terms & Conditions. Please read them carefully before making any purchase.</p>
+        <p>Welcome to CartZebra. By accessing and using our website <strong className="text-foreground">cartzebra.com</strong>, you agree to be bound by these Terms & Conditions. Please read them carefully before making any purchase.</p>
 
         <section>
-          <h2 className="text-lg font-semibold text-foreground mb-2">1. About EkamGift</h2>
-          <p>EkamGift is an online gifting and lifestyle store offering curated products across categories including fashion, electronics, home & living, personalised gifts, hampers, and more. We are committed to delivering joy through thoughtfully selected and beautifully packaged gifts.</p>
+          <h2 className="text-lg font-semibold text-foreground mb-2">1. About CartZebra</h2>
+          <p>CartZebra is an online gifting and lifestyle store offering curated products across categories including fashion, electronics, home & living, personalised gifts, hampers, and more. We are committed to delivering joy through thoughtfully selected and beautifully packaged gifts.</p>
         </section>
 
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-2">2. Eligibility</h2>
-          <p>You must be at least 18 years old to make a purchase on EkamGift. By placing an order, you confirm that you are legally capable of entering into binding contracts under Indian law.</p>
+          <p>You must be at least 18 years old to make a purchase on CartZebra. By placing an order, you confirm that you are legally capable of entering into binding contracts under Indian law.</p>
         </section>
 
         <section>
@@ -63,7 +63,7 @@ const TermsConditions = () => (
           <p>For personalised or custom-made gifts:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li>Please verify all customisation details (names, messages, dates) before placing the order</li>
-            <li>EkamGift is not responsible for errors in customer-provided personalisation text</li>
+            <li>CartZebra is not responsible for errors in customer-provided personalisation text</li>
             <li>Personalised orders cannot be returned or exchanged unless defective</li>
             <li>Cancellation is only possible within 2 hours of order placement</li>
           </ul>
@@ -71,7 +71,7 @@ const TermsConditions = () => (
 
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-2">8. Intellectual Property</h2>
-          <p>All content on this website — including the EkamGift name, logo, images, text, product descriptions, and design elements — are the property of EkamGift and are protected under Indian copyright and trademark laws. Unauthorised use is strictly prohibited.</p>
+          <p>All content on this website — including the CartZebra name, logo, images, text, product descriptions, and design elements — are the property of CartZebra and are protected under Indian copyright and trademark laws. Unauthorised use is strictly prohibited.</p>
         </section>
 
         <section>
@@ -81,23 +81,23 @@ const TermsConditions = () => (
             <li>Use the website for any unlawful purpose</li>
             <li>Attempt to interfere with the website's functionality</li>
             <li>Submit false or misleading information</li>
-            <li>Resell products purchased from EkamGift for commercial purposes without authorisation</li>
+            <li>Resell products purchased from CartZebra for commercial purposes without authorisation</li>
           </ul>
         </section>
 
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-2">10. Limitation of Liability</h2>
-          <p>EkamGift shall not be liable for any indirect, incidental, or consequential damages arising from the use of our website or products. Our total liability shall not exceed the amount paid by you for the relevant order.</p>
+          <p>CartZebra shall not be liable for any indirect, incidental, or consequential damages arising from the use of our website or products. Our total liability shall not exceed the amount paid by you for the relevant order.</p>
         </section>
 
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-2">11. Governing Law & Disputes</h2>
-          <p>These terms are governed by the laws of India. Any disputes shall be subject to the exclusive jurisdiction of courts in India. We encourage you to contact us first at <a href="mailto:support@ekamgift.com" className="text-primary hover:underline">support@ekamgift.com</a> to resolve any issues amicably.</p>
+          <p>These terms are governed by the laws of India. Any disputes shall be subject to the exclusive jurisdiction of courts in India. We encourage you to contact us first at <a href="mailto:support@cartzebra.com" className="text-primary hover:underline">support@cartzebra.com</a> to resolve any issues amicably.</p>
         </section>
 
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-2">12. Changes to Terms</h2>
-          <p>EkamGift reserves the right to update these Terms & Conditions at any time. Changes will be posted on this page with an updated "Last Updated" date. Continued use of the website constitutes acceptance of the revised terms.</p>
+          <p>CartZebra reserves the right to update these Terms & Conditions at any time. Changes will be posted on this page with an updated "Last Updated" date. Continued use of the website constitutes acceptance of the revised terms.</p>
         </section>
       </div>
     </div>

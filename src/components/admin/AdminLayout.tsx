@@ -96,7 +96,7 @@ const AdminLayout: React.FC = () => {
       )}>
         <div className="h-16 flex items-center justify-between px-6 border-b border-border">
           <Link to="/admin/dashboard" className="text-xl font-bold tracking-tight">
-            EkamGift <span className="text-accent">Admin</span>
+            CartZebra <span className="text-accent">Admin</span>
           </Link>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden"><X className="h-5 w-5" /></button>
         </div>

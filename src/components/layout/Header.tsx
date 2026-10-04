@@ -123,7 +123,7 @@ export const Header = () => {
             {/* Center — Logo */}
             <Link to="/" className="absolute left-1/2 -translate-x-1/2">
               <h1 className="font-display text-xl sm:text-2xl tracking-tighter text-foreground">
-                Terroir <span className="font-display-italic font-normal">&</span> Co.
+                CartZebra
               </h1>
             </Link>
 
