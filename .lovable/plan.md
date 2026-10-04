@@ -21,7 +21,9 @@ Refresh the existing CartZebra shopping experience and starter catalog without c
    - Do not create ratings, reviews, comparison prices, discounts, or urgency unless supported by real data.
 
 4. **Refresh the storefront**
-   - Upgrade category cards and two editorial campaign banners with consistent crops, readable overlays, restrained motion, and clear Explore links.
+   - Establish one cohesive CartZebra art direction across categories and campaigns: premium D2C ecommerce meets modern marketplace and editorial fashion/lifestyle—not boxed stock photography or template advertising.
+   - Produce category and campaign imagery as a coordinated visual set with consistent lighting, color grading, proportions, typography, corner radius, and spacing.
+   - Upgrade category cards and two editorial campaign banners with readable overlays, restrained motion, and clear Explore links; category imagery must feel like one authored collection, and banners must feel editorial rather than promotional templates.
    - Remove stale flash-countdown, gourmet, ethnic, EkamTech, and other legacy sample language.
    - Improve product cards with mobile Quick Add, database stock messaging, real compare-price logic, optional second-image hover, and smooth cart feedback.
    - Make search and category URLs reliably filter live catalog data.
@@ -43,6 +45,8 @@ Refresh the existing CartZebra shopping experience and starter catalog without c
 8. **Verification**
    - Run typecheck and inspect the generated build status.
    - Browser-test homepage, search/category filtering, product detail, cart, checkout, tracking, and responsive layouts.
+   - Compare the finished homepage against the supplied screenshots at desktop and mobile sizes. Reject and refine any category or banner treatment that reads as unrelated stock imagery, Canva-style advertising, or a generic Shopify template.
+   - Visually verify consistent lighting, grading, image ratios, type, radii, and spacing across the entire homepage before acceptance.
    - Test Admin product/category/banner editing when an authorized admin session is available.
    - Search source and live content for prohibited legacy references and report only tests actually completed.
 
