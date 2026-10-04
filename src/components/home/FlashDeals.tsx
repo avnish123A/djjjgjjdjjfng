@@ -10,8 +10,10 @@ export const FlashDeals = () => {
   const dealProducts = products
     .filter(p => p.originalPrice && p.originalPrice > p.price)
     .sort((a, b) => {
-      const discA = ((a.originalPrice! - a.price) / a.originalPrice!) * 100;
-      const discB = ((b.originalPrice! - b.price) / b.originalPrice!) * 100;
+      const originalA = a.originalPrice ?? a.price;
+      const originalB = b.originalPrice ?? b.price;
+      const discA = ((originalA - a.price) / originalA) * 100;
+      const discB = ((originalB - b.price) / originalB) * 100;
       return discB - discA;
     })
     .slice(0, 8);
@@ -28,10 +30,10 @@ export const FlashDeals = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <p className="font-utility text-[10px] tracking-[0.3em] text-foreground/40 mb-3">LIMITED OFFERING</p>
-          <h2 className="font-display text-3xl sm:text-4xl tracking-tighter">The Cellar Sale</h2>
+          <p className="font-utility text-foreground/40 mb-3">Current offers</p>
+          <h2 className="font-display text-3xl sm:text-4xl">Worth a closer look</h2>
           <p className="text-sm text-muted-foreground mt-3 max-w-md mx-auto">
-            Select vintages and rare finds at exceptional value. Once they're gone, they're gone.
+            Products with a genuine current compare price, gathered in one place.
           </p>
         </motion.div>
 

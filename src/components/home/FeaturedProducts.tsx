@@ -22,7 +22,7 @@ export const FeaturedProducts = () => {
   }
 
   // Curated selection — best sellers and new arrivals
-  const featured = products.filter(p => p.badge === 'Best Seller' || p.badge === 'New').slice(0, 8);
+  const featured = products.filter(p => p.isFeatured).slice(0, 8);
   const displayProducts = featured.length > 0 ? featured : products.slice(0, 8);
 
   if (displayProducts.length === 0) return null;

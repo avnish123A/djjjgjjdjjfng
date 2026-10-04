@@ -7,7 +7,6 @@ import { FlashDeals } from '@/components/home/FlashDeals';
 import { BestSellers } from '@/components/home/BestSellers';
 import { TrustSection } from '@/components/home/TrustSection';
 import { NewsletterSignup } from '@/components/home/NewsletterSignup';
-import { Testimonials } from '@/components/home/Testimonials';
 import { FAQSection } from '@/components/home/FAQSection';
 
 const Index = () => {
@@ -21,7 +20,6 @@ const Index = () => {
       <FlashDeals />
       <BestSellers />
       <TrustSection />
-      <Testimonials />
       <FAQSection />
       <NewsletterSignup />
     </main>

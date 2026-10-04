@@ -23,6 +23,10 @@ const mapProduct = (p: any): Product => ({
   description: p.description || '',
   lowStockThreshold: p.low_stock_threshold ?? 5,
   trackInventory: p.track_inventory ?? true,
+  slug: p.slug || undefined,
+  isFeatured: p.is_featured ?? false,
+  features: Array.isArray(p.features) ? p.features.filter((item: unknown): item is string => typeof item === 'string') : [],
+  specifications: p.specifications && typeof p.specifications === 'object' && !Array.isArray(p.specifications) ? p.specifications as Record<string, string> : {},
 });
 
 export const useProducts = () => {
@@ -54,6 +58,8 @@ export const useProducts = () => {
         .from('products')
         .select('*, categories(name)')
         .eq('is_active', true)
+        .is('archived_at', null)
+        .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -92,6 +98,8 @@ export const useProduct = (id: string) => {
         .from('products')
         .select('*, categories(name)')
         .eq('id', id)
+        .eq('is_active', true)
+        .is('archived_at', null)
         .single();
 
       if (error) throw error;
