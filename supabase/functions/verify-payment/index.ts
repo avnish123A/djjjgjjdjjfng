@@ -103,16 +103,10 @@ Deno.serve(async (req) => {
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     } else {
-      // Mark as failed
-      await supabase
-        .from('payment_transactions')
-        .update({ status: 'failed', raw_response: body })
-        .eq('id', txn.id)
+      // Unverified callbacks must not change order state (anyone can call this endpoint).
+      // Only record the attempt; gateway webhooks remain authoritative for failures.
+      console.warn('Payment verification failed for order', orderId)
 
-      await supabase
-        .from('orders')
-        .update({ payment_status: 'failed' })
-        .eq('id', orderId)
 
       return new Response(
         JSON.stringify({ success: false, status: 'verification_failed' }),
@@ -167,8 +161,9 @@ async function verifyCashfreePayment(txn: any, config: any): Promise<boolean> {
     if (!response.ok) return false
 
     const payments = await response.json()
-    // Check if any payment is successful
-    return Array.isArray(payments) && payments.some((p: any) => p.payment_status === 'SUCCESS')
+    // A successful payment must cover the full recorded amount
+    return Array.isArray(payments) && payments.some((p: any) =>
+      p.payment_status === 'SUCCESS' && Number(p.payment_amount) + 0.01 >= Number(txn.amount))
   } catch (e) {
     console.error('Cashfree verification error:', e)
     return false
