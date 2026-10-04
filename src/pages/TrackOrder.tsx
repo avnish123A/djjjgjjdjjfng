@@ -1,13 +1,11 @@
-import { useState, useCallback, useRef, useEffect, memo } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, Search, ShieldCheck, Headphones, Package, Truck, CheckCircle, Clock, MapPin, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { Mail, Phone, Package, Truck, CheckCircle2, MapPin, ClipboardCheck, Box, AlertCircle, Loader2, ArrowRight, XCircle, Headphones } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { formatPrice } from '@/lib/format';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import giftImage from '@/assets/3d-gift-tracking.png';
 
 interface TrackedOrder {
   id: string;
@@ -22,500 +20,342 @@ interface TrackedOrder {
   created_at: string;
   tracking_number: string | null;
   courier_name: string | null;
-  estimated_delivery_date: string | null;
+  estimated_delivery_date?: string | null;
+  ship_to?: { city: string; state: string; pincode: string } | null;
   customer_name: string;
-  customer_email: string;
-  customer_phone: string;
-  items: {
-    title: string;
-    price: number;
-    quantity: number;
-    image: string;
-    color: string | null;
-    size: string | null;
-  }[];
+  items: { title: string; price: number; quantity: number; image: string; color: string | null; size: string | null }[];
 }
 
-const statusSteps = [
-  { key: 'placed', label: 'Order Placed', icon: Package },
-  { key: 'processing', label: 'Processing', icon: Clock },
+const steps = [
+  { key: 'placed', label: 'Order placed', icon: Package },
+  { key: 'confirmed', label: 'Confirmed', icon: ClipboardCheck },
+  { key: 'packed', label: 'Packed', icon: Box },
   { key: 'shipped', label: 'Shipped', icon: Truck },
-  { key: 'out_for_delivery', label: 'Out for Delivery', icon: MapPin },
-  { key: 'delivered', label: 'Delivered', icon: CheckCircle },
+  { key: 'out_for_delivery', label: 'Out for delivery', icon: MapPin },
+  { key: 'delivered', label: 'Delivered', icon: CheckCircle2 },
 ] as const;
 
-const getStepIndex = (status: string): number => {
-  const map: Record<string, number> = { placed: 0, processing: 1, shipped: 2, out_for_delivery: 3, delivered: 4, cancelled: -1 };
-  return map[status] ?? 0;
+// Maps real stored statuses (incl. legacy names) to a timeline position
+const statusIndex: Record<string, number> = {
+  placed: 0, pending: 0, confirmed: 1, processing: 1, packed: 2, shipped: 3, out_for_delivery: 4, delivered: 5,
 };
 
-/* ─── Sub-components ─── */
+const statusMessage = (s: string) => ({
+  placed: { title: 'We’ve received your order', body: 'We’ll confirm it shortly.' },
+  pending: { title: 'We’ve received your order', body: 'We’ll confirm it shortly.' },
+  confirmed: { title: 'Your order is confirmed', body: 'We’re getting it ready.' },
+  processing: { title: 'Your order is confirmed', body: 'We’re getting it ready.' },
+  packed: { title: 'Your order is packed', body: 'It will be handed to our courier soon.' },
+  shipped: { title: 'Your order is on its way', body: 'It has left our warehouse.' },
+  out_for_delivery: { title: 'Arriving today', body: 'Your order is out for delivery.' },
+  delivered: { title: 'Delivered', body: 'We hope you love it.' },
+  cancelled: { title: 'This order was cancelled', body: 'If you were charged, contact support and we’ll help.' },
+}[s] || { title: 'Order update', body: '' });
 
-const OrderItem = memo(({ item }: { item: TrackedOrder['items'][0] }) => (
-  <div className="flex gap-4 p-4 rounded-2xl bg-secondary/30 border border-border/40">
-    {item.image && (
-      <div className="w-16 h-16 rounded-xl overflow-hidden bg-secondary shrink-0">
-        <img src={item.image} alt={item.title} className="w-full h-full object-cover" loading="lazy" />
-      </div>
-    )}
-    <div className="flex-1 min-w-0">
-      <p className="text-sm font-semibold line-clamp-1">{item.title}</p>
-      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-        <span>Qty: {item.quantity}</span>
-        {item.color && <span>· {item.color}</span>}
-        {item.size && <span>· {item.size}</span>}
-      </div>
-    </div>
-    <span className="text-sm font-bold shrink-0 self-center">{formatPrice(item.price * item.quantity)}</span>
-  </div>
-));
-OrderItem.displayName = 'OrderItem';
+const fmtDate = (d?: string | null) => {
+  if (!d) return null;
+  const t = new Date(d);
+  return isNaN(t.getTime()) ? null : t.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+};
 
-const DesktopStepper = memo(({ currentStep }: { currentStep: number }) => (
-  <div className="hidden sm:flex items-center justify-between relative py-2">
-    {/* Track line */}
-    <div className="absolute top-[26px] left-[20px] right-[20px] h-[3px] bg-border/60 rounded-full" />
-    <div
-      className="absolute top-[26px] left-[20px] h-[3px] bg-primary rounded-full transition-all duration-1000 ease-out"
-      style={{ width: `calc(${Math.max(0, (currentStep / (statusSteps.length - 1)) * 100)}% - 40px)` }}
-    />
-    {statusSteps.map((step, i) => {
-      const isComplete = i <= currentStep;
-      const isCurrent = i === currentStep;
-      const Icon = step.icon;
-      return (
-        <div key={step.key} className="relative z-10 flex flex-col items-center gap-3">
-          <div
-            className={cn(
-              'w-11 h-11 rounded-full flex items-center justify-center transition-all duration-700',
-              isComplete
-                ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
-                : 'bg-card border-2 border-border text-muted-foreground',
-              isCurrent && 'scale-115 ring-4 ring-primary/15 animate-stepper-pulse'
+/* Abstract route motif: dotted path, moving parcel, destination pin — pure SVG/CSS */
+const RouteVisual = () => {
+  const reduce = useReducedMotion();
+  return (
+    <svg viewBox="0 0 320 120" className="w-full max-w-[320px] h-auto" aria-hidden="true">
+      <path id="route" d="M20 90 C 90 90, 90 30, 160 30 S 240 90, 300 60" fill="none" stroke="hsl(var(--border))" strokeWidth="2" strokeDasharray="4 6" />
+      <circle cx="20" cy="90" r="6" fill="hsl(var(--foreground))" />
+      <g transform="translate(300 60)">
+        <circle r="14" fill="hsl(var(--accent) / 0.15)" />
+        <circle r="5" fill="hsl(var(--accent))" />
+      </g>
+      <g>
+        <rect x="-9" y="-9" width="18" height="18" rx="3" fill="hsl(var(--card))" stroke="hsl(var(--foreground))" strokeWidth="1.5" />
+        <path d="M-9 -2 H9 M0 -9 V9" stroke="hsl(var(--foreground))" strokeWidth="1" opacity="0.5" />
+        {!reduce && <animateMotion dur="6s" repeatCount="indefinite" rotate="0"><mpath href="#route" /></animateMotion>}
+        {reduce && <animateTransform attributeName="transform" type="translate" values="160 30" dur="1s" fill="freeze" />}
+      </g>
+    </svg>
+  );
+};
+
+const Timeline = ({ current }: { current: number }) => {
+  const reduce = useReducedMotion();
+  return (
+    <ol className="relative grid grid-cols-1 sm:grid-cols-6 gap-0 sm:gap-2" aria-label="Order progress">
+      {steps.map((step, i) => {
+        const done = i < current;
+        const active = i === current;
+        const Icon = step.icon;
+        return (
+          <li key={step.key} className="relative flex sm:flex-col items-start sm:items-center gap-3 sm:gap-2 pb-6 sm:pb-0 last:pb-0" aria-current={active ? 'step' : undefined}>
+            {/* connector */}
+            {i < steps.length - 1 && (
+              <>
+                <span className="sm:hidden absolute left-[15px] top-8 bottom-0 w-0.5 bg-border" />
+                <span className="hidden sm:block absolute top-4 left-[calc(50%+18px)] right-[calc(-50%+18px)] h-0.5 bg-border" />
+                {done && (
+                  <motion.span
+                    className="absolute bg-foreground sm:hidden left-[15px] top-8 bottom-0 w-0.5 origin-top"
+                    initial={{ scaleY: reduce ? 1 : 0 }} animate={{ scaleY: 1 }} transition={{ duration: 0.3, delay: i * 0.08 }}
+                  />
+                )}
+                {done && (
+                  <motion.span
+                    className="absolute bg-foreground hidden sm:block top-4 left-[calc(50%+18px)] right-[calc(-50%+18px)] h-0.5 origin-left"
+                    initial={{ scaleX: reduce ? 1 : 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.3, delay: i * 0.08 }}
+                  />
+                )}
+              </>
             )}
-          >
-            <Icon className="h-4.5 w-4.5" />
-          </div>
-          <span className={cn(
-            'text-[11px] font-semibold transition-colors duration-500 text-center',
-            isComplete ? 'text-primary' : 'text-muted-foreground'
-          )}>
-            {step.label}
-          </span>
-        </div>
-      );
-    })}
-  </div>
-));
-DesktopStepper.displayName = 'DesktopStepper';
-
-const MobileStepper = memo(({ currentStep }: { currentStep: number }) => (
-  <div className="sm:hidden space-y-0">
-    {statusSteps.map((step, i) => {
-      const isComplete = i <= currentStep;
-      const isCurrent = i === currentStep;
-      const isLast = i === statusSteps.length - 1;
-      const Icon = step.icon;
-      return (
-        <div key={step.key} className="flex gap-4">
-          <div className="flex flex-col items-center">
-            <div
+            <motion.span
+              initial={reduce ? false : { scale: 0.7, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.25, delay: i * 0.06 }}
               className={cn(
-                'w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-all duration-700',
-                isComplete ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20' : 'bg-card border-2 border-border text-muted-foreground',
-                isCurrent && 'scale-110 ring-4 ring-primary/15 animate-stepper-pulse'
+                'relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition-colors',
+                done && 'bg-foreground border-foreground text-background',
+                active && 'bg-accent border-accent text-accent-foreground ring-4 ring-accent/20',
+                !done && !active && 'bg-card border-border text-muted-foreground',
               )}
             >
-              <Icon className="h-4 w-4" />
-            </div>
-            {!isLast && <div className={cn('w-0.5 h-8 transition-colors duration-700', isComplete ? 'bg-primary' : 'bg-border')} />}
-          </div>
-          <div className="pb-8 pt-1.5">
-            <p className={cn('text-sm font-semibold transition-colors duration-500', isComplete ? 'text-foreground' : 'text-muted-foreground')}>
+              {done ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+              {active && !reduce && <span className="absolute inset-0 rounded-full ring-2 ring-accent/40 animate-ping" />}
+            </motion.span>
+            <span className={cn('pt-1.5 sm:pt-0 text-sm sm:text-xs sm:text-center font-medium', done || active ? 'text-foreground' : 'text-muted-foreground')}>
               {step.label}
-            </p>
-          </div>
-        </div>
-      );
-    })}
-  </div>
-));
-MobileStepper.displayName = 'MobileStepper';
+              {active && <span className="sm:block sm:mt-0.5 ml-2 sm:ml-0 text-[11px] font-semibold text-accent">Current</span>}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+};
 
-/* ─── Result Skeleton ─── */
-const ResultSkeleton = () => (
-  <div className="space-y-6 animate-pulse">
-    <div className="bg-card border border-border rounded-2xl p-8 space-y-4">
-      <div className="h-6 w-48 bg-secondary rounded-lg" />
-      <div className="h-4 w-32 bg-secondary rounded-lg" />
-      <div className="flex gap-4 mt-6">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="flex flex-col items-center gap-2">
-            <div className="w-11 h-11 rounded-full bg-secondary" />
-            <div className="h-3 w-16 bg-secondary rounded" />
-          </div>
-        ))}
-      </div>
-    </div>
-    <div className="bg-card border border-border rounded-2xl p-8 space-y-4">
-      {Array.from({ length: 2 }).map((_, i) => (
-        <div key={i} className="flex gap-4 p-4 rounded-2xl bg-secondary/30">
-          <div className="w-16 h-16 rounded-xl bg-secondary" />
-          <div className="flex-1 space-y-2">
-            <div className="h-4 w-40 bg-secondary rounded" />
-            <div className="h-3 w-24 bg-secondary rounded" />
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-/* ─── Main Page ─── */
+const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const TrackOrder = () => {
+  const reduce = useReducedMotion();
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [touched, setTouched] = useState({ email: false, phone: false });
   const [loading, setLoading] = useState(false);
   const [orders, setOrders] = useState<TrackedOrder[] | null>(null);
-  const [selectedOrder, setSelectedOrder] = useState<TrackedOrder | null>(null);
-  const [error, setError] = useState('');
-  const [showResults, setShowResults] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [error, setError] = useState<{ kind: 'notfound' | 'failed' | 'invalid'; msg: string } | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
-  const abortRef = useRef<AbortController | null>(null);
+  const reqId = useRef(0);
   const refreshInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const startAutoRefresh = useCallback((emailVal: string, phoneVal: string) => {
-    if (refreshInterval.current) clearInterval(refreshInterval.current);
-    refreshInterval.current = setInterval(() => {
-      fetchOrders(emailVal, phoneVal, true);
-    }, 30_000);
-  }, []);
+  useEffect(() => () => { if (refreshInterval.current) clearInterval(refreshInterval.current); reqId.current++; }, []);
 
-  useEffect(() => {
-    return () => {
-      if (refreshInterval.current) clearInterval(refreshInterval.current);
-      if (abortRef.current) abortRef.current.abort();
-    };
-  }, []);
+  const emailErr = !email.trim() ? 'Enter the email you used at checkout' : !emailRe.test(email.trim()) ? 'That email looks incomplete' : null;
+  const phoneDigits = phone.replace(/\D/g, '');
+  const phoneErr = !phone.trim() ? 'Enter the mobile number you used at checkout' : phoneDigits.length < 10 ? 'Enter your 10-digit mobile number' : null;
 
   const fetchOrders = useCallback(async (emailVal: string, phoneVal: string, silent = false) => {
-    if (abortRef.current) abortRef.current.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-
+    const id = ++reqId.current;
     if (!silent) setLoading(true);
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('track-order', {
-        body: { email: emailVal, phone: phoneVal },
-      });
-      if (controller.signal.aborted) return;
-      clearTimeout(timeoutId);
-      if (fnError) throw fnError;
-      if (data?.error) { if (!silent) setError(data.error); return; }
-
-      if (data?.orders?.length > 0) {
-        setOrders(data.orders);
-        setSelectedOrder(prev => {
-          if (prev) {
-            const updated = data.orders.find((o: TrackedOrder) => o.id === prev.id);
-            return updated || data.orders[0];
-          }
-          return data.orders[0];
-        });
-        if (!silent) {
-          setShowResults(true);
-          setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
-        }
-      } else if (!silent) {
-        setError('No orders found. Please check your details.');
+      const { data, error: fnError } = await supabase.functions.invoke('track-order', { body: { email: emailVal, phone: phoneVal } });
+      if (id !== reqId.current) return; // stale response
+      // 404 from the function means "no match" — not a failure
+      const status = (fnError as any)?.context?.status;
+      if (status === 404 || (data?.error && /no orders/i.test(data.error))) {
+        if (!silent) { setOrders(null); setError({ kind: 'notfound', msg: 'We couldn’t find an order with these details.' }); }
+        return;
       }
-    } catch (err: any) {
-      if (controller.signal.aborted && !silent) {
-        setError('Request timed out. Please try again.');
-      } else if (!silent) {
-        setError(err?.message || 'Something went wrong. Please try again.');
-      }
+      if (status === 429) { if (!silent) setError({ kind: 'failed', msg: 'Too many attempts. Please wait a minute and try again.' }); return; }
+      if (fnError || data?.error) throw fnError || new Error(data.error);
+      const list: TrackedOrder[] = Array.isArray(data?.orders) ? data.orders : [];
+      if (list.length === 0) { if (!silent) setError({ kind: 'notfound', msg: 'We couldn’t find an order with these details.' }); return; }
+      setOrders(list);
+      setSelectedId(prev => (prev && list.some(o => o.id === prev) ? prev : list[0].id));
+      if (!silent) setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }), 80);
+    } catch (err) {
+      console.error('[TrackOrder] lookup failed:', err);
+      if (!silent && id === reqId.current) setError({ kind: 'failed', msg: 'We couldn’t reach our servers. Please try again.' });
     } finally {
-      clearTimeout(timeoutId);
-      if (!silent) setLoading(false);
+      if (!silent && id === reqId.current) setLoading(false);
     }
-  }, []);
+  }, [reduce]);
 
-  const handleTrack = useCallback(async (e: React.FormEvent) => {
+  const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setShowResults(false);
+    setTouched({ email: true, phone: true });
+    if (emailErr || phoneErr) return;
+    setError(null);
     setOrders(null);
-    setSelectedOrder(null);
+    const em = email.trim().toLowerCase();
+    const ph = phone.trim();
+    await fetchOrders(em, ph);
+    if (refreshInterval.current) clearInterval(refreshInterval.current);
+    refreshInterval.current = setInterval(() => fetchOrders(em, ph, true), 60_000);
+  };
 
-    const trimmedEmail = email.trim().toLowerCase();
-    const trimmedPhone = phone.trim();
-    if (!trimmedEmail || !trimmedPhone) { setError('Please enter both email and phone number.'); return; }
+  const order = orders?.find(o => o.id === selectedId) || null;
+  const cancelled = order?.order_status === 'cancelled';
+  const current = order ? statusIndex[order.order_status] ?? 0 : 0;
+  const msg = order ? statusMessage(order.order_status) : null;
+  const eta = order && !cancelled && order.order_status !== 'delivered' ? fmtDate(order.estimated_delivery_date) : null;
 
-    await fetchOrders(trimmedEmail, trimmedPhone);
-    startAutoRefresh(trimmedEmail, trimmedPhone);
-  }, [email, phone, fetchOrders, startAutoRefresh]);
-
-  const currentStep = selectedOrder ? getStepIndex(selectedOrder.order_status) : -1;
-  const isCancelled = selectedOrder?.order_status === 'cancelled';
+  const inputCls = (bad: boolean) =>
+    cn('w-full h-12 pl-11 pr-4 rounded-xl border bg-background text-base sm:text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 transition-colors', bad ? 'border-destructive' : 'border-border');
 
   return (
-    <main className="min-h-screen">
-      {/* ─── Premium Split Hero ─── */}
-      <section className="relative overflow-hidden">
-        {/* Background accent */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-background" />
-
-        <div className="container mx-auto px-4 py-16 lg:py-28 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center max-w-6xl mx-auto">
-
-            {/* Left — Illustration + Copy */}
-            <div className="text-center lg:text-left animate-fade-in-up">
-              <div className="flex justify-center lg:justify-start mb-10">
-                <img
-                  src={giftImage}
-                  alt="Track your gift"
-                  className="w-40 h-40 sm:w-56 sm:h-56 lg:w-72 lg:h-72 object-contain drop-shadow-2xl animate-float-gentle"
-                  loading="eager"
-                />
-              </div>
-              <span className="text-[11px] font-medium uppercase tracking-[5px] text-primary mb-4 block">
-                Order Tracking
-              </span>
-              <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl tracking-tight mb-4">
-                Where's My <span className="text-primary">Gift</span>?
-              </h1>
-              <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-md mx-auto lg:mx-0">
-                Track your order in real-time. Enter the details you used while placing your order to get instant updates.
-              </p>
-
-              {/* Trust badges inline */}
-              <div className="flex items-center justify-center lg:justify-start gap-6 mt-8">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <div className="w-8 h-8 rounded-full bg-primary/8 flex items-center justify-center">
-                    <ShieldCheck className="h-4 w-4 text-primary" />
-                  </div>
-                  <span className="font-medium">Secure Lookup</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <div className="w-8 h-8 rounded-full bg-primary/8 flex items-center justify-center">
-                    <Headphones className="h-4 w-4 text-primary" />
-                  </div>
-                  <Link to="/contact" className="font-medium hover:text-primary transition-colors">Need Help?</Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Right — Form Card */}
-            <div className="animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
-              <div className="bg-card border border-border/60 rounded-2xl p-7 sm:p-9 shadow-card">
-                <div className="mb-7">
-                  <h2 className="text-xl font-display tracking-tight mb-1.5">Track Your Order</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Enter your email and phone number below.
-                  </p>
-                </div>
-
-                {error && (
-                  <div className="mb-6 text-sm text-destructive bg-destructive/8 border border-destructive/15 px-4 py-3 rounded-xl animate-fade-in">
-                    {error}
-                  </div>
-                )}
-
-                <form onSubmit={handleTrack} className="space-y-5">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold">Email Address</label>
-                    <div className="relative">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
-                      <Input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="you@example.com"
-                        className="pl-11 h-12 rounded-xl border-border bg-secondary/30 focus:bg-background transition-colors"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold">Phone Number</label>
-                    <div className="relative">
-                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
-                      <Input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="+91 98765 43210"
-                        className="pl-11 h-12 rounded-xl border-border bg-secondary/30 focus:bg-background transition-colors"
-                        required
-                        minLength={10}
-                      />
-                    </div>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full h-13 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm transition-all duration-200 mt-2"
-                  >
-                    {loading ? (
-                      <span className="flex items-center gap-2">
-                        <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                        Searching…
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-2">
-                        <Search className="h-4 w-4" />
-                        Track My Order
-                        <ArrowRight className="h-4 w-4" />
-                      </span>
-                    )}
-                  </Button>
-                </form>
-              </div>
-            </div>
+    <main className="bg-secondary/40 min-h-[70vh]">
+      {/* Compact header + form */}
+      <section className="container mx-auto px-4 pt-8 pb-6 lg:pt-12 max-w-5xl">
+        <div className="grid lg:grid-cols-2 gap-6 lg:gap-12 items-center">
+          <div>
+            <p className="text-xs font-semibold text-accent mb-2">Order tracking</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">Where’s my order?</h1>
+            <p className="text-sm text-muted-foreground mt-2 max-w-md">Enter the email and mobile number you used at checkout to see live status.</p>
+            <div className="hidden lg:block mt-8"><RouteVisual /></div>
           </div>
+
+          <form onSubmit={handleTrack} noValidate className="bg-card border border-border rounded-2xl p-5 sm:p-7 space-y-4">
+            <div>
+              <label htmlFor="tr-email" className="block text-[13px] font-medium mb-1.5">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden />
+                <input id="tr-email" type="email" inputMode="email" autoComplete="email" value={email}
+                  onChange={(e) => setEmail(e.target.value)} onBlur={() => email && setTouched(t => ({ ...t, email: true }))}
+                  placeholder="e.g. priya@gmail.com" className={inputCls(touched.email && !!emailErr)}
+                  aria-invalid={touched.email && !!emailErr} aria-describedby={touched.email && emailErr ? 'tr-email-err' : undefined} />
+              </div>
+              {touched.email && emailErr && <p id="tr-email-err" className="text-xs text-destructive mt-1.5">{emailErr}</p>}
+            </div>
+            <div>
+              <label htmlFor="tr-phone" className="block text-[13px] font-medium mb-1.5">Mobile number</label>
+              <div className="relative">
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden />
+                <input id="tr-phone" type="tel" inputMode="tel" autoComplete="tel" value={phone}
+                  onChange={(e) => setPhone(e.target.value)} onBlur={() => phone && setTouched(t => ({ ...t, phone: true }))}
+                  placeholder="e.g. 98765 43210" className={inputCls(touched.phone && !!phoneErr)}
+                  aria-invalid={touched.phone && !!phoneErr} aria-describedby={touched.phone && phoneErr ? 'tr-phone-err' : undefined} />
+              </div>
+              {touched.phone && phoneErr && <p id="tr-phone-err" className="text-xs text-destructive mt-1.5">{phoneErr}</p>}
+            </div>
+            <Button type="submit" disabled={loading} className="w-full h-12 rounded-full font-semibold">
+              {loading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Finding your order…</> : <>Track order <ArrowRight className="h-4 w-4 ml-1.5" /></>}
+            </Button>
+            <AnimatePresence>
+              {error && (
+                <motion.div role="alert" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                  className="rounded-xl border border-border bg-secondary/60 px-4 py-3 text-sm flex gap-2">
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5 text-destructive" />
+                  <div>
+                    <p className="font-medium">{error.msg}</p>
+                    {error.kind === 'notfound' && <p className="text-muted-foreground text-xs mt-1">Check both details match your order confirmation exactly, or <Link to="/contact" className="underline">contact support</Link>.</p>}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <p className="text-[11px] text-muted-foreground flex items-center gap-1.5"><Headphones className="h-3 w-3" /> Need help? <Link to="/contact" className="underline hover:text-foreground">Contact us</Link></p>
+          </form>
         </div>
       </section>
 
-      {/* ─── Loading Skeleton ─── */}
+      {/* Loading skeleton */}
       {loading && (
-        <section className="container mx-auto px-4 pb-20">
-          <div className="max-w-4xl mx-auto">
-            <ResultSkeleton />
+        <section className="container mx-auto px-4 pb-16 max-w-5xl" aria-busy="true">
+          <div className="bg-card border border-border rounded-2xl p-6 space-y-4 animate-pulse">
+            <div className="h-6 w-56 bg-secondary rounded" />
+            <div className="h-4 w-40 bg-secondary rounded" />
+            <div className="h-16 bg-secondary rounded-xl" />
           </div>
         </section>
       )}
 
-      {/* ─── Order Results ─── */}
-      {showResults && orders && orders.length > 0 && selectedOrder && (
-        <section ref={resultsRef} className="container mx-auto px-4 pb-20 pt-4">
-          <div className="max-w-4xl mx-auto space-y-6">
-
-            {/* Order selector (multiple orders) */}
-            {orders.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide animate-fade-in-up">
-                {orders.map((o) => (
-                  <button
-                    key={o.id}
-                    onClick={() => setSelectedOrder(o)}
-                    className={cn(
-                      'shrink-0 px-5 py-2.5 rounded-full text-sm font-semibold border transition-all duration-300',
-                      selectedOrder.id === o.id
-                        ? 'bg-primary text-primary-foreground border-primary shadow-md shadow-primary/20'
-                        : 'bg-card border-border text-muted-foreground hover:border-primary/40'
-                    )}
-                  >
+      {/* Results */}
+      <AnimatePresence>
+        {!loading && order && msg && (
+          <motion.section
+            ref={resultsRef}
+            key={order.id}
+            initial={reduce ? false : { opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+            className="container mx-auto px-4 pb-16 max-w-5xl space-y-4 scroll-mt-24"
+          >
+            {orders && orders.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Your orders">
+                {orders.map(o => (
+                  <button key={o.id} role="tab" aria-selected={o.id === order.id} onClick={() => setSelectedId(o.id)}
+                    className={cn('shrink-0 px-4 py-2 rounded-full text-xs font-semibold border transition-colors',
+                      o.id === order.id ? 'bg-foreground text-background border-foreground' : 'bg-card border-border text-muted-foreground hover:text-foreground')}>
                     {o.order_number}
                   </button>
                 ))}
               </div>
             )}
 
-            {/* Order Header + Stepper */}
-            <div className="bg-card border border-border/60 rounded-2xl p-6 sm:p-8 shadow-card animate-fade-in-up">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div className="bg-card border border-border rounded-2xl p-5 sm:p-8">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-6">
                 <div>
-                  <div className="flex items-center gap-2.5 mb-1.5">
-                    <span className="text-xs font-bold bg-primary/10 text-primary px-3 py-1 rounded-full uppercase tracking-wider">
-                      {selectedOrder.order_number}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Placed on {new Date(selectedOrder.created_at).toLocaleDateString('en-IN', {
-                      day: 'numeric', month: 'long', year: 'numeric',
-                    })}
-                  </p>
-                  {selectedOrder.estimated_delivery_date && selectedOrder.order_status !== 'delivered' && selectedOrder.order_status !== 'cancelled' && (
-                    <p className="text-xs text-primary font-medium mt-1">
-                      📦 Estimated Delivery: {new Date(selectedOrder.estimated_delivery_date).toLocaleDateString('en-IN', {
-                        day: 'numeric', month: 'long', year: 'numeric',
-                      })}
-                    </p>
-                  )}
+                  <h2 className={cn('text-xl sm:text-2xl font-bold tracking-tight flex items-center gap-2', cancelled && 'text-destructive')}>
+                    {cancelled && <XCircle className="h-5 w-5" />} {msg.title}
+                  </h2>
+                  {msg.body && <p className="text-sm text-muted-foreground mt-1">{msg.body}</p>}
                 </div>
-                <div className="flex items-center gap-3">
-                  {selectedOrder.tracking_number && (
-                    <span className="text-xs text-muted-foreground bg-secondary px-3 py-1.5 rounded-full">
-                      {selectedOrder.courier_name}: {selectedOrder.tracking_number}
-                    </span>
-                  )}
-                  <span className={cn(
-                    'text-xs font-bold px-3 py-1.5 rounded-full capitalize',
-                    isCancelled ? 'bg-destructive/10 text-destructive' :
-                    selectedOrder.order_status === 'delivered' ? 'bg-success/10 text-success' :
-                    'bg-primary/10 text-primary'
-                  )}>
-                    {selectedOrder.order_status.replace('_', ' ')}
-                  </span>
-                </div>
-              </div>
-
-              {/* Status Stepper */}
-              {!isCancelled ? (
-                <>
-                  <DesktopStepper currentStep={currentStep} />
-                  <MobileStepper currentStep={currentStep} />
-                </>
-              ) : (
-                <div className="text-center py-5 text-sm text-destructive bg-destructive/5 rounded-xl font-medium">
-                  This order has been cancelled.
-                </div>
-              )}
-            </div>
-
-            {/* Items */}
-            <div className="bg-card border border-border/60 rounded-2xl p-6 sm:p-8 shadow-card animate-fade-in-up" style={{ animationDelay: '0.08s' }}>
-              <h3 className="font-display text-base mb-5">Order Items</h3>
-              <div className="space-y-3">
-                {selectedOrder.items.map((item, i) => (
-                  <OrderItem key={i} item={item} />
-                ))}
-              </div>
-
-              {/* Totals */}
-              <div className="border-t border-border/50 mt-6 pt-5 space-y-2.5 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium">{formatPrice(selectedOrder.subtotal)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Shipping</span>
-                  <span className="font-medium">{selectedOrder.shipping === 0 ? 'FREE' : formatPrice(selectedOrder.shipping)}</span>
-                </div>
-                {selectedOrder.discount > 0 && (
-                  <div className="flex justify-between text-primary">
-                    <span>Discount</span>
-                    <span className="font-medium">-{formatPrice(selectedOrder.discount)}</span>
+                {eta && (
+                  <div className="rounded-xl bg-secondary px-4 py-2.5 text-sm shrink-0">
+                    <p className="text-[11px] text-muted-foreground">Estimated delivery</p>
+                    <p className="font-semibold">{eta}</p>
                   </div>
                 )}
-                <div className="flex justify-between font-bold text-base pt-3 border-t border-border/50">
-                  <span>Total</span>
-                  <span>{formatPrice(selectedOrder.total)}</span>
-                </div>
+              </div>
+
+              {!cancelled && <Timeline current={current} />}
+
+              <dl className="mt-6 pt-5 border-t border-border grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                <div><dt className="text-[11px] text-muted-foreground">Order</dt><dd className="font-semibold">{order.order_number}</dd></div>
+                <div><dt className="text-[11px] text-muted-foreground">Placed</dt><dd className="font-medium">{fmtDate(order.created_at) || '—'}</dd></div>
+                {order.ship_to?.city && (
+                  <div><dt className="text-[11px] text-muted-foreground">Delivering to</dt><dd className="font-medium">{order.ship_to.city}{order.ship_to.pincode ? ` – ${order.ship_to.pincode}` : ''}</dd></div>
+                )}
+                {order.tracking_number && (
+                  <div><dt className="text-[11px] text-muted-foreground">{order.courier_name || 'Tracking'}</dt><dd className="font-medium break-all">{order.tracking_number}</dd></div>
+                )}
+              </dl>
+            </div>
+
+            <div className="bg-card border border-border rounded-2xl p-5 sm:p-8">
+              <h3 className="font-semibold mb-4">Items</h3>
+              <ul className="space-y-3">
+                {order.items.map((item, i) => (
+                  <li key={i} className="flex gap-3 items-center">
+                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-secondary shrink-0">
+                      {item.image ? <img src={item.image} alt="" className="w-full h-full object-cover" loading="lazy" /> : <Package className="h-5 w-5 m-auto mt-4 text-muted-foreground" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium line-clamp-1">{item.title}</p>
+                      <p className="text-xs text-muted-foreground">Qty {item.quantity}{item.color ? ` · ${item.color}` : ''}{item.size ? ` · ${item.size}` : ''}</p>
+                    </div>
+                    <span className="text-sm font-semibold tabular-nums">{formatPrice(item.price * item.quantity)}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="border-t border-border mt-5 pt-4 space-y-2 text-sm">
+                <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span className="tabular-nums">{formatPrice(order.subtotal)}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Delivery</span><span>{Number(order.shipping) === 0 ? 'Free' : formatPrice(order.shipping)}</span></div>
+                {Number(order.discount) > 0 && <div className="flex justify-between text-success"><span>Discount</span><span className="tabular-nums">−{formatPrice(order.discount)}</span></div>}
+                <div className="flex justify-between font-bold text-base pt-2 border-t border-border"><span>Total</span><span className="tabular-nums">{formatPrice(order.total)}</span></div>
+                <p className="text-xs text-muted-foreground">
+                  {order.payment_method === 'cod' ? 'Cash on delivery' : 'Paid online'} · Payment {order.payment_status}
+                </p>
               </div>
             </div>
 
-            {/* Payment Info */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in-up" style={{ animationDelay: '0.12s' }}>
-              <div className="bg-card border border-border/60 rounded-2xl p-6 shadow-card">
-                <p className="text-[11px] text-muted-foreground uppercase tracking-[3px] font-medium mb-2">Payment Method</p>
-                <p className="font-semibold text-sm capitalize">{selectedOrder.payment_method === 'cod' ? 'Cash on Delivery' : selectedOrder.payment_method}</p>
-              </div>
-              <div className="bg-card border border-border/60 rounded-2xl p-6 shadow-card">
-                <p className="text-[11px] text-muted-foreground uppercase tracking-[3px] font-medium mb-2">Payment Status</p>
-                <p className={cn(
-                  'font-semibold text-sm capitalize',
-                  selectedOrder.payment_status === 'paid' ? 'text-success' : 'text-warning'
-                )}>{selectedOrder.payment_status}</p>
-              </div>
+            <div className="flex flex-wrap gap-3 justify-center pt-2">
+              <Button asChild className="rounded-full px-8"><Link to="/products">Continue shopping</Link></Button>
+              <Button asChild variant="outline" className="rounded-full px-8"><Link to="/contact">Get help with this order</Link></Button>
             </div>
-          </div>
-        </section>
-      )}
+          </motion.section>
+        )}
+      </AnimatePresence>
     </main>
   );
 };
