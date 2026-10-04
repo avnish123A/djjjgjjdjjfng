@@ -14,11 +14,11 @@ const PrivacyPolicy = () => (
       <h1 className="text-3xl font-bold mb-8">Privacy Policy</h1>
       <div className="prose prose-sm max-w-none space-y-6 text-muted-foreground">
         <p><strong className="text-foreground">Last Updated:</strong> February 2026</p>
-        <p>EkamGift ("we", "us", "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website <strong className="text-foreground">ekamgift.com</strong> or place an order with us.</p>
+        <p>CartZebra ("we", "us", "our") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website <strong className="text-foreground">cartzebra.com</strong> or place an order with us.</p>
 
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-2">1. Information We Collect</h2>
-          <p>We collect the following personal information when you interact with EkamGift:</p>
+          <p>We collect the following personal information when you interact with CartZebra:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li><strong className="text-foreground">Personal Details:</strong> Name, email address, phone number, and shipping/billing address</li>
             <li><strong className="text-foreground">Payment Information:</strong> Payment method details processed securely through our payment partners</li>
@@ -81,8 +81,8 @@ const PrivacyPolicy = () => (
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-2">8. Contact Us</h2>
           <p>For privacy-related concerns or to exercise your rights, contact us at:</p>
-          <p><strong className="text-foreground">EkamGift</strong><br/>
-          Email: <a href="mailto:support@ekamgift.com" className="text-primary hover:underline">support@ekamgift.com</a><br/>
+          <p><strong className="text-foreground">CartZebra</strong><br/>
+          Email: <a href="mailto:support@cartzebra.com" className="text-primary hover:underline">support@cartzebra.com</a><br/>
           Phone: +91 98765 43210<br/>
           Address: India</p>
         </section>

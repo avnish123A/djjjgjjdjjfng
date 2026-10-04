@@ -23,10 +23,10 @@ const Maintenance: React.FC = () => {
 
   // SEO meta tags
   useEffect(() => {
-    const pageTitle = isComingSoon ? 'Coming Soon — EkamGift' : 'Under Maintenance — EkamGift';
+    const pageTitle = isComingSoon ? 'Coming Soon — CartZebra' : 'Under Maintenance — CartZebra';
     const pageDesc = isComingSoon
-      ? 'EkamGift is launching soon! Premium curated gifts for every occasion. Sign up to be notified.'
-      : 'EkamGift is currently under maintenance. We\'ll be back shortly with an even better experience.';
+      ? 'CartZebra is launching soon! Premium curated gifts for every occasion. Sign up to be notified.'
+      : 'CartZebra is currently under maintenance. We\'ll be back shortly with an even better experience.';
     
     document.title = pageTitle;
     
@@ -80,8 +80,8 @@ const Maintenance: React.FC = () => {
                 }}
               >
                 <img
-                  src="/logo-ekamgift.png"
-                  alt="EkamGift — Premium Curated Gifts"
+                  src="/logo-cartzebra.png"
+                  alt="CartZebra — Premium Curated Gifts"
                   className="h-20 w-auto object-contain"
                   loading="eager"
                 />

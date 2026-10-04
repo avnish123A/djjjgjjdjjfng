@@ -18,7 +18,7 @@ const ContactUs = () => {
     message: '',
   });
 
-  const email = settings['contact_email'] || 'hello@ekamgift.com';
+  const email = settings['contact_email'] || 'hello@cartzebra.com';
   const phone = settings['contact_phone'] || '+91 98765 43210';
   const address = settings['contact_location'] || 'India';
   const pageTitle = settings['contact_page_title'] || 'Get in Touch';

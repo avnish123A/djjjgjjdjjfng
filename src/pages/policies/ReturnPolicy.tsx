@@ -14,7 +14,7 @@ const ReturnPolicy = () => (
       <h1 className="text-3xl font-bold mb-8">Return & Refund Policy</h1>
       <div className="prose prose-sm max-w-none space-y-6 text-muted-foreground">
         <p><strong className="text-foreground">Last Updated:</strong> February 2026</p>
-        <p>At EkamGift, we want every gift to bring joy. If something isn't right with your order, we're here to make it better. Please read our return and refund policy carefully.</p>
+        <p>At CartZebra, we want every gift to bring joy. If something isn't right with your order, we're here to make it better. Please read our return and refund policy carefully.</p>
 
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-2">1. Return Window</h2>
@@ -43,7 +43,7 @@ const ReturnPolicy = () => (
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-2">3. How to Initiate a Return</h2>
           <ol className="list-decimal pl-5 space-y-1">
-            <li>Email us at <a href="mailto:support@ekamgift.com" className="text-primary hover:underline">support@ekamgift.com</a> with your order number, product photos, and reason for return</li>
+            <li>Email us at <a href="mailto:support@cartzebra.com" className="text-primary hover:underline">support@cartzebra.com</a> with your order number, product photos, and reason for return</li>
             <li>Our team will review your request and respond within <strong className="text-foreground">24–48 hours</strong></li>
             <li>Once approved, you'll receive return shipping instructions or a pickup will be arranged</li>
             <li>Pack the item securely in its original packaging</li>
@@ -128,8 +128,8 @@ const ReturnPolicy = () => (
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-2">9. Contact Us</h2>
           <p>For return or refund queries, reach out to us:</p>
-          <p><strong className="text-foreground">EkamGift Support</strong><br/>
-          Email: <a href="mailto:support@ekamgift.com" className="text-primary hover:underline">support@ekamgift.com</a><br/>
+          <p><strong className="text-foreground">CartZebra Support</strong><br/>
+          Email: <a href="mailto:support@cartzebra.com" className="text-primary hover:underline">support@cartzebra.com</a><br/>
           Phone: +91 98765 43210<br/>
           Response Time: Within 24 hours on business days</p>
         </section>

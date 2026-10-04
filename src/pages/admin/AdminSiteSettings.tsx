@@ -41,7 +41,7 @@ const socialFields = [
 ];
 
 const contactFields = [
-  { key: 'contact_email', label: 'Email', placeholder: 'hello@ekamgift.com', icon: Mail },
+  { key: 'contact_email', label: 'Email', placeholder: 'hello@cartzebra.com', icon: Mail },
   { key: 'contact_phone', label: 'Phone', placeholder: '+91 98765 43210', icon: Phone },
   { key: 'contact_location', label: 'Address', placeholder: 'India', icon: MapPin },
   { key: 'contact_page_title', label: 'Page Heading', placeholder: 'Get in Touch', icon: Mail },

@@ -255,7 +255,7 @@ const Checkout = () => {
           key: paymentData.razorpayKeyId,
           amount: paymentData.amount,
           currency: paymentData.currency,
-          name: 'EkamGift',
+          name: 'CartZebra',
           description: `Order ${orderNumber}`,
           order_id: paymentData.razorpayOrderId,
           prefill: {

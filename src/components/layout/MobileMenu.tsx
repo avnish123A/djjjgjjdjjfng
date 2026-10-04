@@ -17,7 +17,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-6 border-b border-foreground/8">
             <h2 className="font-display text-lg tracking-tighter">
-              Terroir <span className="font-display-italic font-normal">&</span> Co.
+              CartZebra
             </h2>
             <button onClick={onClose} className="p-1 text-foreground/40 hover:text-foreground transition-colors">
               <X className="h-4 w-4" strokeWidth={1.5} />

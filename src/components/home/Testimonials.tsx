@@ -10,7 +10,7 @@ const testimonials = [
   {
     name: 'Rohan K.',
     location: 'Bangalore',
-    text: 'The Darjeeling first flush is legitimately the best tea I\'ve ever had. You can taste the altitude and the care. My pantry is now entirely Terroir & Co.',
+    text: 'The Darjeeling first flush is legitimately the best tea I\'ve ever had. You can taste the altitude and the care. My pantry is now entirely CartZebra',
     initials: 'RK',
   },
   {
