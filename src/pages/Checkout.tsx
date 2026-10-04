@@ -208,24 +208,24 @@ const Checkout = () => {
       if (orderError) throw orderError;
       if (data?.error) throw new Error(data.error);
 
-      const { orderId, orderNumber } = data;
+      const { orderId, orderNumber, checkoutToken } = data;
 
       // Rotate idempotency key after successful order creation
       idempotencyKeyRef.current = crypto.randomUUID();
 
       if (paymentMethod === 'razorpay' || paymentMethod === 'cashfree') {
         const { data: paymentData, error: payErr } = await supabase.functions.invoke('create-payment', {
-          body: { orderId, gateway: paymentMethod },
+          body: { orderId, gateway: paymentMethod, checkoutToken },
         });
         if (payErr || paymentData?.error) {
           throw new Error(paymentData?.error || 'Payment initiation failed');
         }
 
         if (paymentMethod === 'razorpay') {
-          await openRazorpay(paymentData, orderId, orderNumber);
+          await openRazorpay(paymentData, orderId, orderNumber, checkoutToken);
           return;
         } else if (paymentMethod === 'cashfree') {
-          await openCashfree(paymentData, orderId, orderNumber);
+          await openCashfree(paymentData, orderId, orderNumber, checkoutToken);
           return;
         }
       }
@@ -243,7 +243,7 @@ const Checkout = () => {
     }
   };
 
-  const openRazorpay = (paymentData: any, orderId: string, orderNumber: string) => {
+  const openRazorpay = (paymentData: any, orderId: string, orderNumber: string, checkoutToken: string) => {
     return new Promise<void>((resolve, reject) => {
       const loadScript = () => {
         if ((window as any).Razorpay) return Promise.resolve();
@@ -275,6 +275,7 @@ const Checkout = () => {
                 body: {
                   gateway: 'razorpay',
                   orderId,
+                  checkoutToken,
                   razorpayPaymentId: response.razorpay_payment_id,
                   razorpayOrderId: response.razorpay_order_id,
                   razorpaySignature: response.razorpay_signature,
@@ -318,7 +319,7 @@ const Checkout = () => {
     });
   };
 
-  const openCashfree = async (paymentData: any, orderId: string, orderNumber: string) => {
+  const openCashfree = async (paymentData: any, orderId: string, orderNumber: string, checkoutToken: string) => {
     try {
       if (!(window as any).Cashfree) {
         const script = document.createElement('script');
@@ -341,7 +342,7 @@ const Checkout = () => {
 
       if (result?.paymentDetails || result?.error === undefined) {
         const { data: verifyData } = await supabase.functions.invoke('verify-payment', {
-          body: { gateway: 'cashfree', orderId },
+          body: { gateway: 'cashfree', orderId, checkoutToken },
         });
         if (verifyData?.success) {
           clearCart();
