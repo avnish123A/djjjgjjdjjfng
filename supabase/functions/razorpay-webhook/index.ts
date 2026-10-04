@@ -77,6 +77,16 @@ Deno.serve(async (req) => {
         return new Response('OK', { status: 200 })
       }
 
+      // Amount (paise) and currency must match what we recorded for this order
+      const expectedPaise = Math.round(Number(txn.amount) * 100)
+      if (Number(payment.amount) !== expectedPaise || (payment.currency && payment.currency !== 'INR')) {
+        console.error('Razorpay amount/currency mismatch for order:', txn.order_id)
+        await supabase.from('payment_transactions')
+          .update({ status: 'amount_mismatch', raw_response: event })
+          .eq('id', txn.id)
+        return new Response('OK', { status: 200 })
+      }
+
       // Update transaction
       await supabase
         .from('payment_transactions')
