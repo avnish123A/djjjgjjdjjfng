@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy as reactLazy, Suspense, type ComponentType } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useZoomPrevention } from "@/hooks/useZoomPrevention";
 import { Toaster } from "@/components/ui/toaster";
@@ -16,9 +16,21 @@ import { BackToTop } from "@/components/layout/BackToTop";
 import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import PageLoader from "@/components/layout/PageLoader";
+import { AdminPageSkeleton } from "@/components/admin/AdminSkeletons";
 import Index from "./pages/Index";
 import Maintenance from "./pages/Maintenance";
 import NotFound from "./pages/NotFound";
+
+// Lazy import that retries once: after a deploy, old chunk files disappear and
+// the import rejects — the root cause of the generic crash screen on navigation.
+function lazy<T extends ComponentType<any>>(factory: () => Promise<{ default: T }>) {
+  return reactLazy(() =>
+    factory().catch(async (err) => {
+      await new Promise((r) => setTimeout(r, 400));
+      try { return await factory(); } catch { throw err; }
+    })
+  );
+}
 
 // Lazy-loaded storefront pages
 const ProductListing = lazy(() => import("./pages/ProductListing"));
@@ -73,15 +85,15 @@ const queryClient = new QueryClient({
   },
 });
 
-// Admin loading fallback
+// Full-screen admin fallback — only used before the admin shell exists (auth check, login)
 const AdminLoadingFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a]">
-    <div className="flex flex-col items-center gap-3">
-      <div className="h-8 w-8 border-3 border-accent border-t-transparent rounded-full animate-spin" />
-      <p className="text-sm text-white/40">Loading…</p>
-    </div>
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="h-6 w-6 rounded-full border-2 border-border border-t-foreground animate-spin" aria-label="Loading" />
   </div>
 );
+
+// In-shell fallback: sidebar/header stay visible while a page's code loads
+const AdminContentFallback = () => <AdminPageSkeleton />;
 
 // Storefront loading fallback
 const StorefrontLoadingFallback = () => (
@@ -101,13 +113,13 @@ const AdminGuard = ({ children }: { children: React.ReactNode }) => {
 
   if (user && !isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] p-4">
-        <div className="glass-strong rounded-2xl p-8 max-w-md text-center space-y-4">
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="bg-card border border-border rounded-2xl p-8 max-w-md text-center space-y-4">
           <div className="h-12 w-12 rounded-full bg-destructive/20 flex items-center justify-center mx-auto">
             <span className="text-destructive text-xl font-bold">✕</span>
           </div>
-          <h2 className="text-xl font-bold text-white">Access Denied</h2>
-          <p className="text-sm text-white/50">You don't have admin privileges. Contact a super admin to get access.</p>
+          <h2 className="text-xl font-bold text-foreground">Access Denied</h2>
+          <p className="text-sm text-muted-foreground">You don't have admin privileges. Contact a super admin to get access.</p>
           <button onClick={() => window.location.href = '/admin/login'} className="text-accent text-sm hover:underline">
             Back to login
           </button>
@@ -171,9 +183,11 @@ const StorefrontLayout = ({ children }: { children: React.ReactNode }) => (
 const StorefrontRoute = ({ children }: { children: React.ReactNode }) => (
   <MaintenanceGuard>
     <StorefrontLayout>
-      <Suspense fallback={<StorefrontLoadingFallback />}>
-        {children}
-      </Suspense>
+      <ErrorBoundary variant="page">
+        <Suspense fallback={<StorefrontLoadingFallback />}>
+          {children}
+        </Suspense>
+      </ErrorBoundary>
     </StorefrontLayout>
   </MaintenanceGuard>
 );
@@ -182,7 +196,7 @@ const App = () => {
   useZoomPrevention(true);
 
   return (
-  <ErrorBoundary>
+  <ErrorBoundary variant="screen">
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -245,24 +259,24 @@ const App = () => {
                   }
                 >
                   <Route index element={<Navigate to="/admin/dashboard" replace />} />
-                  <Route path="dashboard" element={<Suspense fallback={<AdminLoadingFallback />}><AdminDashboard /></Suspense>} />
-                  <Route path="products" element={<Suspense fallback={<AdminLoadingFallback />}><AdminProducts /></Suspense>} />
-                  <Route path="products/add" element={<Suspense fallback={<AdminLoadingFallback />}><AdminProductForm /></Suspense>} />
-                  <Route path="products/edit/:id" element={<Suspense fallback={<AdminLoadingFallback />}><AdminProductForm /></Suspense>} />
-                  <Route path="orders" element={<Suspense fallback={<AdminLoadingFallback />}><AdminOrders /></Suspense>} />
-                  <Route path="orders/:id" element={<Suspense fallback={<AdminLoadingFallback />}><AdminOrderDetail /></Suspense>} />
-                  <Route path="customers" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCustomers /></Suspense>} />
-                  <Route path="categories" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCategories /></Suspense>} />
-                  <Route path="coupons" element={<Suspense fallback={<AdminLoadingFallback />}><AdminCoupons /></Suspense>} />
-                  <Route path="analytics" element={<Suspense fallback={<AdminLoadingFallback />}><AdminAnalytics /></Suspense>} />
+                  <Route path="dashboard" element={<Suspense fallback={<AdminContentFallback />}><AdminDashboard /></Suspense>} />
+                  <Route path="products" element={<Suspense fallback={<AdminContentFallback />}><AdminProducts /></Suspense>} />
+                  <Route path="products/add" element={<Suspense fallback={<AdminContentFallback />}><AdminProductForm /></Suspense>} />
+                  <Route path="products/edit/:id" element={<Suspense fallback={<AdminContentFallback />}><AdminProductForm /></Suspense>} />
+                  <Route path="orders" element={<Suspense fallback={<AdminContentFallback />}><AdminOrders /></Suspense>} />
+                  <Route path="orders/:id" element={<Suspense fallback={<AdminContentFallback />}><AdminOrderDetail /></Suspense>} />
+                  <Route path="customers" element={<Suspense fallback={<AdminContentFallback />}><AdminCustomers /></Suspense>} />
+                  <Route path="categories" element={<Suspense fallback={<AdminContentFallback />}><AdminCategories /></Suspense>} />
+                  <Route path="coupons" element={<Suspense fallback={<AdminContentFallback />}><AdminCoupons /></Suspense>} />
+                  <Route path="analytics" element={<Suspense fallback={<AdminContentFallback />}><AdminAnalytics /></Suspense>} />
                   
-                  <Route path="pages" element={<Suspense fallback={<AdminLoadingFallback />}><AdminPages /></Suspense>} />
-                  <Route path="pages/new" element={<Suspense fallback={<AdminLoadingFallback />}><AdminPageEditor /></Suspense>} />
-                  <Route path="pages/edit/:id" element={<Suspense fallback={<AdminLoadingFallback />}><AdminPageEditor /></Suspense>} />
-                  <Route path="settings" element={<Suspense fallback={<AdminLoadingFallback />}><AdminSiteSettings /></Suspense>} />
-                  <Route path="hero-slides" element={<Suspense fallback={<AdminLoadingFallback />}><AdminHeroSlides /></Suspense>} />
-                  <Route path="payments" element={<Suspense fallback={<AdminLoadingFallback />}><AdminPayments /></Suspense>} />
-                  <Route path="transactions" element={<Suspense fallback={<AdminLoadingFallback />}><AdminTransactions /></Suspense>} />
+                  <Route path="pages" element={<Suspense fallback={<AdminContentFallback />}><AdminPages /></Suspense>} />
+                  <Route path="pages/new" element={<Suspense fallback={<AdminContentFallback />}><AdminPageEditor /></Suspense>} />
+                  <Route path="pages/edit/:id" element={<Suspense fallback={<AdminContentFallback />}><AdminPageEditor /></Suspense>} />
+                  <Route path="settings" element={<Suspense fallback={<AdminContentFallback />}><AdminSiteSettings /></Suspense>} />
+                  <Route path="hero-slides" element={<Suspense fallback={<AdminContentFallback />}><AdminHeroSlides /></Suspense>} />
+                  <Route path="payments" element={<Suspense fallback={<AdminContentFallback />}><AdminPayments /></Suspense>} />
+                  <Route path="transactions" element={<Suspense fallback={<AdminContentFallback />}><AdminTransactions /></Suspense>} />
                 </Route>
 
                 <Route path="*" element={<StorefrontRoute><NotFound /></StorefrontRoute>} />
