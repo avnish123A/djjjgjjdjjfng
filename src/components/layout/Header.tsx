@@ -22,7 +22,7 @@ export const Header = () => {
   const { data: settings = {} } = useSiteSettings();
 
   const announcementEnabled = settings['announcement_enabled'] !== 'false';
-  const announcementText = settings['announcement_text'] || 'Complimentary shipping on orders above ₹5,000 · Use code HARVEST10 for 10% off';
+  const announcementText = settings['announcement_text'] || 'Smart shopping starts here — discover exclusive deals, trending products & more.';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -180,7 +180,7 @@ export const Header = () => {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search oils, vinegars, spices, teas..."
+                    placeholder="Search products, brands and categories..."
                     className="w-full bg-transparent border-b border-foreground/20 pb-3 text-lg font-display-italic text-foreground placeholder:text-foreground/25 focus:outline-none focus:border-foreground/50 transition-colors"
                   />
                   <button type="submit" className="absolute right-0 bottom-3">

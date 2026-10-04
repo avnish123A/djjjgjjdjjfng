@@ -3,12 +3,12 @@ import { useCategories } from '@/hooks/useCategories';
 import { motion } from 'framer-motion';
 
 const fallbackCategories = [
-  { id: 'f1', name: 'Single-Origin Oils', slug: 'single-origin-oils', image: 'https://images.unsplash.com/photo-1474979266404-7eaabdf50494?w=800&q=80' },
-  { id: 'f2', name: 'Artisan Vinegars', slug: 'artisan-vinegars', image: 'https://images.unsplash.com/photo-1609501676725-7186f017a4b7?w=800&q=80' },
-  { id: 'f3', name: 'Heritage Spices', slug: 'heritage-spices', image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800&q=80' },
-  { id: 'f4', name: 'Wild Honey', slug: 'wild-honey', image: 'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=800&q=80' },
-  { id: 'f5', name: 'Rare Teas', slug: 'rare-teas', image: 'https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=800&q=80' },
-  { id: 'f6', name: 'Cured Salts', slug: 'cured-salts', image: 'https://images.unsplash.com/photo-1518110925495-5fe2c8dcf2f5?w=800&q=80' },
+  { id: 'f1', name: 'Electronics', slug: 'electronics', image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?w=800&q=80' },
+  { id: 'f2', name: 'Fashion', slug: 'fashion', image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&q=80' },
+  { id: 'f3', name: 'Home & Living', slug: 'home-living', image: 'https://images.unsplash.com/photo-1484101403633-562f891dc89a?w=800&q=80' },
+  { id: 'f4', name: 'Beauty', slug: 'beauty', image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&q=80' },
+  { id: 'f5', name: 'Gifts', slug: 'gifts', image: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=800&q=80' },
+  { id: 'f6', name: 'Accessories', slug: 'accessories', image: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=800&q=80' },
 ];
 
 export const CategoryGrid = () => {
@@ -40,8 +40,8 @@ export const CategoryGrid = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-14"
         >
-          <p className="font-utility text-[10px] tracking-[0.3em] text-foreground/40 mb-3">THE COLLECTION</p>
-          <h2 className="font-display text-3xl sm:text-4xl tracking-tighter">Shop by Origin</h2>
+          <p className="font-utility text-[10px] tracking-[0.3em] text-foreground/40 mb-3">EXPLORE</p>
+          <h2 className="font-display text-3xl sm:text-4xl tracking-tighter">Shop by Category</h2>
         </motion.div>
 
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
@@ -55,7 +55,7 @@ export const CategoryGrid = () => {
             >
               <Link
                 to={`/products?category=${cat.slug}`}
-                className="group relative block overflow-hidden aspect-[4/5]"
+                className="group relative block overflow-hidden aspect-[4/5] rounded-2xl"
               >
                 <img
                   src={cat.image || '/placeholder.svg'}

@@ -80,7 +80,7 @@ const Maintenance: React.FC = () => {
                 }}
               >
                 <img
-                  src="/logo-cartzebra.png"
+                  src="/logo-cartzebra.svg"
                   alt="CartZebra"
                   className="h-20 w-auto object-contain"
                   loading="eager"
