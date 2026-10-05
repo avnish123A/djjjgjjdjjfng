@@ -13,7 +13,10 @@ export const BottomNav = () => {
   const location = useLocation();
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border shadow-bottom-nav" style={{ height: '60px' }}>
+    <nav
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border shadow-bottom-nav"
+      style={{ height: 'calc(60px + env(safe-area-inset-bottom))', paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
       <div className="grid grid-cols-5 h-full">
         {navItems.map((item) => {
           const isActive = item.to === '/'
