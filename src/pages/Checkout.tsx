@@ -572,7 +572,7 @@ const Checkout = () => {
   );
 
   return (
-    <main className="bg-secondary/40 pb-32 lg:pb-12">
+    <main className="bg-secondary/40 pb-[calc(60px+2.5rem+env(safe-area-inset-bottom))] lg:pb-12">
       <div className="container mx-auto px-4 pt-5 lg:pt-8 max-w-6xl">
         <div className="flex items-baseline justify-between mb-4 lg:mb-6">
           <h1 className="text-xl lg:text-2xl font-bold tracking-tight">Checkout</h1>
@@ -696,7 +696,7 @@ const Checkout = () => {
                     )}
                   </AnimatePresence>
 
-                  <div className="mt-5 hidden lg:block">
+                  <div className="mt-5">
                     {PrimaryCta({})}
                   </div>
                   <p className="mt-3 text-xs text-muted-foreground flex items-start gap-1.5">
@@ -770,18 +770,6 @@ const Checkout = () => {
             </aside>
           </div>
 
-          {/* Mobile bottom bar — only once payment is open, so it never hides the form */}
-          <AnimatePresence>
-            {currentStep === 'payment' && (
-              <motion.div
-                initial={{ y: 80 }} animate={{ y: 0 }} exit={{ y: 80 }}
-                transition={{ duration: dur }}
-                className="lg:hidden fixed inset-x-0 bottom-[60px] z-40 border-t border-border bg-background/95 backdrop-blur px-4 py-3"
-              >
-                {PrimaryCta({})}
-              </motion.div>
-            )}
-          </AnimatePresence>
         </form>
       </div>
     </main>
