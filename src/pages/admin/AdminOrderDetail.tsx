@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import OrderEmailStatus from '@/components/admin/OrderEmailStatus';
 
 const allStatuses = ['placed', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled'];
 
@@ -371,6 +372,8 @@ const AdminOrderDetail: React.FC = () => {
               {updateStatusMutation.isPending ? 'Updating...' : 'Update Status'}
             </Button>
           </div>
+
+          <OrderEmailStatus orderId={order.id} />
 
           {/* Mark Paid */}
           {order.payment_status === 'pending' && (
