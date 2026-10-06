@@ -176,6 +176,59 @@ export type Database = {
         }
         Relationships: []
       }
+      email_events: {
+        Row: {
+          attempt_count: number
+          created_at: string
+          email_type: string
+          error_message: string | null
+          id: string
+          order_id: string
+          provider: string
+          provider_message_id: string | null
+          recipient: string
+          sent_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempt_count?: number
+          created_at?: string
+          email_type: string
+          error_message?: string | null
+          id?: string
+          order_id: string
+          provider?: string
+          provider_message_id?: string | null
+          recipient: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempt_count?: number
+          created_at?: string
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          order_id?: string
+          provider?: string
+          provider_message_id?: string | null
+          recipient?: string
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hero_slides: {
         Row: {
           archived_at: string | null
