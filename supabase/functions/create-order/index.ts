@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendOrderConfirmation } from '../_shared/order-confirmation-email.ts'
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts'
 
 const corsHeaders = {
@@ -422,6 +423,13 @@ Deno.serve(async (req) => {
           )
         }
       }
+    }
+
+    // COD orders are confirmed at creation; prepaid orders are emailed only after verified payment
+    if (paymentMethod === 'cod') {
+      const __mail = sendOrderConfirmation(supabase, order.id).then((r) => console.log('order confirmation email:', r.status)).catch(() => {})
+      // @ts-ignore EdgeRuntime is provided by the Supabase runtime
+      if (typeof EdgeRuntime !== 'undefined') EdgeRuntime.waitUntil(__mail); else await __mail
     }
 
     return new Response(

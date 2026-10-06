@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendOrderConfirmation } from '../_shared/order-confirmation-email.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -109,6 +110,9 @@ Deno.serve(async (req) => {
           .update({ payment_status: 'paid' })
           .eq('id', txn.order_id)
           .neq('payment_status', 'paid')
+        const __mail = sendOrderConfirmation(supabase, txn.order_id).then((r) => console.log('order confirmation email:', r.status)).catch(() => {})
+        // @ts-ignore EdgeRuntime is provided by the Supabase runtime
+        if (typeof EdgeRuntime !== 'undefined') EdgeRuntime.waitUntil(__mail); else await __mail
       }
 
       console.log('Payment verified via webhook for order:', txn.order_id)
