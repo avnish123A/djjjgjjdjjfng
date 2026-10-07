@@ -3,7 +3,7 @@ import { useSiteMode } from '@/contexts/SiteModeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useQueryClient } from '@tanstack/react-query';
-import { Globe, Wrench, Rocket, Loader2, Save, Image, Share2, Phone, Mail, MapPin, Megaphone, Upload, X, Clock, MessageCircle } from 'lucide-react';
+import { Globe, Wrench, Rocket, Loader2, Save, Image, Share2, Phone, Mail, MapPin, Megaphone, Upload, X, Clock, MessageCircle, MailCheck, RefreshCw, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -115,12 +115,13 @@ const AdminSiteSettings: React.FC = () => {
       </div>
 
       <Tabs defaultValue="hero" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6">
+        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-7">
           <TabsTrigger value="announcement" className="gap-1.5"><Megaphone className="h-3.5 w-3.5" /> Banner</TabsTrigger>
           <TabsTrigger value="hero" className="gap-1.5"><Image className="h-3.5 w-3.5" /> Hero</TabsTrigger>
           <TabsTrigger value="social" className="gap-1.5"><Share2 className="h-3.5 w-3.5" /> Social</TabsTrigger>
           <TabsTrigger value="contact" className="gap-1.5"><Phone className="h-3.5 w-3.5" /> Contact</TabsTrigger>
           <TabsTrigger value="pages" className="gap-1.5"><Clock className="h-3.5 w-3.5" /> Pages</TabsTrigger>
+          <TabsTrigger value="email" className="gap-1.5"><MailCheck className="h-3.5 w-3.5" /> Email</TabsTrigger>
           <TabsTrigger value="mode" className="gap-1.5"><Globe className="h-3.5 w-3.5" /> Mode</TabsTrigger>
         </TabsList>
 
