@@ -75,8 +75,8 @@ export async function sendOrderConfirmation(
       return { status: 'failed', error }
     }
 
-    const apiKey = Deno.env.get('RESEND_API_KEY')
-    if (!apiKey) return await fail('RESEND_API_KEY is not configured on the server')
+    const cfg = getEmailConfig()
+    if (!cfg.ok) return await fail(cfg.error)
 
     const [{ data: items }, { data: settingsRows }] = await Promise.all([
       supabase.from('order_items').select('title, image, quantity, price, size, color').eq('order_id', orderId),
@@ -85,40 +85,15 @@ export async function sendOrderConfirmation(
     const settings: Record<string, string> = {}
     for (const r of settingsRows || []) settings[r.key] = r.value
 
-    const siteUrl = (Deno.env.get('SITE_URL') || 'https://cartzebra.lovable.app').replace(/\/+$/, '')
-    const from = Deno.env.get('EMAIL_FROM') || 'CartZebra <orders@cartzebra.com>'
-    const html = renderHtml(order, items || [], settings, siteUrl)
+    const html = renderHtml(order, items || [], settings, cfg.siteUrl)
     const subject = `${mode === 'test' ? '[Test] ' : ''}Your CartZebra order #${order.order_number} is confirmed`
 
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 10000)
-    let res: Response
-    try {
-      res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          'Idempotency-Key': `${eventId}-${attempt}`,
-        },
-        body: JSON.stringify({ from, to: [recipient], subject, html }),
-        signal: controller.signal,
-      })
-    } catch (e) {
-      return await fail(`Network error contacting Resend: ${(e as Error).message}`)
-    } finally {
-      clearTimeout(timeout)
+    const sent = await sendViaResend(cfg, { to: recipient, subject, html, idempotencyKey: `${eventId}-${attempt}` })
+    if (!sent.ok) {
+      console.error(`Resend failed for order ${orderId}: ${sent.error}`)
+      return await fail(sent.error)
     }
-
-    const bodyText = await res.text()
-    if (!res.ok) {
-      let msg = bodyText
-      try { msg = JSON.parse(bodyText)?.message || bodyText } catch { /* keep text */ }
-      console.error(`Resend failed [${res.status}] for order ${orderId}: ${msg}`)
-      return await fail(`Resend ${res.status}: ${msg}`)
-    }
-    let messageId: string | null = null
-    try { messageId = JSON.parse(bodyText)?.id ?? null } catch { /* ignore */ }
+    const messageId = sent.messageId
 
     await supabase.from('email_events').update({
       status: 'sent', provider_message_id: messageId, error_message: null, sent_at: new Date().toISOString(),
