@@ -389,4 +389,124 @@ const AdminSiteSettings: React.FC = () => {
   );
 };
 
+type EmailHealth = {
+  config: { resend_api_key: boolean; email_from: boolean; site_url: boolean };
+  stats: {
+    failed_count: number;
+    last_sent: { email_type: string; recipient: string; sent_at: string } | null;
+    last_failed: { email_type: string; recipient: string; updated_at: string; error_message: string | null } | null;
+  };
+};
+
+const EmailHealthSection: React.FC = () => {
+  const [health, setHealth] = useState<EmailHealth | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const runCheck = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke('email-health-check', { method: 'GET' });
+      if (fnError) {
+        let msg = 'Health check failed';
+        try {
+          const body = typeof fnError.context?.json === 'function' ? await fnError.context.json() : null;
+          if (body?.error) msg = body.error;
+        } catch { /* keep default */ }
+        throw new Error(msg);
+      }
+      setHealth(data as EmailHealth);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Health check failed');
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => { runCheck(); }, []);
+
+  const fmt = (d?: string | null) => (d ? new Date(d).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—');
+
+  const statusRow = (label: string, ok: boolean, hint: string) => (
+    <div className="flex items-center justify-between p-4 border border-border rounded-lg">
+      <div>
+        <p className="text-sm font-medium">{label}</p>
+        {!ok && <p className="text-xs text-muted-foreground mt-0.5">{hint}</p>}
+      </div>
+      {ok ? (
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-success"><CheckCircle2 className="h-4 w-4" /> Configured</span>
+      ) : (
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-destructive"><AlertTriangle className="h-4 w-4" /> Missing</span>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="bg-card border border-border rounded-xl p-6 space-y-5">
+      <div>
+        <h2 className="font-semibold flex items-center gap-2"><MailCheck className="h-4 w-4 text-primary" /> Email Health</h2>
+        <p className="text-xs text-muted-foreground mt-1">Check transactional email configuration and recent delivery status. Secret values are never shown.</p>
+      </div>
+
+      {error && (
+        <div className="p-4 border border-destructive/30 bg-destructive/5 rounded-lg text-sm text-destructive flex items-center justify-between gap-3">
+          <span>{error}</span>
+          <Button variant="ghost" size="sm" onClick={runCheck}>Retry</Button>
+        </div>
+      )}
+
+      {loading && !health ? (
+        <div className="space-y-3">
+          <div className="h-16 rounded-lg bg-secondary animate-pulse" />
+          <div className="h-16 rounded-lg bg-secondary animate-pulse" />
+          <div className="h-16 rounded-lg bg-secondary animate-pulse" />
+        </div>
+      ) : health ? (
+        <>
+          <div className="space-y-3">
+            {statusRow('Resend API Key', health.config.resend_api_key, 'Add the RESEND_API_KEY secret to your backend so order emails can be sent.')}
+            {statusRow('Sender Address (EMAIL_FROM)', health.config.email_from, 'Set the EMAIL_FROM secret to a sender on your verified domain, e.g. CartZebra <orders@yourdomain.com>.')}
+            {statusRow('Site URL (SITE_URL)', health.config.site_url, 'Set the SITE_URL secret to your storefront URL so email links point to the right site.')}
+          </div>
+
+          {(!health.config.resend_api_key || !health.config.email_from || !health.config.site_url) && (
+            <div className="p-4 border border-yellow-200 bg-yellow-50 rounded-lg text-xs text-yellow-800">
+              Some email settings are missing. Order emails will fail until the missing items above are configured in your backend secrets.
+            </div>
+          )}
+
+          <div className="border-t border-border pt-5 space-y-3">
+            <h3 className="text-sm font-semibold">Delivery Status</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="p-4 border border-border rounded-lg">
+                <p className="text-xs text-muted-foreground">Failed emails</p>
+                <p className={`text-xl font-bold mt-1 ${health.stats.failed_count > 0 ? 'text-destructive' : ''}`}>{health.stats.failed_count}</p>
+              </div>
+              <div className="p-4 border border-border rounded-lg">
+                <p className="text-xs text-muted-foreground">Last successful email</p>
+                {health.stats.last_sent ? (
+                  <p className="text-xs mt-1.5 font-medium">{health.stats.last_sent.email_type}<br /><span className="text-muted-foreground font-normal">{health.stats.last_sent.recipient} · {fmt(health.stats.last_sent.sent_at)}</span></p>
+                ) : <p className="text-xs mt-1.5 text-muted-foreground">None yet</p>}
+              </div>
+              <div className="p-4 border border-border rounded-lg">
+                <p className="text-xs text-muted-foreground">Last failed email</p>
+                {health.stats.last_failed ? (
+                  <p className="text-xs mt-1.5 font-medium">{health.stats.last_failed.email_type}<br /><span className="text-muted-foreground font-normal">{health.stats.last_failed.recipient} · {fmt(health.stats.last_failed.updated_at)}</span>
+                    {health.stats.last_failed.error_message && <span className="block text-destructive mt-1 break-words">{health.stats.last_failed.error_message}</span>}
+                  </p>
+                ) : <p className="text-xs mt-1.5 text-muted-foreground">None</p>}
+              </div>
+            </div>
+          </div>
+        </>
+      ) : null}
+
+      <Button onClick={runCheck} disabled={loading} variant="outline" className="w-full gap-2">
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+        Run Email Health Check
+      </Button>
+    </div>
+  );
+};
+
 export default AdminSiteSettings;
