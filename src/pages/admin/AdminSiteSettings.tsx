@@ -348,6 +348,11 @@ const AdminSiteSettings: React.FC = () => {
           </div>
         </TabsContent>
 
+        {/* Email Health */}
+        <TabsContent value="email">
+          <EmailHealthSection />
+        </TabsContent>
+
         {/* Site Mode */}
         <TabsContent value="mode">
           <div className="bg-card border border-border rounded-xl p-6 space-y-4">
