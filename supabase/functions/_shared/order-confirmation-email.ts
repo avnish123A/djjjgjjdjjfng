@@ -14,6 +14,57 @@
 
 export const ORDER_CONFIRMATION = 'ORDER_CONFIRMATION'
 export const ORDER_CONFIRMATION_TEST = 'ORDER_CONFIRMATION_TEST'
+
+export type EmailConfig =
+  | { ok: true; apiKey: string; from: string; siteUrl: string }
+  | { ok: false; error: string; missing: string[] }
+
+/** Reads Resend config from Edge Function secrets. Never returns secret values in errors. */
+export function getEmailConfig(): EmailConfig {
+  const resendApiKey = (Deno.env.get('RESEND_API_KEY') || '').trim()
+  const emailFrom = (Deno.env.get('EMAIL_FROM') || '').trim()
+  const siteUrl = (Deno.env.get('SITE_URL') || '').trim()
+  const missing: string[] = []
+  const errors: string[] = []
+  if (!resendApiKey) { missing.push('RESEND_API_KEY'); errors.push('Resend API key is not configured') }
+  if (!emailFrom) { missing.push('EMAIL_FROM'); errors.push('Email sender is not configured') }
+  if (!siteUrl) { missing.push('SITE_URL'); errors.push('Site URL is not configured') }
+  if (missing.length) return { ok: false, error: errors.join('; '), missing }
+  return { ok: true, apiKey: resendApiKey, from: emailFrom, siteUrl: siteUrl.replace(/\/+$/, '') }
+}
+
+/** Single Resend sender used by order confirmations and admin test emails. */
+export async function sendViaResend(
+  cfg: { apiKey: string; from: string },
+  msg: { to: string; subject: string; html: string; idempotencyKey?: string },
+): Promise<{ ok: true; messageId: string | null } | { ok: false; error: string }> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 10000)
+  let res: Response
+  try {
+    const headers: Record<string, string> = { Authorization: `Bearer ${cfg.apiKey}`, 'Content-Type': 'application/json' }
+    if (msg.idempotencyKey) headers['Idempotency-Key'] = msg.idempotencyKey
+    res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ from: cfg.from, to: [msg.to], subject: msg.subject, html: msg.html }),
+      signal: controller.signal,
+    })
+  } catch (e) {
+    return { ok: false, error: `Network error contacting Resend: ${(e as Error).message}` }
+  } finally {
+    clearTimeout(timeout)
+  }
+  const bodyText = await res.text()
+  if (!res.ok) {
+    let m = bodyText
+    try { m = JSON.parse(bodyText)?.message || bodyText } catch { /* keep text */ }
+    return { ok: false, error: `Resend ${res.status}: ${String(m).slice(0, 300)}` }
+  }
+  let messageId: string | null = null
+  try { messageId = JSON.parse(bodyText)?.id ?? null } catch { /* ignore */ }
+  return { ok: true, messageId }
+}
 const STALE_PENDING_MS = 2 * 60 * 1000
 
 export type SendResult =
