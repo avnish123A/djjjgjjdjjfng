@@ -63,8 +63,6 @@ const ProductDetail = () => {
     setQuantity(1);
     setSelectedSize(null);
     setSelectedColor(null);
-    setPincode('');
-    setPincodeChecked(false);
     setVariantSelections({});
     setPriceModifier(0);
   }, [id]);
