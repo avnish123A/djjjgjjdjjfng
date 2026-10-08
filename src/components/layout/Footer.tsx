@@ -27,9 +27,9 @@ const socialIcons = [
 export const Footer = () => {
   const { data: s = {} } = useSiteSettings();
   const { data: categories = [] } = useCategories();
-  const email = s.contact_email || 'hello@cartzebra.com';
-  const phone = s.contact_phone || '+91 98765 43210';
-  const location = s.contact_location || 'India';
+  const email = (s.contact_email || '').trim();
+  const phone = (s.contact_phone || '').trim();
+  const location = (s.contact_location || '').trim();
   const activeSocials = socialIcons.filter((si) => s[si.key]?.trim());
 
   const sections = [
@@ -48,9 +48,9 @@ export const Footer = () => {
               Shop smart. Discover more. Trending products, exclusive deals and giftable finds — all in one place.
             </p>
             <div className="mt-8 space-y-3 text-sm text-primary-foreground/60">
-              <div className="flex items-center gap-3"><Mail className="h-4 w-4 text-accent" strokeWidth={1.5} />{email}</div>
-              <div className="flex items-center gap-3"><Phone className="h-4 w-4 text-accent" strokeWidth={1.5} />{phone}</div>
-              <div className="flex items-center gap-3"><MapPin className="h-4 w-4 text-accent" strokeWidth={1.5} />{location}</div>
+              {email && <a href={`mailto:${email}`} className="flex items-center gap-3 break-all hover:text-accent"><Mail className="h-4 w-4 text-accent shrink-0" strokeWidth={1.5} />{email}</a>}
+              {phone && <a href={`tel:${phone.replace(/[^+\d]/g, '')}`} className="flex items-center gap-3 hover:text-accent"><Phone className="h-4 w-4 text-accent shrink-0" strokeWidth={1.5} />{phone}</a>}
+              {location && <div className="flex items-center gap-3"><MapPin className="h-4 w-4 text-accent shrink-0" strokeWidth={1.5} />{location}</div>}
             </div>
             {activeSocials.length > 0 && (
               <div className="flex gap-3 mt-8">

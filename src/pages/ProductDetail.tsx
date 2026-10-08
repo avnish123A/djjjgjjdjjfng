@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ChevronRight, Star, Heart, Minus, Plus, ShoppingBag, Truck, RotateCcw, ShieldCheck, Check, MapPin, Zap, ChevronDown } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ChevronRight, Star, Minus, Plus, ShoppingBag, Truck, RotateCcw, ShieldCheck, Check, MapPin, Zap, ChevronDown } from 'lucide-react';
+import { DELIVERY_ESTIMATE_TEXT, DELIVERY_AVAILABILITY_NOTE } from '@/lib/delivery';
 import { useProduct, useProducts } from '@/hooks/useProducts';
 import { useProductAttributes } from '@/hooks/useProductAttributes';
 import { useCart } from '@/contexts/CartContext';
@@ -37,12 +38,11 @@ const ProductDetail = () => {
   const { data: allProducts = [] } = useProducts();
   const { data: dynamicAttributes = [] } = useProductAttributes(id || '');
   const { addItem } = useCart();
+  const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [pincode, setPincode] = useState('');
-  const [pincodeChecked, setPincodeChecked] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [variantSelections, setVariantSelections] = useState<Record<string, string>>({});
   const [priceModifier, setPriceModifier] = useState(0);
@@ -63,8 +63,6 @@ const ProductDetail = () => {
     setQuantity(1);
     setSelectedSize(null);
     setSelectedColor(null);
-    setPincode('');
-    setPincodeChecked(false);
     setVariantSelections({});
     setPriceModifier(0);
   }, [id]);
@@ -98,34 +96,49 @@ const ProductDetail = () => {
     ? `${product.id}-${Object.entries(variantSelections).sort().map(([k,v]) => `${k}:${v}`).join('|')}`
     : product.id;
 
-  const handleAddToCart = () => {
-    if (requiredMissing) {
-      toast.error('Please select all required options');
-      return;
+  const hasReviews = (product.reviewCount || 0) > 0 && (product.rating || 0) > 0;
+  const maxQty = product.trackInventory !== false ? Math.max(1, Math.min(10, product.stock || 0)) : 10;
+
+  const validateSelection = () => {
+    if (!product.inStock) { toast.error('This product is out of stock'); return false; }
+    if (requiredMissing) { toast.error('Please select all required options'); return false; }
+    if (hasDynamicAttrs) {
+      for (const a of dynamicAttributes) {
+        const v = a.values.find(x => x.value === variantSelections[a.attribute_name]);
+        if (v && v.stock_quantity < quantity) {
+          toast.error(v.stock_quantity > 0 ? `Only ${v.stock_quantity} left for ${a.attribute_label}: ${v.value}` : `${a.attribute_label}: ${v.value} is sold out`);
+          return false;
+        }
+      }
     }
-    setAddingToCart(true);
-    setTimeout(() => {
-      addItem({
-        id: product.id,
-        name: product.name,
-        price: finalPrice,
-        image: product.image,
-        brand: product.brand,
-        variantSelections: hasDynamicAttrs ? variantSelections : undefined,
-        variantKey,
-      });
-      toast.success(`${product.name} added to cart`);
-      setTimeout(() => setAddingToCart(false), 1200);
-    }, 400);
+    if (product.trackInventory !== false && quantity > (product.stock || 0)) {
+      toast.error(`Only ${product.stock} in stock`); return false;
+    }
+    return true;
   };
 
-  const handleCheckPincode = () => {
-    if (pincode.length === 6) {
-      setPincodeChecked(true);
-      toast.success('Delivery available to this pincode');
-    } else {
-      toast.error('Please enter a valid 6-digit pincode');
-    }
+  const cartPayload = () => ({
+    id: product.id,
+    name: product.name,
+    price: finalPrice,
+    image: product.image,
+    brand: product.brand,
+    variantSelections: hasDynamicAttrs ? variantSelections : undefined,
+    variantKey,
+  });
+
+  const handleAddToCart = () => {
+    if (!validateSelection()) return;
+    setAddingToCart(true);
+    addItem(cartPayload(), quantity);
+    toast.success(`${quantity > 1 ? `${quantity} × ` : ''}${product.name} added to cart`);
+    setTimeout(() => setAddingToCart(false), 1200);
+  };
+
+  const handleBuyNow = () => {
+    if (!validateSelection()) return;
+    addItem(cartPayload(), quantity);
+    navigate('/checkout');
   };
 
   const relatedProducts = allProducts.filter((p) => p.categoryId === product.categoryId && p.id !== product.id).slice(0, 4);
@@ -196,7 +209,7 @@ const ProductDetail = () => {
               )}
               <h1 className="font-display text-2xl lg:text-[32px] mb-4 leading-tight tracking-tight">{product.name}</h1>
 
-              {/* Rating */}
+              {hasReviews && (
               <div className="flex items-center gap-2.5 mb-5">
                 <div className="flex items-center gap-0.5">
                   {[...Array(5)].map((_, i) => (
@@ -205,6 +218,7 @@ const ProductDetail = () => {
                 </div>
                 <span className="text-sm text-muted-foreground">{product.rating} ({product.reviewCount} reviews)</span>
               </div>
+              )}
 
               {/* Price */}
               <div className="flex items-baseline gap-3">
@@ -290,11 +304,11 @@ const ProductDetail = () => {
             <div>
               <p className="text-sm font-semibold mb-3">Quantity</p>
               <div className="inline-flex items-center border border-border rounded-xl">
-                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-3 hover:bg-secondary transition-colors rounded-l-xl" aria-label="Decrease quantity">
+                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1} className="p-3 hover:bg-secondary transition-colors rounded-l-xl disabled:opacity-40" aria-label="Decrease quantity">
                   <Minus className="h-4 w-4" />
                 </button>
                 <span className="px-5 py-3 text-sm font-semibold tabular-nums min-w-[3rem] text-center border-x border-border">{quantity}</span>
-                <button onClick={() => setQuantity(Math.min(10, quantity + 1))} className="p-3 hover:bg-secondary transition-colors rounded-r-xl" aria-label="Increase quantity">
+                <button onClick={() => setQuantity(Math.min(maxQty, quantity + 1))} disabled={quantity >= maxQty} className="p-3 hover:bg-secondary transition-colors rounded-r-xl disabled:opacity-40" aria-label="Increase quantity">
                   <Plus className="h-4 w-4" />
                 </button>
               </div>
@@ -302,24 +316,20 @@ const ProductDetail = () => {
 
             {/* ── CTA Buttons (observed for sticky) ── */}
             <div ref={ctaRef} className="space-y-3 pt-1">
-              <div className="flex gap-3">
-                <Button
-                  size="lg"
-                  className="flex-1 gap-2 h-14 text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl"
-                  onClick={handleAddToCart}
-                  disabled={!product.inStock || addingToCart}
-                >
-                  {addingToCart ? (<><Check className="h-5 w-5" /> Added!</>) : (<><ShoppingBag className="h-5 w-5" /> Add to Cart</>)}
-                </Button>
-                <Button variant="outline" size="lg" className="h-14 px-4 rounded-xl border-border">
-                  <Heart className="h-5 w-5" />
-                </Button>
-              </div>
+              <Button
+                size="lg"
+                className="w-full gap-2 h-14 text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl"
+                onClick={handleAddToCart}
+                disabled={!product.inStock || addingToCart}
+              >
+                {addingToCart ? (<><Check className="h-5 w-5" /> Added!</>) : (<><ShoppingBag className="h-5 w-5" /> Add to Cart</>)}
+              </Button>
               <Button
                 variant="outline"
                 size="lg"
                 className="w-full gap-2 h-13 text-base font-semibold rounded-xl border-2 border-foreground hover:bg-foreground hover:text-background transition-all"
                 disabled={!product.inStock}
+                onClick={handleBuyNow}
               >
                 <Zap className="h-5 w-5" />
                 Buy Now
@@ -330,8 +340,8 @@ const ProductDetail = () => {
             <div className="grid grid-cols-3 gap-3">
               {[
                 { icon: Truck, label: 'Free Delivery', sub: 'Above ₹999' },
-                { icon: RotateCcw, label: '7-Day Returns', sub: 'Easy refund' },
-                { icon: ShieldCheck, label: '100% Genuine', sub: 'Verified products' },
+                { icon: RotateCcw, label: '7-Day Returns', sub: 'See policy' },
+                { icon: ShieldCheck, label: 'Secure Checkout', sub: 'UPI, cards & COD' },
               ].map((item) => (
                 <div key={item.label} className="text-center p-3 bg-secondary/60 rounded-xl">
                   <item.icon className="h-5 w-5 mx-auto mb-1.5 text-primary" />
@@ -341,31 +351,13 @@ const ProductDetail = () => {
               ))}
             </div>
 
-            {/* Delivery check */}
-            <div className="p-5 bg-secondary/40 rounded-2xl">
-              <div className="flex items-center gap-2 mb-3">
+            {/* Delivery info (no fake serviceability check) */}
+            <div className="p-5 bg-secondary/40 rounded-2xl text-sm">
+              <div className="flex items-center gap-2 mb-1.5">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
-                <p className="text-sm font-semibold">Check Delivery</p>
+                <p className="font-semibold">{DELIVERY_ESTIMATE_TEXT}</p>
               </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={pincode}
-                  onChange={(e) => { setPincode(e.target.value.replace(/\D/g, '').slice(0, 6)); setPincodeChecked(false); }}
-                  placeholder="Enter pincode"
-                  maxLength={6}
-                  className="flex-1 px-4 py-2.5 border border-border rounded-xl text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                />
-                <Button variant="outline" size="sm" onClick={handleCheckPincode} className="px-4 rounded-xl">Check</Button>
-              </div>
-              {pincodeChecked && (
-                <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
-                  <p className="flex items-center gap-1.5 text-success font-medium"><Check className="h-3.5 w-3.5" /> Delivery available</p>
-                  <p>• Standard: 5-7 days (₹99 or Free above ₹999)</p>
-                  <p>• Express: 2-3 days (₹199)</p>
-                  <p>• Cash on Delivery available</p>
-                </div>
-              )}
+              <p className="text-xs text-muted-foreground">{DELIVERY_AVAILABILITY_NOTE}</p>
             </div>
           </div>
         </div>
@@ -382,7 +374,7 @@ const ProductDetail = () => {
                 {[
                   ['Brand', product.brand],
                   ['Category', product.categoryName],
-                  ['Rating', `${product.rating} / 5`],
+                  ...(hasReviews ? [['Rating', `${product.rating} / 5`]] : []),
                   ['Availability', product.inStock ? 'In Stock' : 'Out of Stock'],
                 ].map(([label, value], i) => (
                   <tr key={label} className={i % 2 === 0 ? 'bg-secondary/50' : ''}>
@@ -394,6 +386,7 @@ const ProductDetail = () => {
             </table>
           </AccordionItem>
 
+          {hasReviews && (
           <AccordionItem title={`Reviews (${product.reviewCount})`}>
             <div className="flex items-center gap-4 mb-5">
               <div className="text-center">
@@ -406,17 +399,17 @@ const ProductDetail = () => {
                 <p className="text-xs text-muted-foreground">{product.reviewCount} reviews</p>
               </div>
             </div>
-            <Button variant="outline" size="sm" className="rounded-xl">Write a Review</Button>
           </AccordionItem>
+          )}
 
           <AccordionItem title="Shipping & Returns">
             <div className="space-y-5 text-sm text-muted-foreground">
               <div>
                 <h4 className="font-semibold text-foreground mb-2">Shipping</h4>
                 <ul className="space-y-1.5">
-                  <li>• Standard Delivery: 5-7 business days (₹99 or Free above ₹999)</li>
-                  <li>• Express Delivery: 2-3 business days (₹199)</li>
-                  <li>• Cash on Delivery available on select pin codes</li>
+                  <li>• {DELIVERY_ESTIMATE_TEXT}</li>
+                  <li>• Free delivery on orders above ₹999</li>
+                  <li>• {DELIVERY_AVAILABILITY_NOTE}</li>
                 </ul>
               </div>
               <div>
@@ -467,7 +460,6 @@ const ProductDetail = () => {
             </div>
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
-            <Button variant="outline" className="h-11 px-4 rounded-xl border-border"><Heart className="h-4 w-4" /></Button>
             <Button
               className="h-11 px-8 gap-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl font-semibold"
               onClick={handleAddToCart}
@@ -485,9 +477,6 @@ const ProductDetail = () => {
           <div className="shrink-0">
             <span className="text-lg font-bold">{formatPrice(finalPrice)}</span>
           </div>
-          <Button variant="outline" className="h-10 px-3 rounded-xl shrink-0 border-border">
-            <Heart className="h-5 w-5" />
-          </Button>
           <Button
             className="flex-1 h-10 gap-2 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl"
             onClick={handleAddToCart}

@@ -20,7 +20,7 @@ interface AppliedCoupon {
 
 interface CartContextType {
   items: CartItem[];
-  addItem: (item: Omit<CartItem, 'quantity'>) => void;
+  addItem: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void;
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -64,14 +64,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch { /* storage full/blocked */ }
   }, [items]);
 
-  const addItem = useCallback((item: Omit<CartItem, 'quantity'>) => {
+  const addItem = useCallback((item: Omit<CartItem, 'quantity'>, qty = 1) => {
+    const n = Math.max(1, Math.min(99, Math.floor(qty) || 1));
     setItems(prev => {
       const itemKey = item.variantKey || item.id;
       const existing = prev.find(i => (i.variantKey || i.id) === itemKey);
       if (existing) {
-        return prev.map(i => (i.variantKey || i.id) === itemKey ? { ...i, quantity: Math.min(99, i.quantity + 1) } : i);
+        return prev.map(i => (i.variantKey || i.id) === itemKey ? { ...i, quantity: Math.min(99, i.quantity + n) } : i);
       }
-      return [...prev, { ...item, quantity: 1 }];
+      return [...prev, { ...item, quantity: n }];
     });
   }, []);
 
