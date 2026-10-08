@@ -1,3 +1,4 @@
+import { DELIVERY_ESTIMATE_TEXT } from '@/lib/delivery';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Lock, CreditCard, Banknote, Check, Calendar, Tag, X, MapPin, User, Package, Loader2, Pencil, AlertCircle, RotateCw, ChevronUp } from 'lucide-react';
@@ -760,7 +761,7 @@ const Checkout = () => {
                     </motion.span>
                   </div>
                   <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Calendar className="h-3.5 w-3.5 shrink-0" /> Usually delivered in 7–14 days
+                    <Calendar className="h-3.5 w-3.5 shrink-0" /> {DELIVERY_ESTIMATE_TEXT}
                   </p>
                   {shipping > 0 && (
                     <p className="text-xs text-muted-foreground">Add {formatPrice(999 - totalPrice)} more for free delivery.</p>

@@ -1,127 +1,89 @@
 import { Link, useSearchParams } from 'react-router-dom';
-import { CheckCircle, Package, ArrowRight, Mail, Truck, Clock } from 'lucide-react';
+import { CheckCircle, Package, ArrowRight, Truck, Clock, Search, BadgeCheck, MapPin, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { DELIVERY_ESTIMATE_TEXT } from '@/lib/delivery';
 
+// Same stages as the Track Order page. Only "Order Placed" is known to be complete here.
 const timelineSteps = [
-  { label: 'Ordered', icon: CheckCircle, done: true },
-  { label: 'Processing', icon: Package, done: true },
-  { label: 'Shipped', icon: Truck, done: false },
-  { label: 'Delivered', icon: CheckCircle, done: false },
+  { label: 'Order Placed', icon: CheckCircle },
+  { label: 'Confirmed', icon: BadgeCheck },
+  { label: 'Packed', icon: Package },
+  { label: 'Shipped', icon: Truck },
+  { label: 'Out for Delivery', icon: MapPin },
+  { label: 'Delivered', icon: Home },
 ];
+
+const ORDER_RE = /^[A-Za-z0-9-]{1,40}$/;
 
 const OrderSuccess = () => {
   const [searchParams] = useSearchParams();
-  const orderNumber = searchParams.get('order') || '';
-
-  // Estimated delivery: 7–14 days from now
-  const deliveryStart = new Date();
-  deliveryStart.setDate(deliveryStart.getDate() + 7);
-  const deliveryEnd = new Date();
-  deliveryEnd.setDate(deliveryEnd.getDate() + 14);
-  const fmt = (d: Date) => d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
-  const formattedDelivery = `${fmt(deliveryStart)} – ${fmt(deliveryEnd)}`;
+  const raw = searchParams.get('order') || '';
+  const orderNumber = ORDER_RE.test(raw) ? raw : '';
 
   return (
     <main className="min-h-screen">
-      <div className="container mx-auto px-4 py-20 lg:py-24">
+      <div className="container mx-auto px-4 py-16 lg:py-24">
         <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4 }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
           className="max-w-lg mx-auto"
         >
-          {/* Success Icon */}
           <div className="text-center mb-10">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 12 }}
-              className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6 relative"
-            >
+            <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="h-10 w-10 text-success" />
-              {/* Confetti-like dots */}
-              {[...Array(6)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: [0, 1, 0], scale: [0, 1, 0] }}
-                  transition={{ delay: 0.5 + i * 0.1, duration: 0.6 }}
-                  className="absolute w-2 h-2 rounded-full bg-accent"
-                  style={{
-                    top: `${20 + Math.sin(i * 60 * Math.PI / 180) * 40}%`,
-                    left: `${50 + Math.cos(i * 60 * Math.PI / 180) * 50}%`,
-                  }}
-                />
-              ))}
-            </motion.div>
-            <h1 className="text-2xl font-bold mb-2 tracking-tight">Order Confirmed!</h1>
-            <p className="text-muted-foreground text-sm">
-              Thank you for your purchase.
-            </p>
+            </div>
+            <h1 className="text-2xl font-bold mb-2 tracking-tight">Order placed</h1>
+            <p className="text-muted-foreground text-sm">Thank you for shopping with CartZebra.</p>
             {orderNumber && (
-              <p className="text-sm font-semibold mt-3">
-                Order Number: <span className="text-accent">{orderNumber}</span>
+              <p className="text-sm font-semibold mt-3 break-all">
+                Order number: <span className="text-accent">{orderNumber}</span>
               </p>
             )}
           </div>
 
-          {/* Estimated Delivery */}
-          <div className="flex items-center justify-center gap-2 mb-8 text-sm">
-            <Clock className="h-4 w-4 text-accent" />
-            <span className="font-semibold">Estimated Delivery: <span className="text-accent">{formattedDelivery}</span></span>
+          <div className="flex items-center justify-center gap-2 mb-8 text-sm text-center">
+            <Clock className="h-4 w-4 text-accent shrink-0" />
+            <span className="font-medium">{DELIVERY_ESTIMATE_TEXT}</span>
           </div>
 
-          {/* Order Timeline */}
-          <div className="bg-secondary rounded-2xl p-6 mb-8">
-            <h3 className="font-semibold mb-5 text-sm">Order Progress</h3>
-            <div className="flex items-center justify-between relative">
-              {/* Progress line */}
-              <div className="absolute top-4 left-0 right-0 h-[2px] bg-border" />
-              <div className="absolute top-4 left-0 h-[2px] bg-foreground" style={{ width: '37%' }} />
-
-              {timelineSteps.map((step, i) => (
-                <div key={step.label} className="relative flex flex-col items-center z-10">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    step.done ? 'bg-foreground text-background' : 'bg-border text-muted-foreground'
-                  }`}>
-                    <step.icon className="h-4 w-4" />
-                  </div>
-                  <span className={`text-[10px] mt-2 ${step.done ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-                    {step.label}
-                  </span>
-                </div>
-              ))}
-            </div>
+          <div className="bg-secondary rounded-2xl p-5 sm:p-6 mb-8">
+            <h3 className="font-semibold mb-5 text-sm">Order progress</h3>
+            <ol className="grid grid-cols-3 sm:grid-cols-6 gap-y-5 gap-x-2">
+              {timelineSteps.map((step, i) => {
+                const done = i === 0;
+                return (
+                  <li key={step.label} className="flex flex-col items-center text-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${done ? 'bg-foreground text-background' : 'bg-border text-muted-foreground'}`}>
+                      <step.icon className="h-4 w-4" />
+                    </div>
+                    <span className={`text-[10px] mt-2 leading-tight ${done ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>{step.label}</span>
+                  </li>
+                );
+              })}
+            </ol>
           </div>
 
-          {/* What's Next Card */}
           <div className="bg-secondary rounded-2xl p-6 mb-8">
             <div className="flex items-center gap-3 mb-4">
               <Package className="h-5 w-5" />
-              <h3 className="font-semibold">What's Next?</h3>
+              <h3 className="font-semibold">What's next?</h3>
             </div>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 text-sm">
-                <Mail className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                <p className="text-muted-foreground">You'll receive a confirmation email with your order details</p>
-              </div>
-              <div className="flex items-start gap-3 text-sm">
-                <Truck className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
-                <p className="text-muted-foreground">Estimated delivery within 7–14 business days. We'll notify you when shipped!</p>
-              </div>
+            <div className="space-y-3 text-sm text-muted-foreground">
+              <p className="flex items-start gap-3"><Search className="h-4 w-4 mt-0.5 shrink-0" />
+                Check your order status anytime on the Track Order page using the email and phone number from checkout.</p>
+              <p className="flex items-start gap-3"><Truck className="h-4 w-4 mt-0.5 shrink-0" />
+                The expected delivery date appears on Track Order once your order is shipped.</p>
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button asChild className="gap-2 rounded-full bg-foreground text-background hover:bg-foreground/90 px-6">
-              <Link to="/products">
-                Continue Shopping <ArrowRight className="h-4 w-4" />
-              </Link>
+              <Link to={orderNumber ? `/track-order?order=${encodeURIComponent(orderNumber)}` : '/track-order'}>Track order</Link>
             </Button>
-            <Button variant="outline" asChild className="rounded-full px-6">
-              <Link to="/">Go Home</Link>
+            <Button variant="outline" asChild className="rounded-full px-6 gap-2">
+              <Link to="/products">Continue shopping <ArrowRight className="h-4 w-4" /></Link>
             </Button>
           </div>
         </motion.div>

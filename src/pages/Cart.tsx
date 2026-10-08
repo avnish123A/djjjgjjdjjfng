@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ChevronRight, Lock, ShieldCheck, Truck, Heart, ChevronDown, Calendar, X, Tag } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ChevronRight, Lock, ShieldCheck, Truck, ChevronDown, Calendar, X, Tag } from 'lucide-react';
+import { DELIVERY_ESTIMATE_TEXT } from '@/lib/delivery';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -165,13 +166,6 @@ const Cart = () => {
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
-                        <button
-                          onClick={() => toast('Moved to wishlist')}
-                          className="p-1.5 text-muted-foreground hover:text-accent transition-colors"
-                          aria-label="Move to wishlist"
-                        >
-                          <Heart className="h-4 w-4" />
-                        </button>
                       </div>
                     </div>
 
@@ -300,7 +294,7 @@ const Cart = () => {
               {/* Estimated Delivery */}
               <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background rounded-lg px-3 py-2">
                 <Calendar className="h-3.5 w-3.5 shrink-0" />
-                <span>Estimated delivery: 3-5 business days</span>
+                <span>{DELIVERY_ESTIMATE_TEXT}</span>
               </div>
 
               <Button asChild size="lg" className="w-full gap-2 h-12 text-base font-semibold rounded-full bg-foreground text-background hover:bg-foreground/90">
