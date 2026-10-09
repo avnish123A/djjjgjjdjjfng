@@ -12,6 +12,8 @@
  * Email failures are recorded and never change order or payment state.
  */
 
+import { DELIVERY_ESTIMATE_TEXT } from './delivery-policy.ts'
+
 export const ORDER_CONFIRMATION = 'ORDER_CONFIRMATION'
 export const ORDER_CONFIRMATION_TEST = 'ORDER_CONFIRMATION_TEST'
 
@@ -279,6 +281,7 @@ ${variant ? `<div style="font-size:12px;color:#596176;margin-top:3px">${variant}
 <tr><td style="padding:20px 20px 8px">
 <h2 style="margin:0 0 8px;font-size:16px;font-weight:700">Delivering to</h2>
 <p style="margin:0;font-size:14px;line-height:1.6;color:#596176"><strong style="color:#0B1020">${esc(order.customer_name)}</strong><br>${addrLines}${order.customer_phone ? `<br>Phone: ${esc(order.customer_phone)}` : ''}</p>
+<p style="margin:12px 0 0;font-size:12px;line-height:1.6;color:#596176">${esc(DELIVERY_ESTIMATE_TEXT)}. This is our usual delivery window; check Track Order for your confirmed delivery date when available.</p>
 </td></tr>
 <tr><td align="center" style="padding:20px">
 <a href="${esc(trackUrl)}" style="display:inline-block;background:#0B1020;color:#FFFFFF;text-decoration:none;font-weight:600;font-size:15px;padding:14px 32px;border-radius:12px">Track My Order</a>
