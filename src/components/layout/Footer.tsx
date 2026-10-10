@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Mail, MapPin, Phone, Instagram, Facebook, Twitter, Youtube } from 'lucide-react';
+import { validContactEmail, validContactPhone } from '@/lib/contact';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useCategories } from '@/hooks/useCategories';
 import { Logo } from '@/components/brand/Logo';
@@ -27,8 +28,8 @@ const socialIcons = [
 export const Footer = () => {
   const { data: s = {} } = useSiteSettings();
   const { data: categories = [] } = useCategories();
-  const email = (s.contact_email || '').trim();
-  const phone = (s.contact_phone || '').trim();
+  const email = validContactEmail(s.contact_email);
+  const phone = validContactPhone(s.contact_phone);
   const location = (s.contact_location || '').trim();
   const activeSocials = socialIcons.filter((si) => s[si.key]?.trim());
 
