@@ -12,6 +12,7 @@
  * Email failures are recorded and never change order or payment state.
  */
 
+import { validContactEmail, validContactPhone } from './contact-validation.ts'
 import { DELIVERY_ESTIMATE_TEXT } from './delivery-policy.ts'
 
 export const ORDER_CONFIRMATION = 'ORDER_CONFIRMATION'
@@ -235,9 +236,12 @@ ${variant ? `<div style="font-size:12px;color:#596176;margin-top:3px">${variant}
     addr.pincode || addr.postal_code ? `PIN ${addr.pincode || addr.postal_code}` : '',
   ].filter(Boolean).map((l) => esc(l)).join('<br>')
 
+  // Malformed (e.g. concatenated) contact values are omitted, never guessed at.
+  const supportEmail = validContactEmail(settings.contact_email)
+  const supportPhone = validContactPhone(settings.contact_phone)
   const supportBits: string[] = []
-  if (settings.contact_email) supportBits.push(`Email <a href="mailto:${esc(settings.contact_email)}" style="color:#0B1020">${esc(settings.contact_email)}</a>`)
-  if (settings.contact_phone) supportBits.push(`Call ${esc(settings.contact_phone)}`)
+  if (supportEmail) supportBits.push(`Email <a href="mailto:${esc(supportEmail)}" style="color:#0B1020">${esc(supportEmail)}</a>`)
+  if (supportPhone) supportBits.push(`Call ${esc(supportPhone)}`)
   const supportLine = supportBits.length ? supportBits.join(' · ') : `Visit <a href="${esc(siteUrl)}/contact" style="color:#0B1020">our contact page</a>`
 
   const label = (t: string) => `<div style="font-size:11px;color:#596176;margin-bottom:3px">${t}</div>`
