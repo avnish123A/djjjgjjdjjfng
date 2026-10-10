@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
+import { validContactEmail, validContactPhone } from '@/lib/contact';
 import { HeroImageUpload } from '@/components/admin/HeroImageUpload';
 
 const modes = [
@@ -148,6 +149,12 @@ const AdminSiteSettings: React.FC = () => {
                   onChange={(e) => updateField(field.key, e.target.value)}
                   placeholder={field.placeholder}
                 />
+                {field.key === 'contact_email' && (formValues[field.key] || '').trim() && !validContactEmail(formValues[field.key]) && (
+                  <p className="text-xs text-destructive flex items-start gap-1.5"><AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />Enter exactly one email address. This value is hidden from the website and order emails until corrected.</p>
+                )}
+                {field.key === 'contact_phone' && (formValues[field.key] || '').trim() && !validContactPhone(formValues[field.key]) && (
+                  <p className="text-xs text-destructive flex items-start gap-1.5"><AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" />Enter exactly one 10-digit Indian phone number. This value is hidden from the website and order emails until corrected.</p>
+                )}
               </div>
             ))}
             <Button onClick={handleSaveSettings} disabled={savingSettings} className="w-full">
