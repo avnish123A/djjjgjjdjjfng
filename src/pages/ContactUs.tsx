@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { validContactEmail, validContactPhone, telHref } from '@/lib/contact';
 
 const ContactUs = () => {
   const { data: settings = {} } = useSiteSettings();
@@ -18,13 +19,14 @@ const ContactUs = () => {
     message: '',
   });
 
-  const email = settings['contact_email'] || 'hello@cartzebra.com';
-  const phone = settings['contact_phone'] || '+91 98765 43210';
-  const address = settings['contact_location'] || 'India';
+  // Only show values that are exactly one well-formed entry; never invent fallbacks.
+  const email = validContactEmail(settings['contact_email']);
+  const phone = validContactPhone(settings['contact_phone']);
+  const address = (settings['contact_location'] || '').trim();
   const pageTitle = settings['contact_page_title'] || 'Get in Touch';
-  const pageDescription = settings['contact_page_description'] || 'Have a question, suggestion, or need help with an order? We\'d love to hear from you.';
-  const businessHours = settings['contact_business_hours'] || 'Mon – Sat: 10 AM – 7 PM IST';
-  const offDay = settings['contact_off_day'] || 'Sunday: Closed';
+  const pageDescription = settings['contact_page_description'] || 'Have a question or need help with an order? Send us a message.';
+  const businessHours = (settings['contact_business_hours'] || '').trim();
+  const offDay = (settings['contact_off_day'] || '').trim();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -32,7 +34,7 @@ const ContactUs = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSubmitting) return;
+    if (isSubmitting || !email) return;
 
     if (!form.email || !form.message.trim()) {
       toast({ title: 'Please fill in all required fields', variant: 'destructive' });
@@ -43,7 +45,7 @@ const ContactUs = () => {
     const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(form.subject || 'Contact Form')}&body=${encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\nPhone: ${form.phone}\n\n${form.message}`)}`;
     window.open(mailtoLink, '_blank');
     
-    toast({ title: '✅ Opening email client!', description: 'Send your message via email.' });
+    toast({ title: 'Opening your email app', description: 'Send your message from there.' });
     setForm({ name: '', email: '', phone: '', subject: '', message: '' });
     setIsSubmitting(false);
   };
@@ -72,20 +74,25 @@ const ContactUs = () => {
                 <MessageSquare className="h-4 w-4 text-primary" /> Contact Information
               </h3>
               <div className="space-y-4 text-sm text-muted-foreground">
+                {email && (
                 <div className="flex items-start gap-3">
                   <Mail className="h-4 w-4 mt-0.5 text-primary shrink-0" />
                   <div>
                     <p className="font-medium text-foreground">Email</p>
-                    <a href={`mailto:${email}`} className="text-primary hover:underline">{email}</a>
+                    <a href={`mailto:${email}`} className="text-primary hover:underline break-all">{email}</a>
                   </div>
                 </div>
+                )}
+                {phone && (
                 <div className="flex items-start gap-3">
                   <Phone className="h-4 w-4 mt-0.5 text-primary shrink-0" />
                   <div>
                     <p className="font-medium text-foreground">Phone</p>
-                    <p>{phone}</p>
+                    <a href={telHref(phone)} className="hover:underline">{phone}</a>
                   </div>
                 </div>
+                )}
+                {address && (
                 <div className="flex items-start gap-3">
                   <MapPin className="h-4 w-4 mt-0.5 text-primary shrink-0" />
                   <div>
@@ -93,14 +100,20 @@ const ContactUs = () => {
                     <p>{address}</p>
                   </div>
                 </div>
+                )}
+                {(businessHours || offDay) && (
                 <div className="flex items-start gap-3">
                   <Clock className="h-4 w-4 mt-0.5 text-primary shrink-0" />
                   <div>
                     <p className="font-medium text-foreground">Business Hours</p>
-                    <p>{businessHours}</p>
-                    <p>{offDay}</p>
+                    {businessHours && <p>{businessHours}</p>}
+                    {offDay && <p>{offDay}</p>}
                   </div>
                 </div>
+                )}
+                {!email && !phone && (
+                  <p>Contact details are being updated. Please check back soon.</p>
+                )}
               </div>
             </div>
           </div>
