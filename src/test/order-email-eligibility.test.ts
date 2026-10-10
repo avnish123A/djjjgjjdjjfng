@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isConfirmable } from '../../supabase/functions/_shared/order-confirmation-email';
+import { isConfirmable } from '../../supabase/functions/_shared/order-email-eligibility';
 
 describe('Existing confirmation eligibility stays unchanged', () => {
   it('allows a successfully placed COD order without claiming prepaid payment', () => {
