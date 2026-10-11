@@ -36,7 +36,7 @@ export const PromoBanners = () => {
                 <img src={banner.image_url} alt={banner.image_alt || banner.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out motion-safe:group-hover:scale-[1.025]" loading="lazy" width={1536} height={1024} />
                 <div className="absolute inset-0 bg-gradient-to-r from-foreground/80 via-foreground/25 to-transparent" />
                 <div className="absolute inset-0 flex max-w-[62%] flex-col justify-center p-6 sm:p-9 text-primary-foreground">
-                  {banner.eyebrow && <p className="font-utility text-accent mb-3">{banner.eyebrow}</p>}
+                  {banner.eyebrow && <p className="font-utility text-brand-lavender mb-3">{banner.eyebrow}</p>}
                   <h3 className="font-display text-2xl sm:text-3xl leading-tight mb-3">{banner.title}</h3>
                   <p className="text-xs sm:text-sm leading-5 text-primary-foreground/75 mb-5">{banner.subtitle}</p>
                   <span className="inline-flex items-center gap-2 font-utility text-primary-foreground">

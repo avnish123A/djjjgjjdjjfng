@@ -40,24 +40,24 @@ export const Footer = () => {
   ];
 
   return (
-    <footer className="bg-primary text-primary-foreground">
+    <footer className="bg-structure text-structure-foreground">
       <div className="container mx-auto px-4 py-16 lg:py-20">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8">
           <div className="lg:col-span-4">
             <Logo variant="light" />
-            <p className="mt-5 text-sm text-primary-foreground/60 leading-relaxed max-w-xs">
+            <p className="mt-5 text-sm text-structure-muted leading-relaxed max-w-xs">
               Shop smart. Discover more. Trending products, exclusive deals and giftable finds — all in one place.
             </p>
-            <div className="mt-8 space-y-3 text-sm text-primary-foreground/60">
-              {email && <a href={`mailto:${email}`} className="flex items-center gap-3 break-all hover:text-accent"><Mail className="h-4 w-4 text-accent shrink-0" strokeWidth={1.5} />{email}</a>}
-              {phone && <a href={`tel:${phone.replace(/[^+\d]/g, '')}`} className="flex items-center gap-3 hover:text-accent"><Phone className="h-4 w-4 text-accent shrink-0" strokeWidth={1.5} />{phone}</a>}
-              {location && <div className="flex items-center gap-3"><MapPin className="h-4 w-4 text-accent shrink-0" strokeWidth={1.5} />{location}</div>}
+            <div className="mt-8 space-y-3 text-sm text-structure-muted">
+              {email && <a href={`mailto:${email}`} className="flex items-center gap-3 break-all hover:text-brand-lavender"><Mail className="h-4 w-4 text-brand-lavender shrink-0" strokeWidth={1.5} />{email}</a>}
+              {phone && <a href={`tel:${phone.replace(/[^+\d]/g, '')}`} className="flex items-center gap-3 hover:text-brand-lavender"><Phone className="h-4 w-4 text-brand-lavender shrink-0" strokeWidth={1.5} />{phone}</a>}
+              {location && <div className="flex items-center gap-3"><MapPin className="h-4 w-4 text-brand-lavender shrink-0" strokeWidth={1.5} />{location}</div>}
             </div>
             {activeSocials.length > 0 && (
               <div className="flex gap-3 mt-8">
                 {activeSocials.map((si) => (
                   <a key={si.key} href={s[si.key]} target="_blank" rel="noopener noreferrer" aria-label={si.label}
-                    className="h-9 w-9 rounded-full border border-primary-foreground/15 flex items-center justify-center hover:bg-accent hover:text-accent-foreground hover:border-accent transition-colors">
+                    className="h-9 w-9 rounded-full border border-structure-foreground/15 flex items-center justify-center hover:bg-accent hover:text-brand-lavender-foreground hover:border-accent transition-colors">
                     <si.icon className="h-4 w-4" strokeWidth={1.5} />
                   </a>
                 ))}
@@ -69,7 +69,7 @@ export const Footer = () => {
               <h4 className="font-bold text-sm mb-5">{section.title}</h4>
               <nav className="space-y-3">
                 {section.links.map((link) => (
-                  <Link key={link.label} to={link.href} className="block text-sm text-primary-foreground/60 hover:text-accent transition-colors">
+                  <Link key={link.label} to={link.href} className="block text-sm text-structure-muted hover:text-brand-lavender transition-colors">
                     {link.label}
                   </Link>
                 ))}
@@ -78,12 +78,12 @@ export const Footer = () => {
           ))}
         </div>
       </div>
-      <div className="border-t border-primary-foreground/10">
+      <div className="border-t border-structure-foreground/10">
         <div className="container mx-auto px-4 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-primary-foreground/50">© {new Date().getFullYear()} CartZebra. All rights reserved.</p>
+          <p className="text-xs text-structure-muted">© {new Date().getFullYear()} CartZebra. All rights reserved.</p>
           <div className="flex items-center gap-2 flex-wrap justify-center">
             {payLogos.map((l) => (
-              <span key={l} className="h-7 px-2 rounded bg-primary-foreground flex items-center">
+              <span key={l} className="h-7 px-2 rounded bg-structure-foreground flex items-center">
                 <img src={`/logos/${l}`} alt={l.split('.')[0]} className="h-4 w-auto" loading="lazy" />
               </span>
             ))}

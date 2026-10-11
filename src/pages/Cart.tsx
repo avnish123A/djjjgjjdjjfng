@@ -73,7 +73,7 @@ const Cart = () => {
             <p className="text-muted-foreground mb-8 text-sm">
               Looks like you haven't added any items yet.
             </p>
-            <Button asChild className="rounded-full bg-foreground text-background hover:bg-foreground/90 px-8">
+            <Button asChild className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 px-8">
               <Link to="/products">Continue Shopping</Link>
             </Button>
           </div>
@@ -297,7 +297,7 @@ const Cart = () => {
                 <span>{DELIVERY_ESTIMATE_TEXT}</span>
               </div>
 
-              <Button asChild size="lg" className="w-full gap-2 h-12 text-base font-semibold rounded-full bg-foreground text-background hover:bg-foreground/90">
+              <Button asChild size="lg" className="w-full gap-2 h-12 text-base font-semibold rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
                 <Link to="/checkout">
                   Proceed to Checkout <ArrowRight className="h-4 w-4" />
                 </Link>

@@ -1,14 +1,12 @@
-# CartZebra storefront refresh
+# CartZebra current work
 
-## Current: purchase experience visual upgrade
-- [ ] Apply local checkout styling and one inline payment CTA
-- [ ] Redesign order success without private lookups or fabricated status
-- [ ] Restyle existing transactional template and provide a real static parcel asset
-- [ ] Verify requested widths, links, totals, email wording, reduced motion and available code checks
+## Shared public design system
+- [x] Inspect current tokens and public action/structure styling
+- [x] Apply shared storefront palette, accessible actions, surfaces, focus and radius rules without deep layout changes
+- [x] Preserve Admin, logo assets, backend and transaction security
+- [ ] Verify automatic build/typecheck results, tests, lint and rendered storefront
 
-- [x] Audit catalog schema, references, and authorized Propshop24 sources
-- [x] Add safe catalog merchandising fields and promo banner table
-- [ ] Archive only the referenced demo product and seed original catalog/categories/campaigns
-- [ ] Implement cohesive homepage, cards, search, product detail, and admin archive/editing
-- [ ] Remove stale unsupported claims and legacy references
-- [ ] Verify storefront, checkout, tracking, admin, responsive layouts, build, and types
+## Earlier trust audit (outside this visual-only step)
+- [ ] Finish admin warnings and email malformed-contact hiding; blocked pending a separate trust-fix step
+- [ ] Confirm delivery, returns, shipping and business claims; blocked on owner confirmation
+- [ ] Verify empty CMS policies and factual legal content; blocked on owner-approved policy text
