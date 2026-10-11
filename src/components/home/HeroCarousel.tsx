@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useHeroSlides } from '@/hooks/useHeroSlides';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 
 const fallbackSlide = {
   id: 'fallback',
@@ -19,6 +20,7 @@ const fallbackSlide = {
 const ease = [0.22, 1, 0.36, 1] as const;
 
 export const HeroCarousel = () => {
+  const reduced = useReducedMotion();
   const { data = [] } = useHeroSlides(true);
   const slides = data.length ? data : [fallbackSlide];
   const [current, setCurrent] = useState(0);
@@ -26,16 +28,16 @@ export const HeroCarousel = () => {
 
   const next = useCallback(() => count > 1 && setCurrent((i) => (i + 1) % count), [count]);
   useEffect(() => {
-    if (count <= 1) return;
+    if (count <= 1 || reduced) return;
     const t = setInterval(next, 6000);
     return () => clearInterval(t);
-  }, [next, count]);
+  }, [next, count, reduced]);
 
   const slide = slides[Math.min(current, count - 1)];
   const words = (slide.title || '').split(/(?<=\.)\s+/);
 
   return (
-    <section className="relative w-full overflow-hidden bg-primary">
+    <section className="relative w-full overflow-hidden bg-structure">
       <div className="relative min-h-[78vh] lg:min-h-[88vh] flex items-center">
         <AnimatePresence mode="wait">
           <motion.img
@@ -43,16 +45,16 @@ export const HeroCarousel = () => {
             src={slide.image_url || fallbackSlide.image_url}
             alt={slide.title}
             className="absolute inset-0 w-full h-full object-cover object-[70%_center]"
-            initial={{ opacity: 0, scale: 1.08 }}
+            initial={{ opacity: 0, scale: 1.015 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 1.4, ease }}
+            transition={{ duration: 0.3, ease }}
             loading="eager"
             width={1920}
             height={1080}
           />
         </AnimatePresence>
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/55 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-structure/90 via-structure/55 to-transparent" />
         <div className="absolute inset-0 zebra-stripes opacity-40 pointer-events-none" />
 
         <div className="relative w-full container mx-auto px-4 py-24">
@@ -63,13 +65,13 @@ export const HeroCarousel = () => {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, ease }}
-                  className="inline-flex items-center gap-2 font-utility text-accent mb-6"
+                  className="inline-flex items-center gap-2 font-utility text-brand-lavender mb-6"
                 >
-                  <span className="h-px w-8 bg-accent" />
+                  <span className="h-px w-8 bg-brand-lavender" />
                   {slide.subtitle}
                 </motion.p>
               )}
-              <h2 className="font-display text-4xl sm:text-6xl lg:text-7xl text-primary-foreground leading-[1.0] mb-6">
+              <h2 className="font-display text-4xl sm:text-6xl lg:text-7xl text-structure-foreground leading-[1.0] mb-6">
                 {words.map((w, i) => (
                   <motion.span
                     key={i}
@@ -87,7 +89,7 @@ export const HeroCarousel = () => {
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.7, delay: 0.45, ease }}
-                  className="text-base sm:text-lg text-primary-foreground/75 mb-10 max-w-md leading-relaxed"
+                  className="text-base sm:text-lg text-structure-foreground/75 mb-10 max-w-md leading-relaxed"
                 >
                   {slide.description}
                 </motion.p>
@@ -110,7 +112,7 @@ export const HeroCarousel = () => {
                 {slide.cta_secondary_text && (
                   <Link
                     to={slide.cta_secondary_link || '/products'}
-                    className="inline-flex items-center rounded-full border border-primary-foreground/30 text-primary-foreground px-7 py-3.5 text-sm font-semibold hover:bg-primary-foreground hover:text-primary active:scale-[0.97] transition"
+                    className="inline-flex items-center rounded-full border border-structure-foreground/30 text-structure-foreground px-7 py-3.5 text-sm font-semibold hover:bg-structure-foreground hover:text-structure active:scale-[0.97] transition"
                   >
                     {slide.cta_secondary_text}
                   </Link>
@@ -126,7 +128,7 @@ export const HeroCarousel = () => {
               <button
                 key={s.id}
                 onClick={() => setCurrent(i)}
-                className={`h-1 rounded-full transition-all duration-500 ${i === current ? 'w-10 bg-accent' : 'w-4 bg-primary-foreground/30'}`}
+                className={`h-1 rounded-full transition-all duration-500 ${i === current ? 'w-10 bg-accent' : 'w-4 bg-structure-foreground/30'}`}
                 aria-label={`Slide ${i + 1}`}
               />
             ))}

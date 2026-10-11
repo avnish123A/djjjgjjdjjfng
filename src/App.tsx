@@ -1,4 +1,5 @@
 import { lazy as reactLazy, Suspense, type ComponentType } from "react";
+import { MotionConfig } from "framer-motion";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useZoomPrevention } from "@/hooks/useZoomPrevention";
 import { Toaster } from "@/components/ui/toaster";
@@ -169,7 +170,8 @@ const MaintenanceGuard = ({ children }: { children: React.ReactNode }) => {
 
 // Storefront layout wrapper
 const StorefrontLayout = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex flex-col min-h-screen pb-[60px] lg:pb-0">
+  <MotionConfig reducedMotion="user">
+  <div className="storefront-theme flex flex-col min-h-screen pb-[calc(60px+env(safe-area-inset-bottom))] lg:pb-0">
     <Header />
     <div className="flex-1">{children}</div>
     <Footer />
@@ -177,6 +179,7 @@ const StorefrontLayout = ({ children }: { children: React.ReactNode }) => (
     <BackToTop />
     <WhatsAppButton />
   </div>
+  </MotionConfig>
 );
 
 // Storefront route with maintenance guard + suspense
