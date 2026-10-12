@@ -1,9 +1,10 @@
 # CartZebra experience-led redesign
 
 ## Gate 1 — Brand and visual asset prototype
-- [ ] Present two original CartZebra logo concepts and select one direction
+- [x] Present two original CartZebra logo concepts and select Discovery Stripe
 - [ ] Refine the selected logo into SVG light/dark/monochrome, standalone symbol and favicon assets
-- [ ] Produce and review one cohesive visual asset contact sheet before storefront-wide replacement
+- [x] Produce the first visual asset family for review before storefront-wide replacement
+- [ ] Correct inconsistent category frames (clouds/gold) and approve the final cohesive contact sheet
 
 ## Gate 2 — Homepage discovery story
 - [ ] Replace repeated product grids with a sparse-catalog editorial sequence
