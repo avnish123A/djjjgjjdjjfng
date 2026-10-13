@@ -1,80 +1,25 @@
 import { Link } from 'react-router-dom';
 import { useCategories } from '@/hooks/useCategories';
-import { motion } from 'framer-motion';
-import { ArrowUpRight } from 'lucide-react';
-
-export const CategoryGrid = () => {
-  const { data: categories = [], isLoading } = useCategories();
-
-  if (isLoading) {
-    return (
-      <section className="py-16 lg:py-24">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="aspect-[4/5] shimmer rounded-sm" />
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (categories.length === 0) return null;
-
-  return (
-    <section className="py-14 lg:py-24 overflow-hidden">
-      <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.3 }}
-          className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 lg:mb-14"
-        >
-          <div>
-            <p className="font-utility text-foreground/45 mb-3">Explore the edit</p>
-            <h2 className="font-display text-3xl sm:text-4xl">Shop by category</h2>
-          </div>
-          <p className="max-w-sm text-sm leading-6 text-muted-foreground">Six considered worlds, photographed as one CartZebra collection.</p>
-        </motion.div>
-
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
-          {categories.map((cat, i) => (
-            <motion.div
-              key={cat.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: i * 0.04 }}
-            >
-              <Link
-                to={`/products?category=${cat.slug}`}
-                className="group relative block overflow-hidden aspect-[4/5] rounded-lg bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                <img
-                  src={cat.image || '/placeholder.svg'}
-                  alt={cat.name}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out motion-safe:group-hover:scale-[1.035]"
-                  loading="lazy"
-                  width={1024}
-                  height={1280}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-foreground/75 via-foreground/5 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6 text-primary-foreground">
-                  <div className="flex items-end justify-between gap-3">
-                    <div>
-                      <h3 className="font-display text-lg sm:text-xl mb-1">{cat.name}</h3>
-                      <span className="font-utility text-primary-foreground/70">Explore</span>
-                    </div>
-                    <ArrowUpRight className="h-4 w-4 shrink-0 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+import { useProducts } from '@/hooks/useProducts';
+import { ArrowRight } from 'lucide-react';
+import electronics from '@/assets/experience/tile-electronics.jpg';
+import fashion from '@/assets/experience/tile-fashion.jpg';
+import beauty from '@/assets/experience/tile-beauty.jpg';
+import home from '@/assets/experience/tile-home.jpg';
+import gifts from '@/assets/experience/tile-gifts.jpg';
+import accessories from '@/assets/experience/tile-accessories.jpg';
+const illustrations:Record<string,string>={electronics,fashion,beauty,home,'home-living':home,'home-and-living':home,gifts,accessories};
+export const CategoryGrid=()=>{
+ const {data:categories=[],isLoading}=useCategories(); const {data:products=[]}=useProducts();
+ const visible=categories.filter(c=>products.some(p=>p.categoryId===c.id));
+ if(!isLoading&&!visible.length)return null;
+ return <section id="categories" className="py-10 lg:py-14 scroll-mt-6"><div className="container px-4">
+  <div className="flex items-center justify-between gap-4 mb-6"><h2 className="section-heading">Shop by category</h2><Link to="/products" className="text-primary text-sm font-semibold flex items-center gap-1 shrink-0">View all <ArrowRight className="h-4 w-4"/></Link></div>
+  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 lg:gap-4">
+   {isLoading?Array.from({length:6},(_,i)=><div key={i} className="aspect-square shimmer rounded-lg"/>):visible.slice(0,6).map(cat=><Link key={cat.id} to={`/products?category=${cat.slug}`} className="group rounded-lg border border-border bg-card overflow-hidden hover:border-primary/40 transition-colors">
+    <div className="aspect-[6/5] overflow-hidden"><img src={illustrations[cat.slug]||cat.image} alt="" loading="lazy" width={512} height={512} className="w-full h-full object-cover transition-transform duration-300 motion-safe:group-hover:scale-105"/></div>
+    <div className="p-3 text-center"><h3 className="text-sm font-bold">{cat.name}</h3><p className="text-xs text-muted-foreground mt-1">Explore collection</p></div>
+   </Link>)}
+  </div>
+ </div></section>;
 };

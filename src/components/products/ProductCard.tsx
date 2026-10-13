@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
@@ -32,18 +32,18 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
   };
 
   return (
-    <div ref={ref} className="group relative card-editorial">
+    <div ref={ref} className="group relative card-editorial product-tile">
       <Link to={`/product/${product.id}`} className="block">
-        <div className="relative overflow-hidden aspect-[4/5] bg-secondary mb-3 rounded-lg">
+        <div className="relative overflow-hidden aspect-square bg-secondary mb-3 rounded-lg">
           <img
             src={product.image}
             alt={product.name}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out motion-safe:group-hover:scale-[1.025]"
+            className="absolute inset-0 w-full h-full object-contain transition-transform duration-300 ease-out motion-safe:group-hover:scale-[1.025]"
             loading="lazy"
             width={1024}
             height={1280}
           />
-          {product.images[1] && <img src={product.images[1]} alt="" className="absolute inset-0 hidden h-full w-full object-cover opacity-0 transition-opacity duration-300 md:block md:group-hover:opacity-100" loading="lazy" width={1024} height={1280} />}
+          {product.images[1] && <img src={product.images[1]} alt="" className="absolute inset-0 hidden h-full w-full object-contain opacity-0 transition-opacity duration-300 md:block md:group-hover:opacity-100" loading="lazy" width={1024} height={1280} />}
           
           {/* Badge — minimal */}
           {product.badge && (
@@ -57,12 +57,12 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
           <Button
             onClick={handleAddToCart}
             size="icon"
-            variant="secondary"
-            className="absolute bottom-3 right-3 h-10 w-10 bg-background/95 text-foreground shadow-sm backdrop-blur md:opacity-0 md:translate-y-1 md:group-hover:translate-y-0 md:group-hover:opacity-100"
+            variant="default"
+            className="absolute bottom-2 right-2 h-11 w-11 shadow-soft"
             aria-label="Add to cart"
             disabled={!product.inStock}
           >
-            <ShoppingBag className="h-4 w-4" strokeWidth={1.5} />
+            <Plus className="h-4 w-4" />
           </Button>
         </div>
 

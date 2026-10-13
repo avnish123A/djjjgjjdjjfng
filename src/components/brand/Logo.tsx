@@ -1,40 +1,17 @@
 import { cn } from '@/lib/utils';
-
-interface LogoProps {
-  className?: string;
-  variant?: 'dark' | 'light';
-  showWordmark?: boolean;
-}
-
-/** CartZebra mark: a geometric "Z" built like a cart path, with zebra-stripe accents and wheels. */
+interface LogoProps { className?: string; variant?: 'dark' | 'light'; showWordmark?: boolean }
+/** Forward-sweeping zebra ribbons form a shopping basket, without an enclosing badge. */
 export const LogoMark = ({ className, variant = 'dark' }: { className?: string; variant?: 'dark' | 'light' }) => (
-  <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" className={cn('h-8 w-8 shrink-0', className)}>
-    <rect width="64" height="64" rx="14" className={variant === 'dark' ? 'fill-primary' : 'fill-primary-foreground'} />
-    <path
-      d="M14 18h36L22 46h28"
-      strokeWidth="6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={variant === 'dark' ? 'stroke-primary-foreground' : 'stroke-primary'}
-    />
-    <path d="M33 25l-7 7M41 25l-11 11" strokeWidth="3" strokeLinecap="round" className="stroke-accent" />
-    <circle cx="25" cy="53" r="2.5" className={variant === 'dark' ? 'fill-primary-foreground' : 'fill-primary'} />
-    <circle cx="45" cy="53" r="2.5" className={variant === 'dark' ? 'fill-primary-foreground' : 'fill-primary'} />
+  <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" className={cn('h-9 w-9 shrink-0', className)}>
+    <g className={variant === 'light' ? 'fill-current' : 'fill-primary'}>
+      <path d="M4 9h8c3 0 5 2 6 5l2 6-7 4-3-9H4zM22 10h10L17 33l-3-8zM38 10h11L19 40l-3-5zM55 10h6L24 44H14zM24 46l36-21-4 13-29 12zM17 51h37l-3 5H19z"/>
+      <circle cx="23" cy="61" r="3"/><circle cx="48" cy="61" r="3"/>
+    </g>
   </svg>
 );
-
 export const Logo = ({ className, variant = 'dark', showWordmark = true }: LogoProps) => (
-  <span className={cn('inline-flex items-center gap-2.5', className)}>
+  <span className={cn('inline-flex items-center gap-2', variant === 'light' ? 'text-structure-foreground' : 'text-foreground', className)}>
     <LogoMark variant={variant} />
-    {showWordmark && (
-      <span
-        className={cn(
-          'font-display text-lg sm:text-xl tracking-[0.08em] leading-none',
-          variant === 'dark' ? 'text-foreground' : 'text-primary-foreground'
-        )}
-      >
-        CART<span className="text-accent">Z</span>EBRA
-      </span>
-    )}
+    {showWordmark && <span className="font-display text-xl sm:text-2xl leading-none">Cart<span className={variant === 'light' ? 'text-brand-lavender' : 'text-primary'}>Zebra</span></span>}
   </span>
 );

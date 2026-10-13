@@ -1,140 +1,20 @@
-import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { useHeroSlides } from '@/hooks/useHeroSlides';
 import { Button } from '@/components/ui/button';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-
-const fallbackSlide = {
-  id: 'fallback',
-  title: 'Shop Smart. Discover More.',
-  subtitle: 'Smarter Shopping',
-  description: 'Discover products, experiences and everyday finds curated for people who want more value from every purchase.',
-  image_url: '/hero/cartzebra-hero-1.jpg',
-  cta_primary_text: 'Shop Now',
-  cta_primary_link: '/products',
-  cta_secondary_text: 'Explore Deals',
-  cta_secondary_link: '/products',
-};
-
-const ease = [0.22, 1, 0.36, 1] as const;
-
+import { motion, useReducedMotion } from 'framer-motion';
+import hero from '@/assets/experience/hero-shopping.jpg';
 export const HeroCarousel = () => {
-  const reduced = useReducedMotion();
-  const { data = [] } = useHeroSlides(true);
-  const slides = data.length ? data : [fallbackSlide];
-  const [current, setCurrent] = useState(0);
-  const count = slides.length;
-
-  const next = useCallback(() => count > 1 && setCurrent((i) => (i + 1) % count), [count]);
-  useEffect(() => {
-    if (count <= 1 || reduced) return;
-    const t = setInterval(next, 6000);
-    return () => clearInterval(t);
-  }, [next, count, reduced]);
-
-  const slide = slides[Math.min(current, count - 1)];
-  const words = (slide.title || '').split(/(?<=\.)\s+/);
-
-  return (
-    <section className="relative w-full overflow-hidden bg-structure">
-      <div className="relative min-h-[78vh] lg:min-h-[88vh] flex items-center">
-        <AnimatePresence mode="wait">
-          <motion.img
-            key={slide.id}
-            src={slide.image_url || fallbackSlide.image_url}
-            alt={slide.title}
-            className="absolute inset-0 w-full h-full object-cover object-[70%_center]"
-            initial={{ opacity: 0, scale: 1.015 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease }}
-            loading="eager"
-            width={1920}
-            height={1080}
-          />
-        </AnimatePresence>
-        <div className="absolute inset-0 bg-gradient-to-r from-structure/90 via-structure/55 to-transparent" />
-        <div className="absolute inset-0 zebra-stripes opacity-40 pointer-events-none" />
-
-        <div className="relative w-full container mx-auto px-4 py-24">
-          <AnimatePresence mode="wait">
-            <motion.div key={slide.id + '-c'} className="max-w-xl" exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.4 }}>
-              {slide.subtitle && (
-                <motion.p
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, ease }}
-                  className="inline-flex items-center gap-2 font-utility text-brand-lavender mb-6"
-                >
-                  <span className="h-px w-8 bg-brand-lavender" />
-                  {slide.subtitle}
-                </motion.p>
-              )}
-              <h2 className="font-display text-4xl sm:text-6xl lg:text-7xl text-structure-foreground leading-[1.0] mb-6">
-                {words.map((w, i) => (
-                  <motion.span
-                    key={i}
-                    className="block"
-                    initial={{ opacity: 0, y: 40 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.15 + i * 0.12, ease }}
-                  >
-                    {w}
-                  </motion.span>
-                ))}
-              </h2>
-              {slide.description && (
-                <motion.p
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.7, delay: 0.45, ease }}
-                  className="text-base sm:text-lg text-structure-foreground/75 mb-10 max-w-md leading-relaxed"
-                >
-                  {slide.description}
-                </motion.p>
-              )}
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.6, ease }}
-                className="flex flex-wrap gap-3"
-              >
-                {slide.cta_primary_text && (
-                  <Link
-                    to={slide.cta_primary_link || '/products'}
-                    className="group inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-7 py-3.5 text-sm font-bold hover:brightness-110 active:scale-[0.97] transition"
-                  >
-                    {slide.cta_primary_text}
-                    <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                )}
-                {slide.cta_secondary_text && (
-                  <Link
-                    to={slide.cta_secondary_link || '/products'}
-                    className="inline-flex items-center rounded-full border border-structure-foreground/30 text-structure-foreground px-7 py-3.5 text-sm font-semibold hover:bg-structure-foreground hover:text-structure active:scale-[0.97] transition"
-                  >
-                    {slide.cta_secondary_text}
-                  </Link>
-                )}
-              </motion.div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {count > 1 && (
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
-            {slides.map((s, i) => (
-              <button
-                key={s.id}
-                onClick={() => setCurrent(i)}
-                className={`h-1 rounded-full transition-all duration-500 ${i === current ? 'w-10 bg-accent' : 'w-4 bg-structure-foreground/30'}`}
-                aria-label={`Slide ${i + 1}`}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
-  );
+ const reduced=useReducedMotion();
+ return <section className="hero-surface relative overflow-hidden">
+  <img src={hero} alt="" width={1920} height={1088} fetchPriority="high" className="absolute inset-0 h-full w-full object-cover object-right hidden md:block"/>
+  <div className="container relative px-4 py-10 md:py-16 lg:py-20">
+   <motion.div initial={reduced?false:{opacity:0,y:12}} animate={{opacity:1,y:0}} transition={{duration:.3}} className="md:w-[48%] lg:max-w-[520px]">
+    <p className="text-xs font-semibold text-primary mb-4">A little more everyday delight</p>
+    <h1 className="font-display text-4xl sm:text-5xl lg:text-[56px] leading-[1.08] mb-5">Everyday Essentials,<br/><span className="text-primary">Extraordinary</span><br/>Value.</h1>
+    <p className="text-sm sm:text-base text-muted-foreground max-w-sm leading-relaxed mb-7">Discover products for everyday living, with a simpler and smarter shopping experience.</p>
+    <div className="flex flex-wrap gap-3"><Button asChild className="h-12 px-6"><Link to="/products">Shop now <ArrowRight/></Link></Button><Button asChild variant="outline" className="h-12 px-5 bg-card/70"><a href="#categories">Explore categories</a></Button></div>
+   </motion.div>
+  </div>
+  <div className="md:hidden h-56 sm:h-72 overflow-hidden"><img src={hero} alt="Decorative shopping parcel with everyday essentials" className="h-full w-full object-cover object-right" width={1920} height={1088}/></div>
+ </section>;
 };
