@@ -7,3 +7,5 @@
 - Wrap the public layout in MotionConfig with user reduced-motion preference, because decorative transitions must respect accessibility without changing routes or business behavior.
 - Render confirmation emails through the existing server-only template and sender, because styling must not introduce a second email flow or alter duplicate protection.
 - Re-export the server-shared delivery policy through the storefront delivery helper, because email and storefront policy wording must have one source without changing order-specific ETA handling.
+
+- Keep the reference-led hero as an original decorative illustration and category artwork separate from real product photos, because catalog accuracy must remain intact.

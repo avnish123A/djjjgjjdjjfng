@@ -1,4 +1,9 @@
-# CartZebra experience-led redesign
+# CartZebra reference-led frontend implementation
+
+- [ ] Stage A: finalized SVG identity, public tokens and working responsive search header
+- [ ] Stage B: illustrated hero, coordinated categories, real-data discovery shelf
+- [ ] Stage C: purchase/browse/tracking/footer presentation; remove unsupported public claims
+- [ ] Stage D: responsive, accessibility, runtime and test verification
 
 ## Gate 1 — Brand and visual asset prototype
 - [x] Present two original CartZebra logo concepts and select Discovery Stripe
