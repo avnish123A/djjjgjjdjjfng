@@ -477,7 +477,7 @@ const Checkout = () => {
     return (
       <div className="flex items-start gap-3">
         <div className={`mt-0.5 h-8 w-8 shrink-0 rounded-full flex items-center justify-center text-xs font-bold transition-colors duration-200 ${
-          done ? 'bg-foreground text-background' : active ? 'bg-accent/10 text-foreground' : 'bg-secondary text-muted-foreground'
+          done ? 'bg-primary text-primary-foreground' : active ? 'bg-accent/10 text-foreground' : 'bg-secondary text-muted-foreground'
         }`}>
           <AnimatePresence mode="wait" initial={false}>
             {done ? (
@@ -575,16 +575,16 @@ const Checkout = () => {
 
   return (
     <main className="purchase-theme pb-[calc(60px+2.5rem+env(safe-area-inset-bottom))] lg:pb-12">
-      <div className="container mx-auto px-4 pt-5 lg:pt-8 max-w-6xl">
+      <div className="container mx-auto px-4 pt-8 lg:pt-10 max-w-6xl">
         <div className="flex items-center justify-between gap-3 mb-5 lg:mb-7">
-          <h1 className="text-2xl font-bold">Checkout</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">Checkout</h1>
           <span className="flex items-center gap-1.5 text-xs text-muted-foreground shrink-0"><Lock className="h-3 w-3" /> Secure checkout</span>
         </div>
 
         <ol aria-label="Checkout progress" className="flex items-center gap-2 sm:gap-4 mb-6 max-w-xl">
           {order.map((step, i) => (
             <li key={step} aria-current={step === currentStep ? 'step' : undefined} className="flex-1 flex items-center gap-2 min-w-0">
-              <span className={`h-6 w-6 shrink-0 flex items-center justify-center rounded-full text-[11px] font-semibold ${i <= stepPos ? 'bg-foreground text-background' : 'bg-card text-muted-foreground border border-border'}`}>
+              <span className={`h-6 w-6 shrink-0 flex items-center justify-center rounded-full text-[11px] font-semibold ${i <= stepPos ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground border border-border'}`}>
                 {isDone(step) ? <Check className="h-3 w-3" /> : i + 1}
               </span>
               <span className={`text-xs ${i <= stepPos ? 'font-semibold' : 'text-muted-foreground'}`}>{['Contact', 'Delivery', 'Payment'][i]}</span>
@@ -726,7 +726,7 @@ const Checkout = () => {
             </div>
 
             {/* Right — sticky summary (desktop) / collapsible (mobile) */}
-            <aside className="lg:col-span-5 lg:sticky lg:top-24 order-first lg:order-none">
+            <aside className="lg:col-span-5 lg:sticky lg:top-24 order-last lg:order-none">
               <div className="purchase-summary purchase-panel border border-border rounded-2xl overflow-hidden">
                 <div className="purchase-stripe" />
                 <Button variant="ghost"
@@ -743,7 +743,7 @@ const Checkout = () => {
                   <motion.span key={total} initial={{ opacity: 0.4 }} animate={{ opacity: 1 }} className="font-bold tabular-nums">{formatPrice(total)}</motion.span>
                 </Button>
                 <div className={`${summaryOpen ? 'block' : 'hidden'} lg:block px-4 pb-4 lg:p-6 space-y-4 border-t lg:border-t-0 border-border`}>
-                  <div className="hidden lg:flex items-center justify-between gap-3"><div><h2 className="font-semibold text-lg">Your order</h2><p className="text-xs text-muted-foreground mt-1">{items.reduce((n, i) => n + i.quantity, 0)} items, one lovely delivery.</p></div><PurchaseParcel compact /></div>
+                  <div className="hidden lg:flex items-center justify-between gap-3"><div><h2 className="font-semibold text-lg">Your order</h2><p className="text-xs text-muted-foreground mt-1">{items.reduce((n, i) => n + i.quantity, 0)} items in your order.</p></div><PurchaseParcel compact /></div>
                   <ul className="space-y-3 max-h-[240px] overflow-y-auto pt-3 lg:pt-0 pr-1">
                     {items.map(item => (
                       <li key={item.variantKey || item.id} className="flex gap-3 items-center">
@@ -751,7 +751,7 @@ const Checkout = () => {
                           <div className="w-14 h-14 rounded-xl overflow-hidden bg-secondary">
                             <img src={item.image} alt="" className="w-full h-full object-cover" loading="lazy" />
                           </div>
-                          <span className="absolute -top-1.5 -right-1.5 bg-foreground text-background text-[10px] font-bold rounded-full h-5 min-w-5 px-1 flex items-center justify-center">{item.quantity}</span>
+                          <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full h-5 min-w-5 px-1 flex items-center justify-center">{item.quantity}</span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium line-clamp-1">{item.name}</p>
@@ -771,7 +771,7 @@ const Checkout = () => {
                     </motion.span>
                   </div>
                   <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Calendar className="h-3.5 w-3.5 shrink-0" /> {DELIVERY_ESTIMATE_TEXT}
+                    <Calendar className="h-3.5 w-3.5 shrink-0" /> Delivery details are confirmed for your order.
                   </p>
                   {shipping > 0 && (
                     <p className="text-xs text-muted-foreground">Add {formatPrice(999 - totalPrice)} more for free delivery.</p>

@@ -5,6 +5,7 @@ import { Mail, Phone, Package, Truck, CheckCircle2, MapPin, ClipboardCheck, Box,
 import { Button } from '@/components/ui/button';
 import { formatPrice } from '@/lib/format';
 import { supabase } from '@/integrations/supabase/client';
+import { PurchaseParcel } from '@/components/brand/PurchaseParcel';
 import { cn } from '@/lib/utils';
 
 interface TrackedOrder {
@@ -47,7 +48,7 @@ const statusMessage = (s: string) => ({
   processing: { title: 'Your order is confirmed', body: 'We’re getting it ready.' },
   packed: { title: 'Your order is packed', body: 'It will be handed to our courier soon.' },
   shipped: { title: 'Your order is on its way', body: 'It has left our warehouse.' },
-  out_for_delivery: { title: 'Arriving today', body: 'Your order is out for delivery.' },
+  out_for_delivery: { title: 'Out for delivery', body: 'Your order is out for delivery.' },
   delivered: { title: 'Delivered', body: 'We hope you love it.' },
   cancelled: { title: 'This order was cancelled', body: 'If you were charged, contact support and we’ll help.' },
 }[s] || { title: 'Order update', body: '' });
@@ -56,27 +57,6 @@ const fmtDate = (d?: string | null) => {
   if (!d) return null;
   const t = new Date(d);
   return isNaN(t.getTime()) ? null : t.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-};
-
-/* Abstract route motif: dotted path, moving parcel, destination pin — pure SVG/CSS */
-const RouteVisual = () => {
-  const reduce = useReducedMotion();
-  return (
-    <svg viewBox="0 0 320 120" className="w-full max-w-[320px] h-auto" aria-hidden="true">
-      <path id="route" d="M20 90 C 90 90, 90 30, 160 30 S 240 90, 300 60" fill="none" stroke="hsl(var(--border))" strokeWidth="2" strokeDasharray="4 6" />
-      <circle cx="20" cy="90" r="6" fill="hsl(var(--foreground))" />
-      <g transform="translate(300 60)">
-        <circle r="14" fill="hsl(var(--accent) / 0.15)" />
-        <circle r="5" fill="hsl(var(--accent))" />
-      </g>
-      <g>
-        <rect x="-9" y="-9" width="18" height="18" rx="3" fill="hsl(var(--card))" stroke="hsl(var(--foreground))" strokeWidth="1.5" />
-        <path d="M-9 -2 H9 M0 -9 V9" stroke="hsl(var(--foreground))" strokeWidth="1" opacity="0.5" />
-        {!reduce && <animateMotion dur="6s" repeatCount="indefinite" rotate="0"><mpath href="#route" /></animateMotion>}
-        {reduce && <animateTransform attributeName="transform" type="translate" values="160 30" dur="1s" fill="freeze" />}
-      </g>
-    </svg>
-  );
 };
 
 const Timeline = ({ current }: { current: number }) => {
@@ -120,7 +100,7 @@ const Timeline = ({ current }: { current: number }) => {
               )}
             >
               {done ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
-              {active && !reduce && <span className="absolute inset-0 rounded-full ring-2 ring-accent/40 animate-ping" />}
+
             </motion.span>
             <span className={cn('pt-1.5 sm:pt-0 text-sm sm:text-xs sm:text-center font-medium', done || active ? 'text-foreground' : 'text-muted-foreground')}>
               {step.label}
@@ -212,7 +192,7 @@ const TrackOrder = () => {
             <p className="text-xs font-semibold text-accent mb-2">Order tracking</p>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight">Where’s my order?</h1>
             <p className="text-sm text-muted-foreground mt-2 max-w-md">Enter the email and mobile number you used at checkout to see live status.</p>
-            <div className="hidden lg:block mt-8"><RouteVisual /></div>
+            <div className="hidden lg:block mt-8"><PurchaseParcel /></div>
           </div>
 
           <form onSubmit={handleTrack} noValidate className="bg-card border border-border rounded-2xl p-5 sm:p-7 space-y-4">
@@ -344,7 +324,7 @@ const TrackOrder = () => {
                 {Number(order.discount) > 0 && <div className="flex justify-between text-success"><span>Discount</span><span className="tabular-nums">−{formatPrice(order.discount)}</span></div>}
                 <div className="flex justify-between font-bold text-base pt-2 border-t border-border"><span>Total</span><span className="tabular-nums">{formatPrice(order.total)}</span></div>
                 <p className="text-xs text-muted-foreground">
-                  {order.payment_method === 'cod' ? 'Cash on delivery' : 'Paid online'} · Payment {order.payment_status}
+                  {order.payment_method === 'cod' ? 'Cash on delivery' : 'Online payment'} · Payment {order.payment_status}
                 </p>
               </div>
             </div>
