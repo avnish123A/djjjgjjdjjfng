@@ -31,15 +31,15 @@ export const PromoBanners = () => {
             >
               <Link
                 to={banner.link}
-                className="group relative block overflow-hidden aspect-[4/3] sm:aspect-[16/9] rounded-lg bg-secondary"
+                className="group relative block overflow-hidden  rounded-lg bg-secondary"
               >
-                <img src={banner.image_url} alt={banner.image_alt || banner.title} className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 ease-out motion-safe:group-hover:scale-[1.025]" loading="lazy" width={1536} height={1024} />
-                <div className="absolute inset-0 bg-gradient-to-r from-foreground/80 via-foreground/25 to-transparent" />
-                <div className="absolute inset-0 flex max-w-[62%] flex-col justify-center p-6 sm:p-9 text-primary-foreground">
-                  {banner.eyebrow && <p className="font-utility text-brand-lavender mb-3">{banner.eyebrow}</p>}
+                <img src={banner.image_url} alt={banner.image_alt || banner.title} className="w-full aspect-[16/9] object-cover transition-transform duration-300 ease-out motion-safe:group-hover:scale-[1.025]" loading="lazy" width={1536} height={1024} />
+
+                <div className="flex flex-col p-5 sm:p-6 bg-card text-foreground">
+                  {banner.eyebrow && <p className="font-utility text-primary mb-3">{banner.eyebrow}</p>}
                   <h3 className="font-display text-2xl sm:text-3xl leading-tight mb-3">{banner.title}</h3>
-                  <p className="text-xs sm:text-sm leading-5 text-primary-foreground/75 mb-5">{banner.subtitle}</p>
-                  <span className="inline-flex items-center gap-2 font-utility text-primary-foreground">
+                  <p className="text-xs sm:text-sm leading-5 text-muted-foreground mb-5">{banner.subtitle}</p>
+                  <span className="inline-flex items-center gap-2 font-utility text-primary">
                     Explore <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-1" strokeWidth={1.5} />
                   </span>
                 </div>
