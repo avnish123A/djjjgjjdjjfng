@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ChevronRight, Star, Minus, Plus, ShoppingBag, Truck, RotateCcw, ShieldCheck, Check, MapPin, Zap, ChevronDown } from 'lucide-react';
-import { DELIVERY_ESTIMATE_TEXT, DELIVERY_AVAILABILITY_NOTE } from '@/lib/delivery';
+import { DELIVERY_AVAILABILITY_NOTE } from '@/lib/delivery';
 import { useProduct, useProducts } from '@/hooks/useProducts';
 import { useProductAttributes } from '@/hooks/useProductAttributes';
 import { useCart } from '@/contexts/CartContext';
@@ -17,14 +17,14 @@ const AccordionItem = ({ title, children, defaultOpen = false }: { title: string
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="border-b border-border">
-      <button
+      <Button variant="ghost"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-5 text-sm font-semibold text-left hover:text-primary transition-colors"
+        aria-expanded={open} className="w-full h-auto flex items-center justify-between py-5 text-sm font-semibold text-left hover:text-primary transition-colors"
       >
         {title}
         <ChevronDown className={cn('h-4 w-4 text-muted-foreground transition-transform duration-300', open && 'rotate-180')} />
-      </button>
-      <div className={cn('overflow-hidden transition-all duration-300', open ? 'max-h-[500px] pb-5' : 'max-h-0')}>
+      </Button>
+      <div className={cn('overflow-hidden transition-all duration-300', open ? 'pb-5' : 'hidden')}>
         {children}
       </div>
     </div>
@@ -166,12 +166,13 @@ const ProductDetail = () => {
           {/* ── IMAGE GALLERY ─────────────────────── */}
           <div className="animate-fade-in-up">
             {/* Main image */}
-            <div className="aspect-square rounded-2xl overflow-hidden bg-secondary cursor-zoom-in group relative">
+            <div className="aspect-square rounded-2xl overflow-hidden bg-card border border-border group relative">
               <img
+                width={1024} height={1024}
                 key={selectedImage}
                 src={displayImages[selectedImage] || product.image}
                 alt={product.name}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 animate-fade-in"
+                className="w-full h-full object-contain transition-transform duration-300 motion-safe:group-hover:scale-[1.025] animate-fade-in"
               />
               {/* Badge */}
               {product.badge && (
@@ -185,7 +186,8 @@ const ProductDetail = () => {
             {displayImages.length > 1 && (
               <div className="flex gap-3 mt-4 overflow-x-auto scrollbar-hide pb-1">
                 {displayImages.map((img, i) => (
-                  <button
+                  <Button variant="ghost"
+                    aria-label={`View product image ${i + 1}`} aria-pressed={selectedImage === i}
                     key={i}
                     onClick={() => setSelectedImage(i)}
                     className={cn(
@@ -194,14 +196,14 @@ const ProductDetail = () => {
                     )}
                   >
                     <img src={img} alt={`View ${i + 1}`} className="w-full h-full object-cover" />
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}
           </div>
 
           {/* ── PRODUCT INFO ──────────────────────── */}
-          <div className="animate-fade-in-up space-y-6" style={{ animationDelay: '0.1s' }}>
+          <div className="animate-fade-in-up space-y-6>
             {/* Brand & title */}
             <div>
               {product.brand && (
@@ -260,7 +262,7 @@ const ProductDetail = () => {
                     <p className="text-sm font-semibold mb-3">Size: {selectedSize || 'Select'}</p>
                     <div className="flex gap-2 flex-wrap">
                       {product.sizes.map((size) => (
-                        <button
+                        <Button variant="ghost"
                           key={size}
                           onClick={() => setSelectedSize(size)}
                           className={cn(
@@ -269,7 +271,7 @@ const ProductDetail = () => {
                           )}
                         >
                           {size}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
@@ -281,18 +283,18 @@ const ProductDetail = () => {
                     <p className="text-sm font-semibold mb-3">Color</p>
                     <div className="flex gap-2.5">
                       {product.colors.map((color, i) => (
-                        <button
+                        <Button variant="ghost"
                           key={i}
                           onClick={() => setSelectedColor(color)}
                           className={cn(
-                            'w-9 h-9 rounded-full border-2 transition-all',
+                            'w-11 h-11 rounded-full border-2 transition-all',
                             selectedColor === color ? 'border-foreground ring-2 ring-foreground/20' : 'border-border hover:border-foreground'
                           )}
                           style={{ backgroundColor: color }}
-                          aria-label={`Color ${i + 1}`}
+                          aria-label={`Color ${color}`} aria-pressed={selectedColor === color}
                         >
                           {selectedColor === color && <Check className="h-4 w-4 mx-auto text-background drop-shadow" />}
-                        </button>
+                        </Button>
                       ))}
                     </div>
                   </div>
@@ -304,18 +306,18 @@ const ProductDetail = () => {
             <div>
               <p className="text-sm font-semibold mb-3">Quantity</p>
               <div className="inline-flex items-center border border-border rounded-xl">
-                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1} className="p-3 hover:bg-secondary transition-colors rounded-l-xl disabled:opacity-40" aria-label="Decrease quantity">
+                <Button variant="ghost" onClick={() => setQuantity(Math.max(1, quantity - 1))} disabled={quantity <= 1} className="p-3 hover:bg-secondary transition-colors rounded-l-xl disabled:opacity-40" aria-label="Decrease quantity">
                   <Minus className="h-4 w-4" />
-                </button>
+                </Button>
                 <span className="px-5 py-3 text-sm font-semibold tabular-nums min-w-[3rem] text-center border-x border-border">{quantity}</span>
-                <button onClick={() => setQuantity(Math.min(maxQty, quantity + 1))} disabled={quantity >= maxQty} className="p-3 hover:bg-secondary transition-colors rounded-r-xl disabled:opacity-40" aria-label="Increase quantity">
+                <Button variant="ghost" onClick={() => setQuantity(Math.min(maxQty, quantity + 1))} disabled={quantity >= maxQty} className="p-3 hover:bg-secondary transition-colors rounded-r-xl disabled:opacity-40" aria-label="Increase quantity">
                   <Plus className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             </div>
 
             {/* ── CTA Buttons (observed for sticky) ── */}
-            <div ref={ctaRef} className="space-y-3 pt-1">
+            <div ref={ctaRef} className="grid sm:grid-cols-2 gap-3 pt-1">
               <Button
                 size="lg"
                 className="w-full gap-2 h-14 text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl"
@@ -327,7 +329,7 @@ const ProductDetail = () => {
               <Button
                 variant="outline"
                 size="lg"
-                className="w-full gap-2 h-14 text-base font-semibold rounded-xl border-2 border-foreground hover:bg-foreground hover:text-background transition-all"
+                className="w-full gap-2 h-14 text-base font-semibold rounded-xl border-2 border-primary text-primary hover:bg-secondary transition-all"
                 disabled={!product.inStock}
                 onClick={handleBuyNow}
               >
@@ -337,11 +339,11 @@ const ProductDetail = () => {
             </div>
 
             {/* ── Trust Badges (near CTA) ── */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
               {[
-                { icon: Truck, label: 'Free Delivery', sub: 'Above ₹999' },
-                { icon: RotateCcw, label: '7-Day Returns', sub: 'See policy' },
-                { icon: ShieldCheck, label: 'Secure Checkout', sub: 'UPI, cards & COD' },
+                { icon: Truck, label: 'Delivery', sub: 'At checkout' },
+                { icon: RotateCcw, label: 'Returns', sub: 'See policy' },
+                { icon: ShieldCheck, label: 'Secure Checkout', sub: 'Payment options' },
               ].map((item) => (
                 <div key={item.label} className="text-center p-3 bg-secondary/60 rounded-xl">
                   <item.icon className="h-5 w-5 mx-auto mb-1.5 text-primary" />
@@ -355,7 +357,7 @@ const ProductDetail = () => {
             <div className="p-5 bg-secondary/40 rounded-2xl text-sm">
               <div className="flex items-center gap-2 mb-1.5">
                 <MapPin className="h-4 w-4 text-muted-foreground" />
-                <p className="font-semibold">{DELIVERY_ESTIMATE_TEXT}</p>
+                <p className="font-semibold">Delivery information</p>
               </div>
               <p className="text-xs text-muted-foreground">{DELIVERY_AVAILABILITY_NOTE}</p>
             </div>
@@ -403,27 +405,8 @@ const ProductDetail = () => {
           )}
 
           <AccordionItem title="Shipping & Returns">
-            <div className="space-y-5 text-sm text-muted-foreground">
-              <div>
-                <h4 className="font-semibold text-foreground mb-2">Shipping</h4>
-                <ul className="space-y-1.5">
-                  <li>• {DELIVERY_ESTIMATE_TEXT}</li>
-                  <li>• Free delivery on orders above ₹999</li>
-                  <li>• {DELIVERY_AVAILABILITY_NOTE}</li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold text-foreground mb-2">Returns & Exchanges</h4>
-                <ul className="space-y-1.5">
-                  <li>• 7-day easy return policy</li>
-                  <li>• Free pickup from your doorstep</li>
-                  <li>• Refund processed within 5-7 business days</li>
-                </ul>
-              </div>
-              <Link to="/policies/shipping" className="inline-block text-primary text-sm font-medium hover:underline">
-                View full shipping policy →
-              </Link>
-            </div>
+            <p className="text-sm text-muted-foreground mb-4">{DELIVERY_AVAILABILITY_NOTE} Review the published policies for shipping and return details.</p>
+            <div className="flex flex-wrap gap-4"><Link to="/policies/shipping" className="text-primary text-sm font-semibold">Shipping policy →</Link><Link to="/policies/returns" className="text-primary text-sm font-semibold">Return policy →</Link></div>
           </AccordionItem>
         </div>
 
@@ -471,21 +454,6 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* ── Mobile Sticky Bottom Bar ────────────── */}
-      <div className="lg:hidden fixed bottom-[60px] left-0 right-0 bg-background/95 backdrop-blur-md border-t border-border p-3 z-40" style={{ height: '64px' }}>
-        <div className="flex items-center gap-3 h-full">
-          <div className="shrink-0">
-            <span className="text-lg font-bold">{formatPrice(finalPrice)}</span>
-          </div>
-          <Button
-            className="flex-1 h-10 gap-2 text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl"
-            onClick={handleAddToCart}
-            disabled={!product.inStock || addingToCart}
-          >
-            {addingToCart ? (<><Check className="h-4 w-4" /> Added!</>) : (<><ShoppingBag className="h-4 w-4" /> Add to Cart</>)}
-          </Button>
-        </div>
-      </div>
     </main>
   );
 };

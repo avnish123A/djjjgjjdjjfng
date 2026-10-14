@@ -4,8 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { ChevronRight, Loader2 } from 'lucide-react';
 import DOMPurify from 'dompurify';
 
-const DynamicPage = () => {
-  const { slug } = useParams<{ slug: string }>();
+const DynamicPage = ({ policySlug }: { policySlug?: string }) => {
+  const { slug: routeSlug } = useParams<{ slug: string }>();
+  const slug = policySlug || routeSlug;
 
   const { data: page, isLoading, error } = useQuery({
     queryKey: ['site-page', slug],
@@ -35,8 +36,8 @@ const DynamicPage = () => {
     return (
       <main className="min-h-screen">
         <div className="container mx-auto px-4 py-24 text-center">
-          <h1 className="text-2xl font-bold mb-4">Page Not Found</h1>
-          <p className="text-muted-foreground mb-6">The page you're looking for doesn't exist or is unpublished.</p>
+          <h1 className="text-2xl font-bold mb-4">Policy not yet published</h1>
+          <p className="text-muted-foreground mb-6">This information is not currently published. Please contact us before placing an order if you need clarification.</p>
           <Link to="/" className="text-primary hover:underline">Go Home</Link>
         </div>
       </main>
@@ -71,7 +72,7 @@ const DynamicPage = () => {
             dangerouslySetInnerHTML={{ __html: sanitizedContent }}
           />
         ) : (
-          <p className="text-muted-foreground">This page has no content yet.</p>
+          <p className="text-muted-foreground">This policy has not yet been published. Please contact us for clarification.</p>
         )}
 
         <p className="text-xs text-muted-foreground mt-12 pt-6 border-t border-border">

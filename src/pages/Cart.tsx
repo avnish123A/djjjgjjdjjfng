@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, ChevronRight, Lock, ShieldCheck, Truck, ChevronDown, Calendar, X, Tag } from 'lucide-react';
-import { DELIVERY_ESTIMATE_TEXT } from '@/lib/delivery';
+import { PurchaseParcel } from '@/components/brand/PurchaseParcel';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -54,8 +54,8 @@ const Cart = () => {
       });
       toast.success(`Coupon "${data.code}" applied! ${Number(data.discount)}% off`);
       setCouponCode('');
-    } catch (err: any) {
-      toast.error(err?.message || 'Failed to apply coupon');
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : 'Failed to apply coupon');
     } finally {
       setCouponLoading(false);
     }
@@ -66,14 +66,12 @@ const Cart = () => {
       <main className="min-h-screen">
         <div className="container mx-auto px-4 py-24">
           <div className="max-w-md mx-auto text-center">
-            <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6">
-              <ShoppingBag className="h-8 w-8 text-muted-foreground" />
-            </div>
+            <PurchaseParcel />
             <h1 className="text-2xl font-bold mb-3 tracking-tight">Your cart is empty</h1>
             <p className="text-muted-foreground mb-8 text-sm">
               Looks like you haven't added any items yet.
             </p>
-            <Button asChild className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 px-8">
+            <Button asChild className="rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 px-8">
               <Link to="/products">Continue Shopping</Link>
             </Button>
           </div>
@@ -119,7 +117,7 @@ const Cart = () => {
 
       <div className="container mx-auto px-4 py-8 lg:py-10">
         <h1 className="text-xl lg:text-2xl font-bold mb-8 tracking-tight">
-          Shopping Cart ({totalItems} {totalItems === 1 ? 'item' : 'items'})
+          My cart ({totalItems} {totalItems === 1 ? 'item' : 'items'})
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
@@ -134,7 +132,7 @@ const Cart = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: -100 }}
                   transition={{ duration: 0.25 }}
-                  className="flex gap-4 p-4 bg-background border border-border rounded-2xl"
+                  className="flex gap-4 p-4 bg-card border border-border rounded-2xl"
                 >
                   <Link to={`/product/${item.id}`} className="shrink-0">
                     <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden bg-secondary">
@@ -159,33 +157,33 @@ const Cart = () => {
                         )}
                       </div>
                       <div className="flex flex-col items-end gap-1 shrink-0">
-                        <button
+                        <Button variant="ghost"
                           onClick={() => { removeItem(item.variantKey || item.id); toast('Item removed'); }}
-                          className="p-1.5 text-muted-foreground hover:text-destructive transition-colors"
+                          className="min-h-11 min-w-11 flex items-center justify-center text-muted-foreground hover:text-destructive transition-colors"
                           aria-label="Remove item"
                         >
                           <Trash2 className="h-4 w-4" />
-                        </button>
+                        </Button>
                       </div>
                     </div>
 
-                    <div className="flex items-end justify-between mt-3">
+                    <div className="flex flex-wrap items-end justify-between gap-3 mt-3">
                       <div className="inline-flex items-center border border-border rounded-lg">
-                        <button
+                        <Button variant="ghost"
                           onClick={() => updateQuantity(item.variantKey || item.id, item.quantity - 1)}
-                          className="p-2 hover:bg-secondary transition-colors"
+                          className="h-11 w-11 flex items-center justify-center hover:bg-secondary transition-colors"
                           aria-label="Decrease"
                         >
                           <Minus className="h-3 w-3" />
-                        </button>
-                        <span className="px-3 text-sm font-semibold tabular-nums">{item.quantity}</span>
-                        <button
+                        </Button>
+                        <span className="px-2 text-sm font-semibold tabular-nums">{item.quantity}</span>
+                        <Button variant="ghost"
                           onClick={() => updateQuantity(item.variantKey || item.id, item.quantity + 1)}
-                          className="p-2 hover:bg-secondary transition-colors"
+                          className="h-11 w-11 flex items-center justify-center hover:bg-secondary transition-colors"
                           aria-label="Increase"
                         >
                           <Plus className="h-3 w-3" />
-                        </button>
+                        </Button>
                       </div>
                       <span className="font-bold">{formatPrice(item.price * item.quantity)}</span>
                     </div>
@@ -204,7 +202,7 @@ const Cart = () => {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="sticky top-24 bg-secondary rounded-2xl p-6 space-y-4">
+            <div className="sticky top-8 bg-card border border-border shadow-soft rounded-2xl p-6 space-y-4">
               <h2 className="font-bold text-lg">Order Summary</h2>
 
               <div className="space-y-3 text-sm">
@@ -232,9 +230,9 @@ const Cart = () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-success">-{formatPrice(discountAmount)}</span>
-                      <button onClick={removeCoupon} className="p-0.5 text-muted-foreground hover:text-destructive">
+                      <Button variant="ghost" onClick={removeCoupon} className="p-0.5 text-muted-foreground hover:text-destructive">
                         <X className="h-3.5 w-3.5" />
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 )}
@@ -242,13 +240,13 @@ const Cart = () => {
                 {/* Collapsible Coupon */}
                 {!appliedCoupon && (
                   <div className="pt-1">
-                    <button
+                    <Button variant="ghost"
                       onClick={() => setCouponOpen(!couponOpen)}
                       className="flex items-center justify-between w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                       <span>Have a coupon code?</span>
                       <ChevronDown className={`h-4 w-4 transition-transform ${couponOpen ? 'rotate-180' : ''}`} />
-                    </button>
+                    </Button>
                     <AnimatePresence>
                       {couponOpen && (
                         <motion.div
@@ -260,11 +258,11 @@ const Cart = () => {
                           <div className="flex gap-2 pt-2">
                             <input
                               type="text"
-                              placeholder="Coupon code"
+                              aria-label="Coupon code" placeholder="Coupon code"
                               value={couponCode}
                               onChange={(e) => setCouponCode(e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
-                              className="flex-1 px-3 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 uppercase"
+                              className="min-w-0 w-0 flex-1 px-3 py-2.5 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-accent/20 uppercase"
                             />
                             <Button
                               variant="outline"
@@ -294,12 +292,12 @@ const Cart = () => {
               {/* Estimated Delivery */}
               <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background rounded-lg px-3 py-2">
                 <Calendar className="h-3.5 w-3.5 shrink-0" />
-                <span>{DELIVERY_ESTIMATE_TEXT}</span>
+                <span>Delivery information will be confirmed for your order.</span>
               </div>
 
-              <Button asChild size="lg" className="w-full gap-2 h-12 text-base font-semibold rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
+              <Button asChild size="lg" className="w-full gap-2 h-12 text-base font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90">
                 <Link to="/checkout">
-                  Proceed to Checkout <ArrowRight className="h-4 w-4" />
+                  Proceed to checkout <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
 

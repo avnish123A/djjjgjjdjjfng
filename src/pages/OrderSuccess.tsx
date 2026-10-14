@@ -3,7 +3,7 @@ import { CheckCircle, Package, ArrowRight, Truck, Clock, Search, BadgeCheck, Map
 import { Button } from '@/components/ui/button';
 import { motion, useReducedMotion } from 'framer-motion';
 import { PurchaseParcel } from '@/components/brand/PurchaseParcel';
-import { DELIVERY_ESTIMATE_TEXT } from '@/lib/delivery';
+import { Logo } from '@/components/brand/Logo';
 
 // Same stages as the Track Order page. Only "Order Placed" is known to be complete here.
 const timelineSteps = [
@@ -33,10 +33,10 @@ const OrderSuccess = () => {
           className="mx-auto"
         >
           <div className="text-center mb-7">
-            <p className="text-sm font-semibold">CartZebra <span className="text-muted-foreground font-normal">/ Your order</span></p>
+            <div className="flex justify-center mb-2"><Logo /></div>
             <PurchaseParcel />
-            <h1 className="text-2xl sm:text-3xl font-bold mb-3">Thank you for your order.</h1>
-            <p className="text-muted-foreground text-sm">A little something to look forward to.</p>
+            <h1 className="text-2xl sm:text-3xl font-bold mb-3">Your next everyday delight.</h1>
+            <p className="text-muted-foreground text-sm">Use order tracking to confirm your payment and latest order status.</p>
             {orderNumber && (
               <p className="text-sm font-semibold mt-3 break-all">
                 Order reference: <span className="text-foreground">{orderNumber}</span>
@@ -57,10 +57,10 @@ const OrderSuccess = () => {
             <h2 className="font-semibold mb-2 text-sm">Your order's journey</h2>
             <p className="text-xs text-muted-foreground mb-5 leading-relaxed">Verify your email and phone on Track Order for confirmed payment and live progress.</p>
             <ol className="grid grid-cols-3 sm:grid-cols-6 gap-y-5 gap-x-2">
-              {timelineSteps.map((step, i) => {
+              {timelineSteps.map((step) => {
                 return (
                   <li key={step.label} className="flex flex-col items-center text-center">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center ${i === 0 ? 'bg-foreground text-background' : 'bg-card border border-border text-muted-foreground'}`}>
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center bg-card border border-border text-muted-foreground`}>
                       <step.icon className="h-4 w-4" />
                     </div>
                     <span className="text-[11px] mt-2 leading-snug text-muted-foreground">{step.label}</span>
@@ -80,7 +80,7 @@ const OrderSuccess = () => {
                 Check your order status anytime on the Track Order page using the email and phone number from checkout.</p>
               <p className="flex items-start gap-3"><Truck className="h-4 w-4 mt-0.5 shrink-0" />
                 Your expected delivery date appears on Track Order when it is available.</p>
-              <p className="flex items-start gap-3"><Clock className="h-4 w-4 mt-0.5 shrink-0" /><span>{DELIVERY_ESTIMATE_TEXT}. This is our usual delivery window, not a confirmed date for your order.</span></p>
+
             </div>
           </div>
 

@@ -24,7 +24,7 @@ import NotFound from "./pages/NotFound";
 
 // Lazy import that retries once: after a deploy, old chunk files disappear and
 // the import rejects — the root cause of the generic crash screen on navigation.
-function lazy<T extends ComponentType<any>>(factory: () => Promise<{ default: T }>) {
+function lazy<T extends ComponentType<never>>(factory: () => Promise<{ default: T }>) {
   return reactLazy(() =>
     factory().catch(async (err) => {
       await new Promise((r) => setTimeout(r, 400));
@@ -223,14 +223,14 @@ const App = () => {
                 <Route path="/faq" element={<StorefrontRoute><FAQ /></StorefrontRoute>} />
 
                 {/* Policy pages — legacy routes kept for backwards compatibility */}
-                <Route path="/policies/privacy" element={<StorefrontRoute><PrivacyPolicy /></StorefrontRoute>} />
-                <Route path="/policies/terms" element={<StorefrontRoute><TermsConditions /></StorefrontRoute>} />
-                <Route path="/policies/returns" element={<StorefrontRoute><ReturnPolicy /></StorefrontRoute>} />
-                <Route path="/policies/shipping" element={<StorefrontRoute><ShippingPolicy /></StorefrontRoute>} />
+                <Route path="/policies/privacy" element={<StorefrontRoute><DynamicPage policySlug="privacy-policy" /></StorefrontRoute>} />
+                <Route path="/policies/terms" element={<StorefrontRoute><DynamicPage policySlug="terms-conditions" /></StorefrontRoute>} />
+                <Route path="/policies/returns" element={<StorefrontRoute><DynamicPage policySlug="return-refund-policy" /></StorefrontRoute>} />
+                <Route path="/policies/shipping" element={<StorefrontRoute><DynamicPage policySlug="shipping-policy" /></StorefrontRoute>} />
                 
 
                 {/* Dynamic CMS pages */}
-                <Route path="/page/:slug" element={<StorefrontRoute><DynamicPage /></StorefrontRoute>} />
+                <Route path="/policies/:slug" element={<StorefrontRoute><DynamicPage /></StorefrontRoute>} />
 
                 {/* Redirect old auth routes */}
                 <Route path="/login" element={<Navigate to="/" replace />} />

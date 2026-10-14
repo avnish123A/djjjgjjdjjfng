@@ -33,8 +33,9 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
 
   return (
     <div ref={ref} className="group relative card-editorial product-tile">
-      <Link to={`/product/${product.id}`} className="block">
+      <div>
         <div className="relative overflow-hidden aspect-square bg-secondary mb-3 rounded-lg">
+          <Link to={`/product/${product.id}`} aria-label={`View ${product.name}`} className="block absolute inset-0">
           <img
             src={product.image}
             alt={product.name}
@@ -45,6 +46,7 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
           />
           {product.images[1] && <img src={product.images[1]} alt="" className="absolute inset-0 hidden h-full w-full object-contain opacity-0 transition-opacity duration-300 md:block md:group-hover:opacity-100" loading="lazy" width={1024} height={1280} />}
           
+          </Link>
           {/* Badge — minimal */}
           {product.badge && (
             <div className="absolute top-4 left-4">
@@ -59,7 +61,7 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
             size="icon"
             variant="default"
             className="absolute bottom-2 right-2 h-11 w-11 shadow-soft"
-            aria-label="Add to cart"
+            aria-label={`Add ${product.name} to cart`}
             disabled={!product.inStock}
           >
             <Plus className="h-4 w-4" />
@@ -69,7 +71,7 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
         <div className="space-y-1.5">
           {product.brand && <p className="text-[11px] font-medium text-muted-foreground">{product.brand}</p>}
           <h3 className="text-sm sm:text-base font-semibold leading-snug line-clamp-2 group-hover:text-accent transition-colors duration-200">
-            {product.name}
+            <Link to={`/product/${product.id}`}>{product.name}</Link>
           </h3>
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 pt-0.5">
             <span className="text-sm font-bold">{formatPrice(product.price)}</span>
@@ -88,7 +90,7 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
             <span className="font-utility text-foreground/60">Out of stock</span>
           </div>
         )}
-      </Link>
+      </div>
     </div>
   );
 });

@@ -334,6 +334,10 @@
 
 /* Reference-led public composition and interaction rhythm. */
 .storefront-theme .container { max-width: 1280px; }
+.storefront-theme .container.max-w-3xl { max-width: 768px; }
+.storefront-theme .container.max-w-5xl { max-width: 1024px; }
+.storefront-theme .container.max-w-6xl { max-width: 1152px; }
+.storefront-theme .container.max-w-md { max-width: 448px; }
 .storefront-theme .font-display { font-weight: 800; }
 .storefront-theme .font-utility { font-size: 12px; }
 .storefront-theme main { min-width: 0; }
@@ -350,3 +354,6 @@
  .storefront-theme .section-heading { font-size: 24px; }
  .storefront-theme .product-tile { padding: 8px; }
 }
+
+.storefront-theme .animate-fade-in-up { animation-duration: .3s; }
+.storefront-theme .purchase-theme section { scroll-margin-top: 24px; }

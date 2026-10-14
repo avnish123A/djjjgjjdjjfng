@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
-import { X, ChevronRight, Package } from 'lucide-react';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { ChevronRight, Package } from 'lucide-react';
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useCategories } from '@/hooks/useCategories';
 import { Logo } from '@/components/brand/Logo';
 
@@ -14,18 +14,15 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent side="left" className="w-[300px] sm:w-[340px] p-0 border-r-0 rounded-none bg-background">
-        <div className="flex flex-col h-full">
+      <SheetContent side="left" className="storefront-theme w-[min(300px,100vw)] sm:w-[340px] p-0 border-r-0 rounded-none bg-background">
+        <SheetTitle className="sr-only">CartZebra menu</SheetTitle><SheetDescription className="sr-only">Shop categories and find order support</SheetDescription><div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-6 border-b border-foreground/8">
             <Link to="/" onClick={onClose} aria-label="CartZebra home"><Logo /></Link>
-            <button onClick={onClose} className="p-1 text-foreground/40 hover:text-foreground transition-colors">
-              <X className="h-4 w-4" strokeWidth={1.5} />
-            </button>
           </div>
 
           <div className="flex-1 overflow-y-auto">
             <div className="px-6 pt-6 pb-3">
-              <p className="font-utility text-[9px] tracking-[0.25em] text-foreground/30 mb-4">CATEGORIES</p>
+              <p className="font-utility text-[9px] tracking-[0.25em] text-muted-foreground mb-4">CATEGORIES</p>
               <nav className="space-y-1">
                 {categories.map((cat) => (
                   <Link
@@ -35,7 +32,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
                     className="flex items-center justify-between py-3 text-sm text-foreground/70 hover:text-foreground transition-colors"
                   >
                     {cat.name}
-                    <ChevronRight className="h-3.5 w-3.5 text-foreground/20" strokeWidth={1.5} />
+                    <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.5} />
                   </Link>
                 ))}
                 <Link
@@ -52,7 +49,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
             <div className="h-[1px] bg-foreground/5 mx-6" />
 
             <div className="px-6 py-4">
-              <p className="font-utility text-[9px] tracking-[0.25em] text-foreground/30 mb-4">QUICK LINKS</p>
+              <p className="font-utility text-[9px] tracking-[0.25em] text-muted-foreground mb-4">QUICK LINKS</p>
               <nav className="space-y-1">
                 <Link to="/track-order" onClick={onClose} className="flex items-center gap-3 py-3 text-sm text-foreground/70 hover:text-foreground transition-colors">
                   <Package className="h-4 w-4" strokeWidth={1.5} />
@@ -64,7 +61,7 @@ export const MobileMenu = ({ open, onClose }: MobileMenuProps) => {
             <div className="h-[1px] bg-foreground/5 mx-6" />
 
             <div className="px-6 py-4">
-              <p className="font-utility text-[9px] tracking-[0.25em] text-foreground/30 mb-4">HELP</p>
+              <p className="font-utility text-[9px] tracking-[0.25em] text-muted-foreground mb-4">HELP</p>
               <nav className="space-y-2">
                 <Link to="/policies/shipping" onClick={onClose} className="block py-2 text-sm text-foreground/50 hover:text-foreground transition-colors">Shipping</Link>
                 <Link to="/policies/returns" onClick={onClose} className="block py-2 text-sm text-foreground/50 hover:text-foreground transition-colors">Returns</Link>

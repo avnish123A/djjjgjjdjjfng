@@ -132,10 +132,7 @@ const AdminLogin: React.FC = () => {
         <div className="glass-strong rounded-2xl p-8 shadow-[0_8px_60px_-12px_rgba(200,169,106,0.15)]">
           <motion.div variants={container} initial="hidden" animate="show" className="text-center mb-8">
             <motion.div variants={item} className="inline-flex items-center gap-2 mb-2">
-              <Shield className="h-5 w-5 text-accent" />
-              <h1 className="text-2xl font-bold tracking-[0.15em] text-white">
-                CartZebra <span className="text-accent font-normal tracking-normal text-lg">Admin</span>
-              </h1>
+              <img src="/logo-cartzebra-white.svg" alt="CartZebra" width={240} height={58} className="w-60 h-auto" />
             </motion.div>
             <motion.p variants={item} className="text-sm text-white/50">
               {mode === 'login' && 'Sign in to manage your store'}
