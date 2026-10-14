@@ -337,7 +337,7 @@ const ProductDetail = () => {
             </div>
 
             {/* ── Trust Badges (near CTA) ── */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
               {[
                 { icon: Truck, label: 'Free Delivery', sub: 'Above ₹999' },
                 { icon: RotateCcw, label: '7-Day Returns', sub: 'See policy' },

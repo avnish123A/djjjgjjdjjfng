@@ -1,6 +1,6 @@
 import { X, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { formatPrice } from '@/lib/format';
 import type { Category } from '@/types/product';
 
@@ -18,7 +18,7 @@ const FilterContent = ({ selectedCategory, onCategoryChange, priceRange, onPrice
     <div>
       <h3 className="font-semibold text-sm mb-3">Category</h3>
       <div className="space-y-1">
-        <label className="flex items-center gap-2.5 cursor-pointer py-1.5">
+        <label className="flex items-center gap-2.5 cursor-pointer min-h-11">
           <input
             type="radio"
             name="category"
@@ -29,7 +29,7 @@ const FilterContent = ({ selectedCategory, onCategoryChange, priceRange, onPrice
           <span className="text-sm">All Categories</span>
         </label>
         {categories.map((cat) => (
-          <label key={cat.id} className="flex items-center gap-2.5 cursor-pointer py-1.5">
+          <label key={cat.id} className="flex items-center gap-2.5 cursor-pointer min-h-11">
             <input
               type="radio"
               name="category"
@@ -54,7 +54,7 @@ const FilterContent = ({ selectedCategory, onCategoryChange, priceRange, onPrice
           step={500}
           value={priceRange[1]}
           onChange={(e) => onPriceChange([priceRange[0], parseInt(e.target.value)])}
-          className="w-full accent-foreground"
+          aria-label="Maximum price" className="w-full accent-primary"
         />
         <div className="flex justify-between text-sm text-muted-foreground">
           <span>{formatPrice(priceRange[0])}</span>
@@ -83,7 +83,7 @@ export const ProductFilters = (props: ProductFiltersProps) => {
     <>
       {/* Desktop sidebar */}
       <aside className="hidden lg:block w-56 shrink-0">
-        <div className="sticky top-24 bg-background border border-border rounded-2xl p-5">
+        <div className="sticky top-24 bg-card border border-border rounded-2xl p-5">
           <h3 className="font-bold text-sm mb-5 uppercase tracking-wider">Filters</h3>
           <FilterContent {...props} />
         </div>
@@ -98,8 +98,8 @@ export const ProductFilters = (props: ProductFiltersProps) => {
               Filters
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-80 pt-12">
-            <h3 className="font-bold text-sm mb-6 uppercase tracking-wider">Filters</h3>
+          <SheetContent side="left" className="storefront-theme w-[min(320px,100vw)] pt-12">
+            <SheetTitle className="mb-4">Filters</SheetTitle><SheetDescription className="sr-only">Filter the product collection by category and price</SheetDescription>
             <FilterContent {...props} />
           </SheetContent>
         </Sheet>

@@ -12,7 +12,7 @@ const faqCategories = [
       {
         question: 'How long does delivery take?',
         answer:
-          'Standard delivery takes 3–5 business days across India. Express delivery (1–2 days) is available for select pin codes.',
+          'Standard delivery takes 7–14 business days across India. Express delivery is currently unavailable.',
       },
       {
         question: 'Do you offer free shipping?',

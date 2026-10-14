@@ -24,7 +24,7 @@ import NotFound from "./pages/NotFound";
 
 // Lazy import that retries once: after a deploy, old chunk files disappear and
 // the import rejects — the root cause of the generic crash screen on navigation.
-function lazy<T extends ComponentType<any>>(factory: () => Promise<{ default: T }>) {
+function lazy<T extends ComponentType<Record<string, never>>>(factory: () => Promise<{ default: T }>) {
   return reactLazy(() =>
     factory().catch(async (err) => {
       await new Promise((r) => setTimeout(r, 400));
@@ -230,7 +230,7 @@ const App = () => {
                 
 
                 {/* Dynamic CMS pages */}
-                <Route path="/page/:slug" element={<StorefrontRoute><DynamicPage /></StorefrontRoute>} />
+                <Route path="/policies/:slug" element={<StorefrontRoute><DynamicPage /></StorefrontRoute>} />
 
                 {/* Redirect old auth routes */}
                 <Route path="/login" element={<Navigate to="/" replace />} />

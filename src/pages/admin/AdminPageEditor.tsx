@@ -148,7 +148,7 @@ const AdminPageEditor: React.FC = () => {
         <div className="flex items-center gap-2">
           {!isNew && form.is_published && (
             <Button variant="outline" size="sm" asChild className="gap-1.5">
-              <a href={`/page/${form.slug}`} target="_blank" rel="noopener noreferrer">
+              <a href={`/policies/${form.slug}`} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="h-3.5 w-3.5" /> Preview
               </a>
             </Button>
