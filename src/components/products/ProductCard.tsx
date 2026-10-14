@@ -46,7 +46,7 @@ export const ProductCard = forwardRef<HTMLDivElement, ProductCardProps>(({ produ
           />
           {product.images[1] && <img src={product.images[1]} alt="" className="absolute inset-0 hidden h-full w-full object-contain opacity-0 transition-opacity duration-300 md:block md:group-hover:opacity-100" loading="lazy" width={1024} height={1280} />}
           
-          </div>
+          </Link>
           {/* Badge — minimal */}
           {product.badge && (
             <div className="absolute top-4 left-4">
