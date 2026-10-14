@@ -171,7 +171,7 @@ const AdminPageEditor: React.FC = () => {
             <div className="space-y-2">
               <Label htmlFor="slug">URL Slug *</Label>
               <Input id="slug" value={form.slug} onChange={(e) => updateField('slug', e.target.value)} placeholder="e.g. privacy-policy" />
-              <p className="text-xs text-muted-foreground">URL: /page/{form.slug || '...'}</p>
+              <p className="text-xs text-muted-foreground">URL: /policies/{form.slug || '...'}</p>
             </div>
             <div className="space-y-2 flex items-end">
               <Button
