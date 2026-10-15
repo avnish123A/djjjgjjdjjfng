@@ -9,3 +9,4 @@
 - Re-export the server-shared delivery policy through the storefront delivery helper, because email and storefront policy wording must have one source without changing order-specific ETA handling.
 
 - Keep the reference-led hero as an original decorative illustration and category artwork separate from real product photos, because catalog accuracy must remain intact.
+- Scope checkout-specific tokens to `.checkout-theme` and share coupon eligibility between cart and checkout; preserve server calculation authority and payment handlers because review controls must not create a second transaction flow.

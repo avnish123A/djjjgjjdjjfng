@@ -169,18 +169,21 @@ const MaintenanceGuard = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Storefront layout wrapper
-const StorefrontLayout = ({ children }: { children: React.ReactNode }) => (
+const StorefrontLayout = ({ children }: { children: React.ReactNode }) => {
+  const isCheckout = useLocation().pathname === '/checkout';
+  return (
   <MotionConfig reducedMotion="user">
   <div className="storefront-theme flex flex-col min-h-screen pb-[calc(60px+env(safe-area-inset-bottom))] lg:pb-0">
-    <Header />
+    {!isCheckout && <Header />}
     <div className="flex-1">{children}</div>
     <Footer />
-    <BottomNav />
-    <BackToTop />
-    <WhatsAppButton />
+    {!isCheckout && <BottomNav />}
+    {!isCheckout && <BackToTop />}
+    {!isCheckout && <WhatsAppButton />}
   </div>
   </MotionConfig>
-);
+  );
+};
 
 // Storefront route with maintenance guard + suspense
 const StorefrontRoute = ({ children }: { children: React.ReactNode }) => (

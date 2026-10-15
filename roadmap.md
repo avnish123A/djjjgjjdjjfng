@@ -1,5 +1,11 @@
 # CartZebra reference-led frontend implementation
 
+## Current scope — Checkout phase two
+- [ ] Implement checkout-local identity, review items, coupons, early existing payment choices and grouped form
+- [ ] Implement desktop bill and keyboard-aware mobile checkout bar
+- [ ] Verify Cashfree One Click/COD eligibility; preserve production flow if unavailable
+- [ ] Verify tests, preview compilation and responsive checkout; report access/payment blockers without publishing
+
 - [ ] Stage A: finalized SVG identity, public tokens and working responsive search header
 - [ ] Stage B: illustrated hero, coordinated categories, real-data discovery shelf
 - [ ] Stage C: purchase/browse/tracking/footer presentation; remove unsupported public claims
