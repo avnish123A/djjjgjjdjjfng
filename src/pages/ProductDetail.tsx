@@ -203,7 +203,7 @@ const ProductDetail = () => {
           </div>
 
           {/* ── PRODUCT INFO ──────────────────────── */}
-          <div className="animate-fade-in-up space-y-6>
+          <div className="animate-fade-in-up space-y-6">
             {/* Brand & title */}
             <div>
               {product.brand && (
