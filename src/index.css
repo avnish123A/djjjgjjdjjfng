@@ -357,3 +357,34 @@
 
 .storefront-theme .animate-fade-in-up { animation-duration: .3s; }
 .storefront-theme .purchase-theme section { scroll-margin-top: 24px; }
+
+/* Checkout-only identity: storefront and admin remain untouched. */
+.storefront-theme .checkout-theme {
+  --background: 60 9% 98%;
+  --foreground: 240 5% 4%;
+  --card: 0 0% 100%;
+  --card-foreground: var(--foreground);
+  --primary: 46 68% 47%;
+  --primary-foreground: 240 5% 4%;
+  --accent: var(--primary);
+  --accent-foreground: var(--foreground);
+  --secondary: 0 0% 96%;
+  --secondary-foreground: var(--foreground);
+  --muted: var(--secondary);
+  --muted-foreground: 0 0% 42%;
+  --border: 0 0% 90%;
+  --input: var(--border);
+  --ring: 46 68% 35%;
+  --success: 142 71% 29%;
+  --destructive: 0 72% 51%;
+  --shadow-checkout-bar: 0 -4px 20px hsl(var(--foreground) / .06);
+  min-height: 80vh;
+}
+.checkout-section { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: 8px; padding: 20px; }
+.checkout-bottom-bar { position: fixed; z-index: 50; bottom: 0; inset-inline: 0; background: hsl(var(--card)); border-top: 1px solid hsl(var(--border)); box-shadow: var(--shadow-checkout-bar); padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
+.checkout-theme .purchase-summary { background: hsl(var(--card)); }
+.checkout-theme .purchase-stripe { background: hsl(var(--primary)); }
+.checkout-theme input[type=radio] { accent-color: hsl(var(--primary)); }
+.checkout-theme section { scroll-margin-top: 20px; }
+.checkout-theme .purchase-cta { white-space: normal; line-height: 1.25; box-shadow: none; }
+@media (max-width: 359px) { .checkout-section { padding: 14px; } .checkout-bottom-bar { padding-inline: 12px; } }
