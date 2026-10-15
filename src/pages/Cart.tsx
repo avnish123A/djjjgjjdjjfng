@@ -7,7 +7,7 @@ import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { formatPrice } from '@/lib/format';
-import { supabase } from '@/integrations/supabase/client';
+import { validateCheckoutCoupon } from '@/lib/checkout-coupon';
 
 const Cart = () => {
   const { items, updateQuantity, removeItem, totalPrice, totalItems, appliedCoupon, discountAmount, applyCoupon, removeCoupon } = useCart();
@@ -20,39 +20,11 @@ const Cart = () => {
   const freeShippingRemaining = 999 - totalPrice;
 
   const handleApplyCoupon = async () => {
-    const code = couponCode.trim().toUpperCase();
-    if (!code) { toast.error('Please enter a coupon code'); return; }
-
     setCouponLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('coupons')
-        .select('*')
-        .eq('code', code)
-        .eq('is_active', true)
-        .maybeSingle();
-
-      if (error) throw error;
-      if (!data) { toast.error('Invalid coupon code'); return; }
-
-      // Check expiry
-      if (data.expiry_date && new Date(data.expiry_date) < new Date()) {
-        toast.error('This coupon has expired');
-        return;
-      }
-
-      // Check min order
-      if (totalPrice < Number(data.min_order)) {
-        toast.error(`Minimum order of ${formatPrice(Number(data.min_order))} required for this coupon`);
-        return;
-      }
-
-      applyCoupon({
-        code: data.code,
-        discount: Number(data.discount),
-        minOrder: Number(data.min_order),
-      });
-      toast.success(`Coupon "${data.code}" applied! ${Number(data.discount)}% off`);
+      const coupon = await validateCheckoutCoupon(couponCode, totalPrice);
+      applyCoupon(coupon);
+      toast.success(`Coupon "${coupon.code}" applied! ${coupon.discount}% off`);
       setCouponCode('');
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Failed to apply coupon');

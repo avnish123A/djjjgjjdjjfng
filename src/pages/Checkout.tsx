@@ -1,8 +1,9 @@
-import { PurchaseParcel } from '@/components/brand/PurchaseParcel';
+import { Logo } from '@/components/brand/Logo';
+import { CheckoutReview } from '@/components/checkout/CheckoutReview';
 import { DELIVERY_ESTIMATE_TEXT } from '@/lib/delivery';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Lock, CreditCard, Banknote, Check, Calendar, Tag, X, MapPin, User, Package, Loader2, Pencil, AlertCircle, RotateCw, ChevronUp } from 'lucide-react';
+import { Lock, CreditCard, Banknote, Check, Tag, X, MapPin, User, Package, Loader2, AlertCircle, RotateCw, ChevronUp, ArrowLeft } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { formatPrice } from '@/lib/format';
@@ -31,8 +32,8 @@ interface ActiveGateway {
 
 const gatewayDisplay: Record<string, { label: string; desc: string; icon: React.ElementType; badge: string | null }> = {
   cod: { label: 'Cash on Delivery', desc: 'Pay when you receive your order', icon: Banknote, badge: 'No extra charge' },
-  razorpay: { label: 'Razorpay', desc: 'UPI, Cards, Net Banking, Wallets', icon: CreditCard, badge: 'Recommended' },
-  cashfree: { label: 'Cashfree', desc: 'UPI, Cards, Net Banking, EMI', icon: CreditCard, badge: null },
+  razorpay: { label: 'Razorpay', desc: 'Complete payment with Razorpay', icon: CreditCard, badge: null },
+  cashfree: { label: 'Cashfree Checkout', desc: 'Choose an available payment method securely with Cashfree.', icon: CreditCard, badge: null },
 };
 
 const getCodDisplay = (gw: ActiveGateway) => {
@@ -69,7 +70,7 @@ const getShippingErrors = (f: CheckoutForm) => {
   return e;
 };
 
-const fieldLabels: Record<string, string> = { name: 'name', email: 'email', phone: 'mobile number', address: 'address', city: 'city', state: 'state', pincode: 'PIN code' };
+
 
 const Checkout = () => {
   const { items, totalPrice, clearCart, appliedCoupon, discountAmount, removeCoupon, refreshCart } = useCart();
@@ -82,7 +83,15 @@ const Checkout = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<string>('cod');
-  const [currentStep, setCurrentStep] = useState<Step>('contact');
+  const [currentStep, setCurrentStep] = useState<Step>('payment');
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  useEffect(() => {
+    const viewport = window.visualViewport;
+    if (!viewport) return;
+    const measure = () => setKeyboardOpen(window.innerHeight - viewport.height > 150);
+    viewport.addEventListener('resize', measure);
+    return () => viewport.removeEventListener('resize', measure);
+  }, []);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [gatewaysError, setGatewaysError] = useState(false);
@@ -170,27 +179,9 @@ const Checkout = () => {
 
   const markTouched = (fields: string[]) => setTouched(prev => ({ ...prev, ...Object.fromEntries(fields.map(f => [f, true])) }));
 
-  const goNext = () => {
-    if (currentStep === 'contact') {
-      markTouched(Object.keys(contactErrors));
-      if (contactValid) setCurrentStep(shippingValid ? 'payment' : 'shipping');
-    } else if (currentStep === 'shipping') {
-      markTouched(Object.keys(shippingErrors));
-      if (shippingValid) setCurrentStep('payment');
-    }
-  };
-
-  // Move focus to the newly opened section's heading for keyboard/screen-reader users
-  const firstRender = useRef(true);
-  useEffect(() => {
-    if (firstRender.current) { firstRender.current = false; return; }
-    const t = setTimeout(() => document.getElementById(`section-${currentStep}`)?.focus(), 240);
-    return () => clearTimeout(t);
-  }, [currentStep]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (currentStep !== 'payment') { goNext(); return; }
+    // All sections remain visible; the existing validation pipeline gates submission.
 
     // Anti-double-click guard
     if (submissionLockRef.current) return;
@@ -201,8 +192,8 @@ const Checkout = () => {
       setPaymentError(validationError);
       return;
     }
-    if (!contactValid) { setCurrentStep('contact'); markTouched(Object.keys(contactErrors)); return; }
-    if (!shippingValid) { setCurrentStep('shipping'); markTouched(Object.keys(shippingErrors)); return; }
+    if (!contactValid) { setCurrentStep('contact'); markTouched(Object.keys(contactErrors)); document.getElementById('section-contact')?.scrollIntoView({ block: 'center' }); return; }
+    if (!shippingValid) { setCurrentStep('shipping'); markTouched(Object.keys(shippingErrors)); document.getElementById('section-shipping')?.scrollIntoView({ block: 'center' }); return; }
     setPaymentError(null);
 
     // Lock submissions
@@ -409,7 +400,7 @@ const Checkout = () => {
 
   if (items.length === 0) {
     return (
-      <main className="purchase-theme bg-background">
+      <main className="purchase-theme checkout-theme bg-background">
         <div className="container mx-auto px-4 py-20 text-center max-w-md">
           <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-5">
             <Package className="h-7 w-7 text-muted-foreground" />
@@ -424,9 +415,8 @@ const Checkout = () => {
     );
   }
 
-  const order: Step[] = ['contact', 'shipping', 'payment'];
-  const stepPos = order.indexOf(currentStep);
-  const isDone = (s: Step) => order.indexOf(s) < stepPos && (s === 'contact' ? contactValid : shippingValid);
+
+
   const dur = reduceMotion ? 0 : 0.22;
 
   const inputCls = (field: string) =>
@@ -465,77 +455,20 @@ const Checkout = () => {
     'aria-describedby': showError(name) ? `co-${name}-err` : undefined,
   });
 
-  const missingHint = (errs: Record<string, string>) => {
-    const keys = Object.keys(errs);
-    if (keys.length === 0) return null;
-    return `Add your ${keys.map(k => fieldLabels[k]).join(', ')} to continue`;
-  };
-
-  const SectionHeader = ({ step, index, title, icon: Icon, summary }: { step: Step; index: number; title: string; icon: React.ElementType; summary?: React.ReactNode }) => {
-    const done = isDone(step);
-    const active = currentStep === step;
-    return (
-      <div className="flex items-start gap-3">
-        <div className={`mt-0.5 h-8 w-8 shrink-0 rounded-full flex items-center justify-center text-xs font-bold transition-colors duration-200 ${
-          done ? 'bg-primary text-primary-foreground' : active ? 'bg-accent/10 text-foreground' : 'bg-secondary text-muted-foreground'
-        }`}>
-          <AnimatePresence mode="wait" initial={false}>
-            {done ? (
-              <motion.span key="c" initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: dur }}>
-                <Check className="h-4 w-4" />
-              </motion.span>
-            ) : (
-              <motion.span key="n" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>{index}</motion.span>
-            )}
-          </AnimatePresence>
-        </div>
-        <div className="flex-1 min-w-0">
-          <h2 id={`section-${step}`} tabIndex={-1} className={`font-semibold text-base leading-8 outline-none ${active || done ? 'text-foreground' : 'text-muted-foreground'}`}>
-            <Icon className="inline h-4 w-4 mr-1.5 -mt-0.5 text-muted-foreground" aria-hidden />{title}
-          </h2>
-          {done && !active && summary && <div className="text-sm text-muted-foreground mt-0.5 break-words">{summary}</div>}
-        </div>
-        {done && !active && (
-          <Button variant="ghost" size="sm"
-            type="button"
-            onClick={() => setCurrentStep(step)}
-            className="shrink-0 inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 transition-colors"
-            aria-label={`Edit ${title.toLowerCase()}`}
-          >
-            <Pencil className="h-3 w-3" /> Edit
-          </Button>
-        )}
-      </div>
-    );
-  };
-
-  const Expand = ({ open, children }: { open: boolean; children: React.ReactNode }) => (
-    <AnimatePresence initial={false}>
-      {open && (
-        <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: 'auto', opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          transition={{ duration: dur, ease: [0.22, 1, 0.36, 1] }}
-          className="overflow-hidden"
-        >
-          <div className="pt-5">{children}</div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+  const SectionHeader = ({ step, title, icon: Icon }: { step: Step; title: string; icon: React.ElementType }) => (
+    <div className="flex items-center gap-2"><Icon className="h-4 w-4 text-muted-foreground" /><h2 id={`section-${step}`} className="text-lg font-bold">{title}</h2></div>
   );
+  const Expand = ({ children }: { open: boolean; children: React.ReactNode }) => <div className="pt-4">{children}</div>;
+  const cardCls = (_step: Step) => 'checkout-section';
 
-  const cardCls = (step: Step) =>
-    `bg-card border rounded-2xl p-4 sm:p-6 transition-colors duration-200 ${currentStep === step ? 'border-accent/30 purchase-panel' : 'border-border'}`;
-
-  const ctaLabel = paymentMethod === 'cod' ? `Place order · ${formatPrice(total)}` : `Pay ${formatPrice(total)}`;
-  const canPay = !isSubmitting && !gatewaysLoading && activeGateways.length > 0 && !isCodBelowMin && contactValid && shippingValid;
+  const ctaLabel = paymentMethod === 'cod' ? 'Place COD order' : paymentMethod === 'cashfree' ? 'Continue with Cashfree' : 'Continue with Razorpay';
+  const canPay = !isSubmitting && !gatewaysLoading && activeGateways.some(g => g.gateway_name === paymentMethod) && !isCodBelowMin && contactValid && shippingValid;
 
   const PrimaryCta = ({ className = '' }: { className?: string }) => (
     <Button variant="accent"
-      type="submit"
+      type="submit" form="checkout-form"
       disabled={!canPay}
-      className={`purchase-cta h-14 rounded-xl text-base font-semibold w-full transition-all duration-200 ${className}`}
+      className={`purchase-cta h-12 rounded-lg text-sm font-semibold w-full transition-all duration-200 ${className}`}
     >
       <AnimatePresence mode="wait" initial={false}>
         {isSubmitting ? (
@@ -574,75 +507,23 @@ const Checkout = () => {
   );
 
   return (
-    <main className="purchase-theme pb-[calc(60px+2.5rem+env(safe-area-inset-bottom))] lg:pb-12">
+    <main className="purchase-theme checkout-theme pb-[calc(170px+env(safe-area-inset-bottom))] lg:pb-12">
       <div className="container mx-auto px-4 pt-8 lg:pt-10 max-w-6xl">
-        <div className="flex items-center justify-between gap-3 mb-5 lg:mb-7">
-          <h1 className="text-2xl sm:text-3xl font-bold">Checkout</h1>
-          <span className="flex items-center gap-1.5 text-xs text-muted-foreground shrink-0"><Lock className="h-3 w-3" /> Secure checkout</span>
-        </div>
-
-        <ol aria-label="Checkout progress" className="flex items-center gap-2 sm:gap-4 mb-6 max-w-xl">
-          {order.map((step, i) => (
-            <li key={step} aria-current={step === currentStep ? 'step' : undefined} className="flex-1 flex items-center gap-2 min-w-0">
-              <span className={`h-6 w-6 shrink-0 flex items-center justify-center rounded-full text-[11px] font-semibold ${i <= stepPos ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground border border-border'}`}>
-                {isDone(step) ? <Check className="h-3 w-3" /> : i + 1}
-              </span>
-              <span className={`text-xs ${i <= stepPos ? 'font-semibold' : 'text-muted-foreground'}`}>{['Contact', 'Delivery', 'Payment'][i]}</span>
-              {i < 2 && <span className="h-px bg-border flex-1 ml-1" />}
-            </li>
-          ))}
-        </ol>
-        <form onSubmit={handleSubmit} noValidate>
+        <motion.header initial={{ opacity: reduceMotion ? 1 : 0, y: reduceMotion ? 0 : 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: dur }} className="mb-6">
+          <div className="flex items-center justify-between gap-3"><Link to="/" aria-label="CartZebra home"><Logo /></Link><span className="flex items-center gap-1 text-[11px] text-muted-foreground"><Lock className="h-3 w-3" />Secure checkout</span></div>
+          <Button asChild variant="ghost" className="px-0 mt-3 text-sm"><Link to="/cart"><ArrowLeft />Back to cart</Link></Button>
+          <h1 className="text-2xl font-bold mt-2">Review & checkout</h1>
+          <ol aria-label="Checkout progress" className="flex gap-4 mt-3 text-xs text-muted-foreground">
+            <li className="flex gap-1 items-center"><Check className="h-3 w-3 text-success" />Cart</li><li className="font-semibold text-foreground" aria-current="step">Checkout</li><li>Confirmation</li>
+          </ol>
+        </motion.header>
+        <form id="checkout-form" onSubmit={handleSubmit} noValidate>
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 items-start">
             {/* Left — progressive sections */}
             <div className="lg:col-span-7 space-y-3">
-              {/* Contact */}
-              <section className={cardCls('contact')} aria-labelledby="section-contact">
-                {SectionHeader({ step: 'contact', index: 1, title: 'Contact', icon: User,
-                  summary: <>{form.name} · {form.phone}<br className="sm:hidden" /><span className="hidden sm:inline"> · </span>{form.email}</> })}
-                {Expand({ open: currentStep === 'contact', children: (<>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {Field({ name: "name", label: "Full name", className: "sm:col-span-2", children: (<input {...aria('name')} type="text" autoComplete="name" value={form.name} onChange={handleChange} onBlur={handleBlur} className={inputCls('name')} placeholder="e.g. Priya Sharma" />) })}
-                    {Field({ name: "phone", label: "Mobile number", children: (<input {...aria('phone')} type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={handleChange} onBlur={handleBlur} className={inputCls('phone')} placeholder="98765 43210" />) })}
-                    {Field({ name: "email", label: "Email", children: (<input {...aria('email')} type="email" inputMode="email" autoComplete="email" value={form.email} onChange={handleChange} onBlur={handleBlur} className={inputCls('email')} placeholder="you@example.com" />) })}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-3">We'll send order updates here. You'll need these to track your order.</p>
-                  <div className="mt-5">
-                    <Button type="button" onClick={goNext} disabled={!contactValid} className="h-12 rounded-xl w-full sm:w-auto sm:px-10 font-semibold">
-                      Continue to delivery
-                    </Button>
-                    {!contactValid && <p className="text-xs text-muted-foreground mt-2" aria-live="polite">{missingHint(contactErrors)}</p>}
-                  </div>
-                </>) })}
-              </section>
-
-              {/* Delivery */}
-              <section className={cardCls('shipping')} aria-labelledby="section-shipping">
-                {SectionHeader({ step: 'shipping', index: 2, title: 'Delivery address', icon: MapPin,
-                  summary: <>{form.address}{form.address2 ? `, ${form.address2}` : ''}, {form.city}, {form.state} – {form.pincode}</> })}
-                {Expand({ open: currentStep === 'shipping', children: (<>
-                  <div className="grid grid-cols-2 gap-4">
-                    {Field({ name: "address", label: "House no., building, street", className: "col-span-2", children: (<input {...aria('address')} type="text" autoComplete="address-line1" value={form.address} onChange={handleChange} onBlur={handleBlur} className={inputCls('address')} placeholder="Flat 12B, Sunrise Apartments, MG Road" />) })}
-                    {Field({ name: "address2", label: "Landmark / area", optional: true, className: "col-span-2", children: (<input {...aria('address2')} type="text" autoComplete="address-line2" value={form.address2} onChange={handleChange} className={inputCls('address2')} placeholder="Near City Mall" />) })}
-                    {Field({ name: "pincode", label: "PIN code", children: (<input {...aria('pincode')} type="text" inputMode="numeric" autoComplete="postal-code" value={form.pincode} onChange={handleChange} onBlur={handleBlur} className={inputCls('pincode')} placeholder="400001" />) })}
-                    {Field({ name: "city", label: "City", children: (<input {...aria('city')} type="text" autoComplete="address-level2" value={form.city} onChange={handleChange} onBlur={handleBlur} className={inputCls('city')} placeholder="Mumbai" />) })}
-                    {Field({ name: "state", label: "State", className: "col-span-2", children: (<select {...aria('state')} autoComplete="address-level1" value={form.state} onChange={(e) => { handleChange(e); setTouched(p => ({ ...p, state: true })); }} className={inputCls('state')}>
-                        <option value="">Choose state</option>
-                        {indianStates.map(s => <option key={s} value={s}>{s}</option>)}
-                      </select>) })}
-                  </div>
-                  <div className="mt-5">
-                    <Button type="button" onClick={goNext} disabled={!shippingValid} className="h-12 rounded-xl w-full sm:w-auto sm:px-10 font-semibold">
-                      Continue to payment
-                    </Button>
-                    {!shippingValid && <p className="text-xs text-muted-foreground mt-2" aria-live="polite">{missingHint(shippingErrors)}</p>}
-                  </div>
-                </>) })}
-              </section>
-
               {/* Payment */}
               <section className={cardCls('payment')} aria-labelledby="section-payment">
-                {SectionHeader({ step: 'payment', index: 3, title: 'Payment', icon: CreditCard })}
+                {SectionHeader({ step: 'payment', title: 'Payment choice', icon: CreditCard })}
                 {Expand({ open: currentStep === 'payment', children: (<>
                   <div className="space-y-2.5" role="radiogroup" aria-label="Payment method">
                     {gatewaysLoading ? (
@@ -715,18 +596,50 @@ const Checkout = () => {
                       ? 'Pay in cash when your order arrives.'
                       : 'You\u2019ll complete payment on the secure payment partner window. CartZebra never sees or stores your card or UPI details.'}
                   </p>
-                  <div className="mt-5">{PrimaryCta({})}</div>
-                  <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed">
-                    By placing your order you agree to our <Link to="/policies/terms" className="underline hover:text-foreground">Terms</Link> and <Link to="/policies/privacy" className="underline hover:text-foreground">Privacy Policy</Link>.
-                  </p>
+                  
+                  
                 </>) })}
               </section>
+              <CheckoutReview locked={isSubmitting} onEdit={() => { pendingOrderRef.current = null; }} />
+              {/* Contact */}
+              <section className={cardCls('contact')} aria-labelledby="section-contact">
+                {SectionHeader({ step: 'contact', title: 'Contact details', icon: User })}
+                {Expand({ open: currentStep === 'contact', children: (<>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {Field({ name: "name", label: "Full name", className: "sm:col-span-2", children: (<input {...aria('name')} type="text" autoComplete="name" value={form.name} onChange={handleChange} onBlur={handleBlur} className={inputCls('name')} placeholder="e.g. Priya Sharma" />) })}
+                    {Field({ name: "phone", label: "Mobile number", children: (<input {...aria('phone')} type="tel" inputMode="tel" autoComplete="tel" value={form.phone} onChange={handleChange} onBlur={handleBlur} className={inputCls('phone')} placeholder="98765 43210" />) })}
+                    {Field({ name: "email", label: "Email", children: (<input {...aria('email')} type="email" inputMode="email" autoComplete="email" value={form.email} onChange={handleChange} onBlur={handleBlur} className={inputCls('email')} placeholder="you@example.com" />) })}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-3">We'll send order updates here. You'll need these to track your order.</p>
+                </>) })}
+              </section>
+
+              {/* Delivery */}
+              <section className={cardCls('shipping')} aria-labelledby="section-shipping">
+                {SectionHeader({ step: 'shipping', title: 'Delivery address', icon: MapPin })}
+                {Expand({ open: currentStep === 'shipping', children: (<>
+                  <div className="grid grid-cols-2 gap-4">
+                    {Field({ name: "address", label: "House no., building, street", className: "col-span-2", children: (<input {...aria('address')} type="text" autoComplete="address-line1" value={form.address} onChange={handleChange} onBlur={handleBlur} className={inputCls('address')} placeholder="Flat 12B, Sunrise Apartments, MG Road" />) })}
+                    {Field({ name: "address2", label: "Landmark / area", optional: true, className: "col-span-2", children: (<input {...aria('address2')} type="text" autoComplete="address-line2" value={form.address2} onChange={handleChange} className={inputCls('address2')} placeholder="Near City Mall" />) })}
+                    {Field({ name: "pincode", label: "PIN code", children: (<input {...aria('pincode')} type="text" inputMode="numeric" autoComplete="postal-code" value={form.pincode} onChange={handleChange} onBlur={handleBlur} className={inputCls('pincode')} placeholder="400001" />) })}
+                    {Field({ name: "city", label: "City", children: (<input {...aria('city')} type="text" autoComplete="address-level2" value={form.city} onChange={handleChange} onBlur={handleBlur} className={inputCls('city')} placeholder="Mumbai" />) })}
+                    {Field({ name: "state", label: "State", className: "col-span-2", children: (<select {...aria('state')} autoComplete="address-level1" value={form.state} onChange={(e) => { handleChange(e); setTouched(p => ({ ...p, state: true })); }} className={inputCls('state')}>
+                        <option value="">Choose state</option>
+                        {indianStates.map(s => <option key={s} value={s}>{s}</option>)}
+                      </select>) })}
+                  </div>
+                </>) })}
+              </section>
+
+              <p className="text-xs text-muted-foreground leading-5">{DELIVERY_ESTIMATE_TEXT}. Availability is confirmed for your order.</p>
+              <p className="text-xs text-muted-foreground leading-5">By placing your order you agree to our <Link to="/policies/terms" className="underline">Terms</Link> and <Link to="/policies/privacy" className="underline">Privacy Policy</Link>.</p>
+
 
 
             </div>
 
             {/* Right — sticky summary (desktop) / collapsible (mobile) */}
-            <aside className="lg:col-span-5 lg:sticky lg:top-24 order-last lg:order-none">
+            <aside id="checkout-bill" className="lg:col-span-5 lg:sticky lg:top-24 order-last lg:order-none">
               <div className="purchase-summary purchase-panel border border-border rounded-2xl overflow-hidden">
                 <div className="purchase-stripe" />
                 <Button variant="ghost"
@@ -737,32 +650,13 @@ const Checkout = () => {
                 >
                   <span className="flex items-center gap-2 font-medium">
                     <Package className="h-4 w-4 text-muted-foreground" />
-                    {summaryOpen ? 'Hide' : 'Show'} summary ({items.reduce((n, i) => n + i.quantity, 0)})
+                    {summaryOpen ? 'Hide' : 'View'} bill details ({items.reduce((n, i) => n + i.quantity, 0)})
                     <ChevronUp className={`h-4 w-4 transition-transform duration-200 ${summaryOpen ? '' : 'rotate-180'}`} />
                   </span>
                   <motion.span key={total} initial={{ opacity: 0.4 }} animate={{ opacity: 1 }} className="font-bold tabular-nums">{formatPrice(total)}</motion.span>
                 </Button>
                 <div className={`${summaryOpen ? 'block' : 'hidden'} lg:block px-4 pb-4 lg:p-6 space-y-4 border-t lg:border-t-0 border-border`}>
-                  <div className="hidden lg:flex items-center justify-between gap-3"><div><h2 className="font-semibold text-lg">Your order</h2><p className="text-xs text-muted-foreground mt-1">{items.reduce((n, i) => n + i.quantity, 0)} items in your order.</p></div><PurchaseParcel compact /></div>
-                  <ul className="space-y-3 max-h-[240px] overflow-y-auto pt-3 lg:pt-0 pr-1">
-                    {items.map(item => (
-                      <li key={item.variantKey || item.id} className="flex gap-3 items-center">
-                        <div className="relative shrink-0">
-                          <div className="w-14 h-14 rounded-xl overflow-hidden bg-secondary">
-                            <img src={item.image} alt="" className="w-full h-full object-cover" loading="lazy" />
-                          </div>
-                          <span className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground text-[10px] font-bold rounded-full h-5 min-w-5 px-1 flex items-center justify-center">{item.quantity}</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium line-clamp-1">{item.name}</p>
-                          {item.variantSelections && Object.keys(item.variantSelections).length > 0 && (
-                            <p className="text-[11px] text-muted-foreground line-clamp-1">{Object.values(item.variantSelections).join(' · ')}</p>
-                          )}
-                        </div>
-                        <span className="text-sm font-semibold tabular-nums">{formatPrice(item.price * item.quantity)}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <h2 className="hidden lg:block font-bold text-lg">Bill details</h2>
                   <div className="border-t border-border pt-4">{summaryRows}</div>
                   <div className="border-t border-border pt-4 flex justify-between items-baseline">
                     <span className="font-semibold">Total</span>
@@ -770,18 +664,19 @@ const Checkout = () => {
                       {formatPrice(total)}
                     </motion.span>
                   </div>
-                  <p className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Calendar className="h-3.5 w-3.5 shrink-0" /> Delivery details are confirmed for your order.
-                  </p>
-                  {shipping > 0 && (
-                    <p className="text-xs text-muted-foreground">Add {formatPrice(999 - totalPrice)} more for free delivery.</p>
-                  )}
+                  <div className="hidden lg:block">{PrimaryCta({})}</div>
                 </div>
               </div>
             </aside>
           </div>
 
         </form>
+      </div>
+      <div className={`checkout-bottom-bar lg:hidden ${keyboardOpen ? 'hidden' : ''}`}>
+        <div className="max-w-6xl mx-auto flex items-center gap-3">
+          <div className="min-w-0 shrink-0"><motion.p key={total} initial={{ opacity: reduceMotion ? 1 : .5 }} animate={{ opacity: 1 }} transition={{ duration: dur }} className="font-bold text-lg tabular-nums" aria-live="polite">{formatPrice(total)}</motion.p><Button type="button" variant="ghost" className="h-7 p-0 text-[11px] text-muted-foreground" onClick={() => { setSummaryOpen(true); document.getElementById('checkout-bill')?.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' }); }}>View bill details<ChevronUp className="h-3 w-3" /></Button></div>
+          <div className="flex-1 min-w-0">{PrimaryCta({})}</div>
+        </div>
       </div>
     </main>
   );
